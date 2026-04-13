@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soterra Labs — From GPU to Revenue.</title>
+  <meta name="description" content="Soterra Labs delivers production-grade AI for any business — from bare metal GPU infrastructure to agentic AI applications that generate business value." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal:       #2563eb;
+      --teal-light: #dbeafe;
+      --dark:       #111827;
+      --mid:        #374151;
+      --muted:      #6b7280;
+      --border:     #e5e7eb;
+      --bg:         #ffffff;
+      --bg-alt:     #f9fafb;
+      --max-w:      780px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      color: var(--dark);
+      background: var(--bg);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+    }
+    .nav-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .logo svg { height: 32px; width: auto; }
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--mid);
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--teal); }
+
+    /* ── SECTIONS ── */
+    section { padding: 36px 24px; }
+    section:nth-child(even) { background: var(--bg-alt); }
+
+    .inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+    }
+
+    /* ── HERO ── */
+    #hero {
+      padding: 48px 24px 36px;
+      background: var(--bg);
+    }
+    .hero-label {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--teal);
+      background: var(--teal-light);
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--dark);
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+    h1 span { color: var(--teal); }
+    h1 span.gpu { color: #4ade80; }
+    .hero-sub {
+      font-size: 18px;
+      color: var(--mid);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+    .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-block;
+      background: var(--teal);
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover { background: #0f766e; }
+    .btn-secondary {
+      display: inline-block;
+      border: 1.5px solid var(--border);
+      color: var(--mid);
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-secondary:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* ── SECTION HEADERS ── */
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 12px;
+    }
+    h2 {
+      font-size: clamp(24px, 3.5vw, 32px);
+      font-weight: 700;
+      color: var(--dark);
+      letter-spacing: -0.3px;
+      margin-bottom: 10px;
+      line-height: 1.25;
+    }
+    .section-intro {
+      font-size: 17px;
+      color: var(--mid);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    /* ── VERTICALS ── */
+    .verticals {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+    .vertical-tag {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--mid);
+      background: var(--bg-alt);
+      border: 1.5px solid var(--border);
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── SERVICE CARDS ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 700px) { .cards { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .cards { grid-template-columns: 1fr; } }
+
+    .card {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 22px;
+      background: var(--bg);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .card:hover {
+      border-color: var(--teal);
+      box-shadow: 0 4px 20px rgba(13,148,136,0.08);
+    }
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--teal-light);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .card-icon svg { width: 20px; height: 20px; stroke: var(--teal); }
+    .card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 10px;
+    }
+    .card p {
+      font-size: 15px;
+      color: var(--mid);
+      line-height: 1.65;
+      margin-bottom: 16px;
+    }
+    .card-tag {
+      font-size: 12px;
+      color: var(--teal);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── ABOUT ── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+    @media (max-width: 640px) { .about-grid { grid-template-columns: 1fr; } }
+
+    .about-text p {
+      font-size: 16px;
+      color: var(--mid);
+      line-height: 1.75;
+      margin-bottom: 16px;
+    }
+    .about-text p:last-child { margin-bottom: 0; }
+    .about-text strong { color: var(--dark); }
+
+    .credentials {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .credential {
+      border-left: 3px solid var(--teal);
+      padding-left: 16px;
+    }
+    .credential-company {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--dark);
+      letter-spacing: 0.3px;
+    }
+    .credential-detail {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+      line-height: 1.5;
+    }
+
+    /* ── PRINCIPLES ── */
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 8px;
+    }
+    @media (max-width: 640px) { .principles { grid-template-columns: 1fr; } }
+
+    .principle {
+      padding: 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+    }
+    .principle-num {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--teal);
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+    .principle h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+    .principle p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── BLOG ── */
+    .blog-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 600px) { .blog-grid { grid-template-columns: 1fr; } }
+
+    .post-card {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      background: var(--bg);
+      text-decoration: none;
+      display: block;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .post-card:hover {
+      border-color: var(--teal);
+      box-shadow: 0 4px 20px rgba(13,148,136,0.08);
+    }
+    .post-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 10px;
+    }
+    .post-card h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dark);
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+    .post-card p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .blog-cta {
+      margin-top: 32px;
+      font-size: 14px;
+      color: var(--mid);
+    }
+    .blog-cta a {
+      color: var(--teal);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .blog-cta a:hover { text-decoration: underline; }
+
+    /* ── CONTACT ── */
+    #contact { background: var(--dark); }
+    #contact .section-label { color: #93c5fd; }
+    #contact h2 { color: #fff; }
+    #contact .section-intro { color: #9ca3af; }
+
+    .contact-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border: 1.5px solid #374151;
+      border-radius: 6px;
+      color: #d1d5db;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .contact-link:hover { border-color: #2563eb; color: #93c5fd; }
+    .contact-link svg { width: 16px; height: 16px; stroke: currentColor; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--dark);
+      border-top: 1px solid #1f2937;
+      padding: 24px;
+      text-align: center;
+    }
+    footer p {
+      font-size: 13px;
+      color: #4b5563;
+    }
+    footer span { color: #2563eb; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a href="#" class="logo">
+        <img src="logo-lit.svg" alt="Soterra Labs" style="height:40px; width:auto;" />
+      </a>
+      <ul class="nav-links">
+        <li><a href="#services">Services</a></li>
+        <li><a href="#thinking">Thinking</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="inner">
+      <div class="hero-label">AI Built for Your Business</div>
+      <h1>From <span class="gpu">GPU</span><br/>to <span>revenue.</span></h1>
+      <p class="hero-sub">
+        Most companies invest in GPU infrastructure and wait months to see returns.
+        We compress that. From bare metal to running AI — infrastructure, applications,
+        and the sales intelligence to sell it — we work the full stack so your GPU
+        investment pays off fast.
+      </p>
+      <div class="cta-row">
+        <a href="#contact" class="btn-primary">Get in touch</a>
+        <a href="#services" class="btn-secondary">What we do</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="inner">
+      <div class="section-label">Services</div>
+      <h2>Three ways we engage</h2>
+      <p class="section-intro">
+        Whether you're a startup that needs its first AI system, a growing business
+        ready to automate, or a technology vendor that needs a pre-sale edge — we build
+        and deliver what you actually need, not a proof of concept that stalls after the demo.
+      </p>
+      <div class="cards">
+
+        <div class="card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+            </svg>
+          </div>
+          <h3>GTM Intelligence</h3>
+          <p>
+            For technology vendors and their sales teams: structured pre-sale assessment
+            tools that surface what a prospect actually needs before architecture is
+            committed. Qualify faster, disqualify early, walk into every technical
+            conversation with data. Licensed under your brand.
+          </p>
+          <div class="card-tag">AI Readiness · GPU Fit · Pre-Sale Discovery · White-Label Licensing</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <h3>AI Systems</h3>
+          <p>
+            We design and build AI that handles real work — document processing,
+            intelligent search, automated workflows, and multi-agent applications.
+            You don't need an internal AI team. You need a system that works, delivered
+            with everything your people need to run it.
+          </p>
+          <div class="card-tag">Agentic AI · RAG · Workflow Automation · Document Intelligence</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+            </svg>
+          </div>
+          <h3>AI Infrastructure</h3>
+          <p>
+            GPU procurement is the easy part. Getting models running reliably on the
+            hardware is where most teams get stuck. We design and deploy the full AI
+            stack — inference serving, model deployment, orchestration, and monitoring
+            — sized for the workload you actually have.
+          </p>
+          <div class="card-tag">GPU Stack · Inference Serving · Model Deployment · Monitoring</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- PRINCIPLES -->
+  <section id="principles">
+    <div class="inner">
+      <div class="section-label">How we build</div>
+      <h2>Three invariants. Every engagement.</h2>
+      <p class="section-intro">
+        Not values. Engineering constraints — derived from watching what happens when
+        they're violated at scale.
+      </p>
+      <div class="principles">
+        <div class="principle">
+          <div class="principle-num">01</div>
+          <h4>The deal is not the outcome. The deployment is.</h4>
+          <p>Every engagement delivers with tests, documentation, and artifacts your team
+          can run without us. We don't build proof-of-concepts that stall after the demo.
+          We build systems that are owned by you from day one.</p>
+        </div>
+        <div class="principle">
+          <div class="principle-num">02</div>
+          <h4>Business logic belongs in code, not in a prompt.</h4>
+          <p>Routing decisions, risk rules, and scoring live in deterministic code —
+          inspectable, testable, auditable. AI does what it's reliable at: synthesizing
+          results and generating narratives. Not making decisions you can't explain.</p>
+        </div>
+        <div class="principle">
+          <div class="principle-num">03</div>
+          <h4>Test the failure, not just the success.</h4>
+          <p>A retry mechanism only tested on the happy path isn't a retry mechanism.
+          A governance gate that always returns true isn't a gate — it's a comment.
+          Every system is tested against what actually breaks it.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- THINKING / BLOG -->
+  <section id="thinking">
+    <div class="inner">
+      <div class="section-label">Thinking</div>
+      <h2>What gets built. What breaks. What ships.</h2>
+      <p class="section-intro">
+        No hype, no thought leadership. A practitioner's account of building production
+        AI systems — the failures, the fixes, and what the architecture actually looks
+        like after it survives contact with a real environment.
+      </p>
+      <div class="blog-grid">
+
+        <a class="post-card" href="https://aitechy226.github.io/posts/gpu-infrastructure-five-calculations/" target="_blank" rel="noopener">
+          <div class="post-tag">GPU · Infrastructure · TCO</div>
+          <h4>GPU Infrastructure: The Five Calculations That Actually Matter</h4>
+          <p>$/hr is the last number to calculate. VRAM fit, quantization impact, multi-node threshold, egress cost, and real TCO — in that order.</p>
+        </a>
+
+        <a class="post-card" href="https://aitechy226.github.io/posts/enterprise-rag-trust-layer/" target="_blank" rel="noopener">
+          <div class="post-tag">RAG · FSI · Production</div>
+          <h4>The Trust Layer: What Separates Good RAG from Enterprise RAG</h4>
+          <p>Four bugs found while hardening a RAG system for FSI — and what they reveal about the gap between a working system and a trustworthy one.</p>
+        </a>
+
+        <a class="post-card" href="https://aitechy226.github.io/posts/agentic-hype-vs-reality/" target="_blank" rel="noopener">
+          <div class="post-tag">Agents · Architecture</div>
+          <h4>Why Your AI Agent Demo Looks Great and Your Production System Doesn't</h4>
+          <p>The gap between the demo and production — the reliability argument, the auditability argument, and which one survives model improvements.</p>
+        </a>
+
+        <a class="post-card" href="https://aitechy226.github.io/posts/mcp-production-part-1/" target="_blank" rel="noopener">
+          <div class="post-tag">MCP · Architecture · Production</div>
+          <h4>MCP in Production, Part 1: Persistent Sessions, Pooling, and Fault Tolerance</h4>
+          <p>Five transport-layer decisions — each driven by a real failure in a KYC onboarding system.</p>
+        </a>
+
+        <a class="post-card" href="https://aitechy226.github.io/posts/benchmarking-ai-devices/" target="_blank" rel="noopener">
+          <div class="post-tag">AI PC · Inference · Procurement</div>
+          <h4>The AI PC Buying Problem Every Enterprise Needs to Solve</h4>
+          <p>The vendor benchmarks are valid. The procurement question still doesn't have a clean answer — here's the gap and how to close it.</p>
+        </a>
+
+        <a class="post-card" href="https://aitechy226.github.io/posts/mcp-service-to-service/" target="_blank" rel="noopener">
+          <div class="post-tag">MCP · LangGraph · KYC</div>
+          <h4>I Used MCP as a Service-to-Service Protocol. Here's What I Learned.</h4>
+          <p>MCP was designed as an LLM-to-tool protocol. The tradeoffs of using it as a service layer between a LangGraph orchestrator and integration servers.</p>
+        </a>
+
+        <a class="post-card" href="https://aitechy226.github.io/posts/professional-digital-twin/" target="_blank" rel="noopener">
+          <div class="post-tag">Agents · Architecture · Digital Twin</div>
+          <h4>Designing a Professional Digital Twin: The Architecture</h4>
+          <p>Most professional knowledge lives in people's heads. Here's what it looks like when you structure it as an agentic system — personas, tools, skills, rules, and memory.</p>
+        </a>
+
+      </div>
+      <p class="blog-cta">
+        All posts at <a href="https://aitechy226.github.io" target="_blank" rel="noopener">Practical AI Builder →</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="inner">
+      <div class="section-label">Contact</div>
+      <h2>Let's talk.</h2>
+      <p class="section-intro">
+        Just getting started with AI? Scaling something that's already working? Need
+        a pre-sale tool for your sales team? Reach out directly — every engagement
+        starts with a conversation, not a sales process.
+      </p>
+      <div class="contact-row">
+        <a href="mailto:sri@soterralabs.ai" class="contact-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/>
+          </svg>
+          sri@soterralabs.ai
+        </a>
+        <a href="https://www.linkedin.com/in/srikanthsamudrla/" target="_blank" rel="noopener" class="contact-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+            <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+          </svg>
+          LinkedIn
+        </a>
+        <a href="https://aitechy226.github.io" target="_blank" rel="noopener" class="contact-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+            <path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/>
+          </svg>
+          Practical AI Builder
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 <span>Soterra Labs</span> — From GPU to Revenue.</p>
+  </footer>
+
+</body>
+</html>
