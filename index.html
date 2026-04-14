@@ -278,6 +278,79 @@
       letter-spacing: 0.5px;
     }
 
+    /* ── FEATURED GTM CARD ── */
+    .card-featured {
+      border: 1.5px solid var(--border);
+      border-top: 4px solid var(--teal);
+      border-radius: 10px;
+      padding: 32px;
+      background: var(--bg);
+      margin-bottom: 24px;
+    }
+    .card-featured-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 6px;
+    }
+    .card-featured-subtitle {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 16px;
+      line-height: 1.3;
+    }
+    .card-featured-intro {
+      font-size: 16px;
+      color: var(--mid);
+      line-height: 1.75;
+      margin-bottom: 28px;
+      max-width: 680px;
+    }
+    .gpu-nav-block {
+      background: var(--bg-alt);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .gpu-nav-block h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 10px;
+    }
+    .gpu-nav-block p {
+      font-size: 15px;
+      color: var(--mid);
+      line-height: 1.7;
+      margin-bottom: 0;
+    }
+    .proof-placeholder {
+      border: 1.5px dashed var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 12px;
+      font-style: italic;
+    }
+    .card-featured-closing {
+      font-size: 15px;
+      color: var(--mid);
+      margin-bottom: 20px;
+      margin-top: 8px;
+    }
+    .supporting-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 540px) { .supporting-cards { grid-template-columns: 1fr; } }
+
     /* ── ABOUT ── */
     .about-grid {
       display: grid;
@@ -459,6 +532,7 @@
       </button>
       <ul class="nav-links" id="navLinks">
         <li><a href="#services">Services</a></li>
+        <li><a href="#" style="opacity:0.45; cursor:default;" onclick="return false;">Products <span style="font-size:10px; font-weight:700; letter-spacing:0.5px; color:var(--teal); margin-left:4px;">SOON</span></a></li>
         <li><a href="#thinking">Thinking</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
@@ -488,10 +562,10 @@
       <div class="hero-label">AI Built for Your Business</div>
       <h1>From <span class="gpu">GPU</span><br/>To <span>Revenue.</span></h1>
       <p class="hero-sub">
-        Most companies invest in GPU infrastructure and wait months to see returns.
-        We compress that. From bare metal to running AI — infrastructure, applications,
-        and the sales intelligence to sell it — we work the full stack so your GPU
-        investment pays off fast.
+        Technology vendors lose deals because prospects can't buy with confidence.
+        Businesses with AI ambitions stall because the right system never ships.
+        We work the full stack — from pre-sale intelligence tools that close your
+        discovery gap, to production AI systems and infrastructure that actually run.
       </p>
       <div class="cta-row">
         <a href="#contact" class="btn-primary">Get in touch</a>
@@ -506,27 +580,43 @@
       <div class="section-label">Services</div>
       <h2>Three ways we engage</h2>
       <p class="section-intro">
-        Whether you're a startup that needs its first AI system, a growing business
-        ready to automate, or a technology vendor that needs a pre-sale edge — we build
-        and deliver what you actually need, not a proof of concept that stalls after the demo.
+        We don't consult. We build. Whether the gap is in your sales motion, your internal
+        workflows, or your infrastructure — we deliver working systems, not recommendations.
+        Three engagements. One standard.
       </p>
-      <div class="cards">
 
-        <div class="card">
-          <div class="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-            </svg>
-          </div>
-          <h3>GTM Intelligence</h3>
+      <!-- GTM INTELLIGENCE — featured -->
+      <div class="card-featured">
+        <div class="card-featured-label">GTM Intelligence</div>
+        <div class="card-featured-subtitle">Pre-sale tools that do your discovery before your rep gets on the call.</div>
+        <p class="card-featured-intro">
+          Your reps spend 30 minutes on discovery calls that could have been a five-minute
+          tool your prospect completes on their own. Your best qualification logic lives in
+          your two senior SEs and nowhere else. We fix both — pre-sale tools built for your
+          product, licensed under your brand, configured to your catalog. Ready in a week.
+        </p>
+
+        <div class="gpu-nav-block">
+          <h4>GPU Navigator</h4>
           <p>
-            For technology vendors and their sales teams: structured pre-sale assessment
-            tools that surface what a prospect actually needs before architecture is
-            committed. Qualify faster, disqualify early, walk into every technical
-            conversation with data. Licensed under your brand.
+            The first tool we shipped — built for GPU cloud and bare metal providers. A prospect
+            spends five minutes on their own: workload, infrastructure, buying situation. They get
+            a personalized report — the right GPU for their workload, whether their model fits on
+            a single GPU or needs multi-GPU configuration, a cost comparison against what they're
+            paying today. Your rep gets the fit score and findings before the first call.
           </p>
-          <div class="card-tag">AI Readiness · GPU Fit · Pre-Sale Discovery · White-Label Licensing</div>
         </div>
+
+        <div class="proof-placeholder">Sample report preview — coming soon</div>
+        <div class="proof-placeholder">Client quote — coming soon</div>
+
+        <p class="card-featured-closing">GPU Navigator is one. We build these for any product, any sales motion.</p>
+
+        <a href="#contact" class="btn-primary" style="display:inline-block;">Request a vendor walkthrough &rarr;</a>
+      </div>
+
+      <!-- SUPPORTING SERVICES -->
+      <div class="supporting-cards">
 
         <div class="card">
           <div class="card-icon">
@@ -667,9 +757,9 @@
       <div class="section-label">Contact</div>
       <h2>Let's talk.</h2>
       <p class="section-intro">
-        Just getting started with AI? Scaling something that's already working? Need
-        a pre-sale tool for your sales team? Reach out directly — every engagement
-        starts with a conversation, not a sales process.
+        Need a pre-sale tool for your sales team? Building AI for a real workflow?
+        Getting models running on infrastructure you've already procured? Reach out
+        directly — every engagement starts with a conversation, not a sales process.
       </p>
       <div class="contact-row">
         <a href="mailto:cto@soterralabs.ai" class="contact-link">
