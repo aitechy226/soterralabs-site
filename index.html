@@ -53,8 +53,9 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 60px;
+      height: 68px;
     }
+    @media (max-width: 540px) { .nav-inner { height: 56px; } }
     .logo {
       display: flex;
       align-items: center;
@@ -62,6 +63,10 @@
       text-decoration: none;
     }
     .logo svg { height: 32px; width: auto; }
+    .logo img { height: 44px; width: auto; display: block; }
+    @media (max-width: 540px) {
+      .logo img { height: 34px; }
+    }
     .nav-links {
       display: flex;
       gap: 4px;
@@ -72,12 +77,13 @@
       position: relative;
       text-decoration: none;
       color: var(--dark);
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.8px;
       text-transform: uppercase;
-      padding: 8px 14px;
+      padding: 10px 16px;
       border-radius: 4px;
+      white-space: nowrap;
       transition: color 0.2s ease, background 0.2s ease;
     }
     .nav-links a::after {
@@ -613,7 +619,7 @@
   <nav>
     <div class="nav-inner">
       <a href="#" class="logo">
-        <img src="logo-lit.svg" alt="Soterra Labs" style="height:40px; width:auto;" />
+        <img src="logo-lit.svg" alt="Soterra Labs" />
       </a>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -676,7 +682,7 @@
         <p class="card-featured-intro">Most people don't have 30 minutes with a sales rep for a discovery call. They have five minutes when the calendar clears. They click through a short interactive assessment: a domain-aware engine that understands the product category, with no vendor in the room and no pressure.</p>
 
         <div class="gpu-nav-block">
-          <h4>GPU Navigator</h4>
+          <h4>GPU Navigator<sup style="font-size:0.6em; vertical-align:super;">&#8482;</sup></h4>
           <p>
             The first tool we shipped — built for the GPU infrastructure space. Five minutes:
             workload, current setup, buying situation. The output is a personalized report —
@@ -684,7 +690,7 @@
             on a single GPU or likely needs multi-GPU configuration, a cost estimate
             relevant to their situation. Findings to inform the conversation, not replace it.
           </p>
-          <p style="margin-top:14px; font-size:15px; color:var(--mid);">GPU Navigator is one. We build these for any product, any buying decision.</p>
+          <p style="margin-top:14px; font-size:15px; color:var(--mid);">GPU Navigator<sup style="font-size:0.6em; vertical-align:super;">&#8482;</sup> is one. We build these for any product, any buying decision.</p>
         </div>
 
         <div class="card-tag" style="margin-bottom:20px;">Pre-Sale Discovery · Qualification Scoring · Domain-Aware Intelligence</div>
