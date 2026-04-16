@@ -17,8 +17,9 @@
       --mid:        #374151;
       --muted:      #6b7280;
       --border:     #e5e7eb;
-      --bg:         #ffffff;
+      --bg:         #f5f7fa;
       --bg-alt:     #f0f2f5;
+      --bg-card:    #ffffff;
       --max-w:      780px;
       --shadow-sm:  0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.04);
       --shadow-md:  0 2px 6px rgba(0,0,0,0.05), 0 8px 20px rgba(0,0,0,0.06);
@@ -30,7 +31,7 @@
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
       color: var(--dark);
-      background: var(--bg);
+      background: var(--bg-card);
       line-height: 1.6;
       font-size: 16px;
       -webkit-font-smoothing: antialiased;
@@ -53,9 +54,9 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 68px;
+      height: 96px;
     }
-    @media (max-width: 540px) { .nav-inner { height: 56px; } }
+    @media (max-width: 540px) { .nav-inner { height: 72px; } }
     .logo {
       display: flex;
       align-items: center;
@@ -63,9 +64,9 @@
       text-decoration: none;
     }
     .logo svg { height: 32px; width: auto; }
-    .logo img { height: 44px; width: auto; display: block; }
+    .logo img { height: 72px; width: auto; display: block; }
     @media (max-width: 540px) {
-      .logo img { height: 34px; }
+      .logo img { height: 52px; }
     }
     .nav-links {
       display: flex;
@@ -157,11 +158,11 @@
     }
 
     /* ── SECTIONS ── */
-    section { padding: 56px 24px; background: #ffffff; }
-    #services { background: #f8fafc; }
-    #principles { background: #ffffff; }
-    #thinking { background: #f8fafc; }
-    #about { background: #ffffff; }
+    section { padding: 56px 24px; background: #d6dde6; }
+    #services   { background: #b8d4ed; }
+    #principles { background: #d6dde6; }
+    #thinking   { background: #c4cbd5; }
+    #about      { background: #deecdf; }
 
     .inner {
       max-width: var(--max-w);
@@ -194,7 +195,7 @@
       margin-bottom: 24px;
     }
     h1 {
-      font-size: clamp(32px, 5vw, 48px);
+      font-size: clamp(28px, 4.3vw, 42px);
       font-weight: 700;
       line-height: 1.15;
       color: #fff;
@@ -258,10 +259,11 @@
       border-radius: 3px;
       margin-bottom: 16px;
     }
-    #services .section-label { color: #0d47a1; background: #e3f2fd; border-left-color: #0070c0; }
-    #principles .section-label { color: #0d47a1; background: #e3f2fd; border-left-color: #0070c0; }
-    #thinking .section-label { color: #78350f; background: #fff8e1; border-left-color: #f59e0b; }
-    #about .section-label { color: #1b5e20; background: #e8f5e9; border-left-color: #2e7d32; }
+    #services .section-label { color: #0a3d80; background: #e3f2fd; border-left-color: #0070c0; }
+    #principles .section-label { color: #6b3410; background: #fde8d4; border-left-color: #92400e; }
+    #thinking .section-label { color: #3730a3; background: #e0e7ff; border-left-color: #4338ca; }
+    #about .section-label { color: #14401a; background: #e8f5e9; border-left-color: #2e7d32; }
+
     h2 {
       font-size: clamp(24px, 3.5vw, 32px);
       font-weight: 700;
@@ -305,11 +307,11 @@
     @media (max-width: 480px) { .cards { grid-template-columns: 1fr; } }
 
     .card {
-      border: 1px solid rgba(0,0,0,0.04);
+      border: none;
       border-left: 3px solid var(--teal);
       border-radius: 12px;
       padding: 24px 24px 24px 28px;
-      background: var(--bg);
+      background: var(--bg-card);
       box-shadow: var(--shadow-sm);
       transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
@@ -349,11 +351,11 @@
 
     /* ── FEATURED GTM CARD ── */
     .card-featured {
-      border: 1px solid rgba(0,0,0,0.04);
+      border: none;
       border-top: 4px solid var(--teal);
       border-radius: 12px;
       padding: 36px;
-      background: var(--bg);
+      background: var(--bg-card);
       margin-bottom: 24px;
       box-shadow: var(--shadow-md);
     }
@@ -381,8 +383,8 @@
     }
     .gpu-nav-block {
       background: var(--bg-alt);
-      border: 1px solid rgba(0,0,0,0.04);
-      border-left: 3px solid #2e7d32;
+      border: none;
+      border-left: 3px solid var(--teal);
       border-radius: 10px;
       padding: 24px 24px 24px 28px;
       margin-bottom: 20px;
@@ -433,10 +435,10 @@
     @media (max-width: 640px) { .about-grid { grid-template-columns: 1fr; } }
 
     .about-text {
-      border: 1px solid rgba(0,0,0,0.04);
+      border: none;
       border-left: 3px solid #2e7d32;
       border-radius: 12px;
-      background: var(--bg);
+      background: var(--bg-card);
       box-shadow: var(--shadow-sm);
       padding: 28px 28px 28px 32px;
     }
@@ -482,10 +484,10 @@
 
     .principle {
       padding: 22px 22px 22px 26px;
-      border: 1px solid rgba(0,0,0,0.04);
-      border-left: 3px solid var(--teal);
+      border: none;
+      border-left: 3px solid #92400e;
       border-radius: 12px;
-      background: var(--bg);
+      background: var(--bg-card);
       box-shadow: var(--shadow-sm);
       transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
@@ -496,7 +498,7 @@
     .principle-num {
       font-size: 12px;
       font-weight: 700;
-      color: var(--teal);
+      color: #92400e;
       letter-spacing: 1px;
       margin-bottom: 10px;
     }
@@ -521,11 +523,11 @@
     @media (max-width: 600px) { .blog-grid { grid-template-columns: 1fr; } }
 
     .post-card {
-      border: 1px solid rgba(0,0,0,0.04);
-      border-left: 3px solid #f59e0b;
+      border: none;
+      border-left: 3px solid #4338ca;
       border-radius: 12px;
       padding: 26px 26px 26px 30px;
-      background: var(--bg);
+      background: var(--bg-card);
       text-decoration: none;
       display: block;
       box-shadow: var(--shadow-sm);
@@ -540,7 +542,7 @@
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
-      color: var(--teal);
+      color: #4338ca;
       margin-bottom: 10px;
     }
     .post-card h4 {
@@ -684,7 +686,7 @@
         <div class="gpu-nav-block">
           <h4>GPU Navigator<sup style="font-size:0.6em; vertical-align:super;">&#8482;</sup></h4>
           <p>
-            The first tool we shipped — built for the GPU infrastructure space. Five minutes:
+            This tool is built for the GPU infrastructure space. Five minutes:
             workload, current setup, buying situation. The output is a personalized report —
             a recommended GPU for their workload, an estimate of whether their model fits
             on a single GPU or likely needs multi-GPU configuration, a cost estimate
