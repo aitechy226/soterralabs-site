@@ -215,17 +215,10 @@
     .output-card {
       padding: 18px;
       border-radius: 8px;
-      border: 1px solid;
+      border: 1px solid #e2e8f0;
+      background: #fff;
     }
 
-    .output-card.green  { background: #f0fdf4; border-color: #bbf7d0; }
-    .output-card.blue   { background: #eff6ff; border-color: #bfdbfe; }
-    .output-card.amber  { background: #fffbeb; border-color: #fde68a; }
-    .output-card.red    { background: #fef2f2; border-color: #fecaca; }
-    .output-card.purple { background: #f5f3ff; border-color: #ddd6fe; }
-    .output-card.teal   { background: #f0fdfa; border-color: #99f6e4; }
-
-    .output-icon { font-size: 20px; margin-bottom: 8px; display: block; }
     .output-card h3 { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
     .output-card p { font-size: 13px; color: #64748b; line-height: 1.55; }
 
@@ -323,34 +316,6 @@
       line-height: 1.55;
     }
 
-    .ship-icon {
-      font-size: 20px;
-      margin-bottom: 8px;
-      display: block;
-    }
-
-    /* ── SOCIAL PROOF / QUOTE ── */
-    .quote-block {
-      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
-      padding: 24px 40px;
-      text-align: center;
-    }
-
-    .quote-text {
-      font-size: 20px;
-      font-weight: 600;
-      color: #fff;
-      margin: 0 auto 8px;
-      line-height: 1.5;
-      font-style: italic;
-    }
-
-    .quote-attr {
-      font-size: 13px;
-      color: #4ade80;
-      font-weight: 600;
-    }
-
     /* ── CTA BLOCK ── */
     .cta-block {
       background: #f0fdf4;
@@ -413,7 +378,7 @@
 
   <!-- ══════ HERO ══════ -->
   <div class="hero">
-    <div class="hero-eyebrow">GTM Intelligence · GPU Navigator™</div>
+    <div class="hero-eyebrow">GPU Navigator™</div>
     <h1>The Brief <span>Before the Call.</span></h1>
     <a href="#contact" class="hero-cta">Request a Demo</a>
     <div class="hero-proof">Vendor-branded. Your rates. Your GPU catalog. Hosted on your subdomain.</div>
@@ -497,32 +462,32 @@
 
       <div class="outputs-grid">
         <div class="output-card green">
-          <span class="output-icon">&#127919;</span>
+          
           <h3>Precision-Aware Sizing</h3>
           <p>INT8 at 30B gets a different GPU than BF16 at 30B. The recommendation adapts to quantization, not just parameter count.</p>
         </div>
         <div class="output-card purple">
-          <span class="output-icon">&#129518;</span>
+          
           <h3>Topology Detection</h3>
           <p>When VRAM exceeds single-GPU capacity, the report flags multi-node and specifies NVLink or InfiniBand — automatically.</p>
         </div>
         <div class="output-card blue">
-          <span class="output-icon">&#128176;</span>
+          
           <h3>Competitive Positioning</h3>
           <p>Your pricing vs competing options — at the prospect's exact GPU type and pricing model. You control which competitors appear and at what rates.</p>
         </div>
         <div class="output-card amber">
-          <span class="output-icon">&#128679;</span>
+          
           <h3>Switching Cost Assessment</h3>
           <p>Integration depth determines switching cost — classified as High, Medium, or Low with specific steps.</p>
         </div>
         <div class="output-card red">
-          <span class="output-icon">&#9888;&#65039;</span>
+          
           <h3>Blocker Detection</h3>
           <p>Named findings with specific penalties. A 55 with "contract lock-in (−25)" is actionable. A green checkbox isn't.</p>
         </div>
         <div class="output-card teal">
-          <span class="output-icon">&#128200;</span>
+          
           <h3>TCO as Internal Justification</h3>
           <p>3-year projection from actual GPU hours. This is the number the prospect's budget owner forwards to procurement.</p>
         </div>
@@ -607,17 +572,17 @@
 
       <div class="ship-grid">
         <div class="ship-card">
-          <span class="ship-icon">&#9881;&#65039;</span>
+          
           <h3>Self-Service Admin Panel</h3>
           <p>GPU catalog, rates, competitor pricing, compliance certs, topology, CTAs — update and download your config.</p>
         </div>
         <div class="ship-card">
-          <span class="ship-icon">&#128187;</span>
+          
           <h3>Lightweight Deployment</h3>
           <p>The assessment runs as static files — no vendor-side servers or databases. Lead notifications use a managed serverless Worker.</p>
         </div>
         <div class="ship-card">
-          <span class="ship-icon">&#128274;</span>
+          
           <h3>Signed Access Links</h3>
           <p>Report links are scoped to your organization and time-bounded. Rotating your key invalidates all outstanding links.</p>
         </div>
@@ -632,16 +597,16 @@
     <div class="section-lead">From RTX 4090 to B300 — covering inference, training, fine-tuning, and HPC workloads.</div>
 
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
-      <div style="padding:14px 16px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px;">
-        <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#059669; margin-bottom:10px;">Flagship</div>
+      <div style="padding:14px 16px; background:#fff; border:1px solid #e2e8f0; border-radius:8px;">
+        <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#1e293b; margin-bottom:10px;">Flagship</div>
         <div style="font-size:14px; color:#1e293b; font-weight:600; line-height:2;">H100 · H200 · B200 · B300 · GH200</div>
       </div>
-      <div style="padding:14px 16px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px;">
-        <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#3b82f6; margin-bottom:10px;">Professional</div>
+      <div style="padding:14px 16px; background:#fff; border:1px solid #e2e8f0; border-radius:8px;">
+        <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#1e293b; margin-bottom:10px;">Professional</div>
         <div style="font-size:14px; color:#1e293b; font-weight:600; line-height:2;">A100 80GB · A100 40GB · L40S · L40 · A6000 · RTX 6000 Ada · RTX Pro 6000</div>
       </div>
-      <div style="padding:14px 16px; background:#f5f3ff; border:1px solid #ddd6fe; border-radius:8px;">
-        <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#7c3aed; margin-bottom:10px;">Value</div>
+      <div style="padding:14px 16px; background:#fff; border:1px solid #e2e8f0; border-radius:8px;">
+        <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#1e293b; margin-bottom:10px;">Value</div>
         <div style="font-size:14px; color:#1e293b; font-weight:600; line-height:2;">RTX 4090 · RTX 5090 · L4</div>
       </div>
     </div>

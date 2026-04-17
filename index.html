@@ -96,7 +96,6 @@
     [data-theme="dark"] .post-card::after { color: #a5b4fc; }
     [data-theme="dark"] #about .section-label      { color: #86efac; background: rgba(134,239,172,0.10); border-left-color: #22c55e; }
 
-    [data-theme="dark"] .vertical-tag { color: #cbd5e1; background: #1e293b; border-color: rgba(255,255,255,0.08); }
     [data-theme="dark"] .btn-secondary { color: #cbd5e1; border-color: rgba(255,255,255,0.15); }
     [data-theme="dark"] .btn-secondary:hover { border-color: #7ec8e3; color: #7ec8e3; }
 
@@ -361,33 +360,6 @@
       margin-bottom: 16px;
     }
 
-    /* ── VERTICALS ── */
-    .verticals {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 28px;
-    }
-    .vertical-tag {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--mid);
-      background: var(--bg-alt);
-      border: 1.5px solid var(--border);
-      padding: 4px 12px;
-      border-radius: 20px;
-      letter-spacing: 0.3px;
-    }
-
-    /* ── SERVICE CARDS ── */
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-    }
-    @media (max-width: 700px) { .cards { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 480px) { .cards { grid-template-columns: 1fr; } }
-
     .card {
       border: none;
       border-left: 3px solid var(--teal);
@@ -401,17 +373,6 @@
       transform: translateY(-2px);
       box-shadow: var(--shadow-lg);
     }
-    .card-icon {
-      width: 40px;
-      height: 40px;
-      background: var(--teal-light);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-    }
-    .card-icon svg { width: 20px; height: 20px; stroke: var(--teal); }
     .card h3 {
       font-size: 18px;
       font-weight: 700;
@@ -507,14 +468,6 @@
     @media (max-width: 540px) { .supporting-cards { grid-template-columns: 1fr; } }
 
     /* ── ABOUT ── */
-    .about-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 28px;
-      align-items: start;
-    }
-    @media (max-width: 640px) { .about-grid { grid-template-columns: 1fr; } }
-
     .about-text {
       border: none;
       border-left: 3px solid #2e7d32;
@@ -800,11 +753,6 @@
       <div class="supporting-cards">
 
         <div class="card">
-          <div class="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-            </svg>
-          </div>
           <h3>AI Systems</h3>
           <p>AI that does the work your team is doing manually — document processing, intelligent search, multi-agent applications, automated pipelines. Scoped to your workflow. Built to run, not to demo.</p>
           <div class="card-tag">Agentic AI · RAG · Workflow Automation · Document Intelligence</div>
@@ -812,11 +760,6 @@
         </div>
 
         <div class="card">
-          <div class="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
-            </svg>
-          </div>
           <h3>AI Infrastructure</h3>
           <p>You bought the GPUs. Now make them earn. We deploy the full AI stack — inference serving, model deployment, orchestration, monitoring — engineered for the workload you actually have, not a reference architecture.</p>
           <div class="card-tag">GPU Stack · Inference Serving · Model Deployment · Monitoring</div>
