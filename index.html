@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Soterra Labs — From GPU to Revenue.</title>
   <meta name="description" content="Soterra Labs delivers production-grade AI for any business — from bare metal GPU infrastructure to agentic AI applications that generate business value." />
-  <script>(function(){var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -26,79 +25,6 @@
       --shadow-md:  0 2px 6px rgba(0,0,0,0.05), 0 8px 20px rgba(0,0,0,0.06);
       --shadow-lg:  0 4px 10px rgba(0,0,0,0.06), 0 14px 36px rgba(10,31,68,0.10);
     }
-
-    /* ── THEME TOGGLE BUTTON ── */
-    .theme-toggle {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      padding: 0;
-      background: none;
-      border: none;
-      cursor: pointer;
-      border-radius: 50%;
-      margin-left: auto;
-      margin-right: 8px;
-      color: var(--mid);
-      transition: background 0.2s ease, color 0.2s ease;
-    }
-    .theme-toggle:hover { background: rgba(0,0,0,0.06); color: var(--teal); }
-    .theme-toggle svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-    .theme-toggle .icon-moon { display: none; }
-    [data-theme="dark"] .theme-toggle .icon-sun { display: none; }
-    [data-theme="dark"] .theme-toggle .icon-moon { display: block; }
-
-    /* ── DARK THEME ── */
-    [data-theme="dark"] {
-      --dark:   #e5e7eb;
-      --mid:    #d1d5db;
-      --muted:  #d1d5db;
-      --border: rgba(255,255,255,0.08);
-      --bg:     #0a0e1a;
-      --bg-alt: #111827;
-      --bg-card:#121827;
-      color-scheme: dark;
-    }
-    [data-theme="dark"] body { background: #0a0e1a; color: #e5e7eb; }
-    [data-theme="dark"] #services   { background: #0f1a2c; }
-    [data-theme="dark"] #principles { background: #0c1117; }
-    [data-theme="dark"] #thinking   { background: #0d1420; }
-    [data-theme="dark"] #about      { background: #0c1a10; }
-
-    [data-theme="dark"] .card,
-    [data-theme="dark"] .principle,
-    [data-theme="dark"] .post-card,
-    [data-theme="dark"] .about-text,
-    [data-theme="dark"] .card-featured { background: #121827; }
-    [data-theme="dark"] .gpu-nav-block { background: #1a2233; }
-
-    [data-theme="dark"] h2,
-    [data-theme="dark"] .card h3,
-    [data-theme="dark"] .principle h4,
-    [data-theme="dark"] .post-card h4,
-    [data-theme="dark"] .gpu-nav-block h4,
-    [data-theme="dark"] .about-text strong,
-    [data-theme="dark"] .card-featured-subtitle { color: #f3f4f6; }
-
-    [data-theme="dark"] .card p,
-    [data-theme="dark"] .principle p,
-    [data-theme="dark"] .post-card p,
-    [data-theme="dark"] .gpu-nav-block p,
-    [data-theme="dark"] .about-text p,
-    [data-theme="dark"] .card-featured-intro,
-    [data-theme="dark"] .section-intro { color: #d1d5db; }
-
-    [data-theme="dark"] #services .section-label   { color: #60a5fa; background: rgba(96,165,250,0.10); border-left-color: #3b82f6; }
-    [data-theme="dark"] #principles .section-label { color: #fdba74; background: rgba(253,186,116,0.10); border-left-color: #c2410c; }
-    [data-theme="dark"] #thinking .section-label   { color: #a5b4fc; background: rgba(165,180,252,0.10); border-left-color: #6366f1; }
-    [data-theme="dark"] .post-card::after { color: #a5b4fc; }
-    [data-theme="dark"] #about .section-label      { color: #86efac; background: rgba(134,239,172,0.10); border-left-color: #22c55e; }
-
-    [data-theme="dark"] .btn-secondary { color: #cbd5e1; border-color: rgba(255,255,255,0.15); }
-    [data-theme="dark"] .btn-secondary:hover { border-color: #7ec8e3; color: #7ec8e3; }
-
 
     html { scroll-behavior: smooth; }
 
@@ -665,10 +591,6 @@
       <a href="#" class="logo">
         <img src="logo-lit.svg" alt="Soterra Labs" />
       </a>
-      <button class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme">
-        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/></svg>
-        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      </button>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -698,12 +620,6 @@
       });
     });
 
-    const themeToggle = document.getElementById('themeToggle');
-    themeToggle.addEventListener('click', () => {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      if (isDark) { document.documentElement.removeAttribute('data-theme'); localStorage.setItem('theme', 'light'); }
-      else { document.documentElement.setAttribute('data-theme', 'dark'); localStorage.setItem('theme', 'dark'); }
-    });
   </script>
 
   <!-- HERO -->
