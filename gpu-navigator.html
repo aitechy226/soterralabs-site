@@ -214,8 +214,9 @@
 
     .output-card {
       padding: 18px;
-      border-radius: 8px;
+      border-radius: 0 0 8px 8px;
       border: 1px solid #e2e8f0;
+      border-top: 3px solid #1565c0;
       background: #fff;
     }
 
@@ -299,7 +300,8 @@
     .ship-card {
       padding: 20px 20px;
       border: 1px solid #e2e8f0;
-      border-radius: 8px;
+      border-top: 3px solid #059669;
+      border-radius: 0 0 8px 8px;
       background: #fff;
     }
 
@@ -379,22 +381,100 @@
   <!-- ══════ HERO ══════ -->
   <div class="hero">
     <div class="hero-eyebrow">GPU Navigator™</div>
-    <h1>The Brief <span>Before the Call.</span></h1>
+    <h1>GPU Sizing <span>in Five Minutes.</span></h1>
+    <div class="hero-proof">A growing number of providers rent GPU compute outside the hyperscalers — but most of them show you a catalog and an hourly rate. If you already know which GPU fits your workload, that works. Most people don't.</div>
     <a href="#contact" class="hero-cta">Request a Demo</a>
-    <div class="hero-proof">Vendor-branded. Your rates. Your GPU catalog. Hosted on your subdomain.</div>
   </div>
 
-  <!-- ══════ THE PROBLEM ══════ -->
+  <!-- ══════ PART 1: THE PROSPECT'S EXPERIENCE ══════ -->
+
+  <!-- WHAT THE DEVELOPER DOES -->
   <div class="section-dark">
     <div class="section">
-      <div class="section-eyebrow">The Vendor's Problem</div>
-      <h2>Your Sales Rep Starts Most Deals Blind</h2>
-      <div class="section-lead">The prospect filled out a contact form. Your sales rep got a name and a company. Now what?</div>
+      <div class="section-eyebrow">How It Works</div>
+      <h2>What the Prospect Sees.</h2>
+      <div class="section-lead">ML/AI engineers, GPU infrastructure buyers, dev teams evaluating compute — four steps, five minutes, no sales rep required.</div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-badge">1</div>
+          <div>
+            <h3>Describe Your Workload</h3>
+            <p>Training, fine-tuning, or inference. Model size, precision class, and how many GPU-hours you need.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-badge">2</div>
+          <div>
+            <h3>Tell Us What You're Running Today</h3>
+            <p>Current provider, what you're paying, how deep the integration goes. This shapes the switching cost assessment.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-badge">3</div>
+          <div>
+            <h3>Flag What Matters to You</h3>
+            <p>Data residency, compliance certifications, networking requirements, contract constraints. Anything that could block or enable a move.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-badge">4</div>
+          <div>
+            <h3>Set Your Budget and Timeline</h3>
+            <p>Monthly budget range, decision timeline, and who signs. The recommendation adapts to what's realistic.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT THE DEVELOPER GETS -->
+  <div class="section">
+    <div class="section-eyebrow">The Report</div>
+    <h2>What the Prospect Walks Away With.</h2>
+    <div class="section-lead">A personalized report — not a price list.</div>
+
+    <div class="outputs-grid">
+      <div class="output-card">
+        <h3>GPU Recommendation</h3>
+        <p>A GPU recommendation matched to your workload by VRAM capacity, memory bandwidth, and compute throughput.</p>
+      </div>
+      <div class="output-card">
+        <h3>VRAM Fit Analysis</h3>
+        <p>Whether your model fits on a single GPU or requires multi-GPU / multi-node. Precision-aware — INT8 at 30B gets a different answer than BF16 at 30B.</p>
+      </div>
+      <div class="output-card">
+        <h3>Cost Estimate</h3>
+        <p>Monthly and annual cost estimate at the provider's actual rates, based on the GPU-hours your workload requires.</p>
+      </div>
+      <div class="output-card">
+        <h3>Compatibility Score</h3>
+        <p>How well the provider fits your situation — workload match, infrastructure readiness, compliance coverage, and switching cost. With specific findings, not just a number.</p>
+      </div>
+      <div class="output-card">
+        <h3>Topology Detection</h3>
+        <p>When VRAM exceeds single-GPU capacity, the report flags multi-node and specifies NVLink or InfiniBand requirements — automatically.</p>
+      </div>
+      <div class="output-card">
+        <h3>Switching Cost Assessment</h3>
+        <p>How deep your current integration runs, classified as High, Medium, or Low with specific steps to evaluate.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ PART 2: THE VENDOR'S VALUE ══════ -->
+
+  <!-- WHY VENDORS LICENSE THIS -->
+  <div class="section-dark">
+    <div class="section">
+      <div class="section-eyebrow">For GPU Providers</div>
+      <h2>Why Vendors License GPU Navigator.</h2>
+      <div class="section-lead">It helps their buyers make an informed decision before they place the order — so the GPU they rent is sized for the workload they actually have.</div>
 
       <div class="problem-grid">
         <div class="problem-card">
           <h3>No Data at Handoff</h3>
-          <p>No workload type, no model size, no budget, no timeline, no technical requirements. Discovery starts from scratch.</p>
+          <p>Today, a prospect fills out a contact form. The sales rep gets a name and a company — no workload, no budget, no requirements. Discovery starts from scratch.</p>
         </div>
         <div class="problem-card">
           <h3>Multiple Meetings Before Sizing</h3>
@@ -408,95 +488,11 @@
     </div>
   </div>
 
-  <!-- ══════ HOW IT WORKS ══════ -->
+  <!-- WHAT THE VENDOR CONTROLS -->
   <div class="section">
-    <div class="section-eyebrow">What Your Sales Rep Learns</div>
-    <h2>Each Step Feeds the Sales Brief</h2>
-    <div class="section-lead">The prospect completes a short assessment. Here's what each step delivers to your team.</div>
-
-    <div class="steps-grid">
-      <div class="step-card">
-        <div class="step-badge">1</div>
-        <div>
-          <div class="who">From: Their ML Engineer</div>
-          <h3>Workload & GPU Sizing</h3>
-          <p>Your sales rep knows the exact workload, model size, precision class, and GPU-hours demand.</p>
-        </div>
-      </div>
-      <div class="step-card">
-        <div class="step-badge">2</div>
-        <div>
-          <div class="who">From: Their DevOps Team</div>
-          <h3>Current Infrastructure</h3>
-          <p>Your sales rep knows what they're running today, what they're paying, and how deep the integration runs. Switching cost is pre-assessed.</p>
-        </div>
-      </div>
-      <div class="step-card">
-        <div class="step-badge">3</div>
-        <div>
-          <div class="who">From: Their Compliance & Legal</div>
-          <h3>Deal Blockers</h3>
-          <p>Data residency, certifications, contract lock-in, networking gaps. Your sales rep sees what could kill the deal — and what's clear.</p>
-        </div>
-      </div>
-      <div class="step-card">
-        <div class="step-badge">4</div>
-        <div>
-          <div class="who">From: Their Budget Owner</div>
-          <h3>Budget & Authority</h3>
-          <p>Timeline, monthly budget, decision authority, payment preferences. Your sales rep knows if this deal can close and who signs.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════ WHAT THE PROSPECT GETS ══════ -->
-  <div class="section-dark">
-    <div class="section">
-      <div class="section-eyebrow">Beyond the Report</div>
-      <h2>What the Landing Page Didn't Tell You</h2>
-      <div class="section-lead">The prospect sees a report. Here's what's running underneath — and why a form builder doesn't get you here.</div>
-
-      <div class="outputs-grid">
-        <div class="output-card green">
-          
-          <h3>Precision-Aware Sizing</h3>
-          <p>INT8 at 30B gets a different GPU than BF16 at 30B. The recommendation adapts to quantization, not just parameter count.</p>
-        </div>
-        <div class="output-card purple">
-          
-          <h3>Topology Detection</h3>
-          <p>When VRAM exceeds single-GPU capacity, the report flags multi-node and specifies NVLink or InfiniBand — automatically.</p>
-        </div>
-        <div class="output-card blue">
-          
-          <h3>Competitive Positioning</h3>
-          <p>Your pricing vs competing options — at the prospect's exact GPU type and pricing model. You control which competitors appear and at what rates.</p>
-        </div>
-        <div class="output-card amber">
-          
-          <h3>Switching Cost Assessment</h3>
-          <p>Integration depth determines switching cost — classified as High, Medium, or Low with specific steps.</p>
-        </div>
-        <div class="output-card red">
-          
-          <h3>Blocker Detection</h3>
-          <p>Named findings with specific penalties. A 55 with "contract lock-in (−25)" is actionable. A green checkbox isn't.</p>
-        </div>
-        <div class="output-card teal">
-          
-          <h3>TCO as Internal Justification</h3>
-          <p>3-year projection from actual GPU hours. This is the number the prospect's budget owner forwards to procurement.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════ WHAT MAKES IT DIFFERENT ══════ -->
-  <div class="section">
-    <div class="section-eyebrow">What You Control</div>
-    <h2>Your Catalog. Your Competitive Story. Your Rules.</h2>
-    <div class="section-lead">The assessment runs your data, not ours. Each deployment is configured to your inventory and market position.</div>
+    <div class="section-eyebrow">What the Vendor Controls</div>
+    <h2>Their Catalog. Their Rates. Their Rules.</h2>
+    <div class="section-lead">Each deployment runs the vendor's data, not ours. Configured to their inventory and market position.</div>
 
     <div class="diff-grid">
       <div class="diff-left">
@@ -504,34 +500,34 @@
           <div class="diff-check">&#10003;</div>
           <div>
             <h4>GPU Inventory Management</h4>
-            <p>Mark GPUs as active, out of stock, or discontinued. The tool only recommends hardware you can actually deliver.</p>
+            <p>Mark GPUs as active, out of stock, or discontinued. The tool only recommends hardware the vendor can actually deliver.</p>
           </div>
         </div>
         <div class="diff-item">
           <div class="diff-check">&#10003;</div>
           <div>
             <h4>Competitor Rate Positioning</h4>
-            <p>You define which competitors appear and at what rates. Your competitive narrative, your numbers.</p>
+            <p>The vendor defines which competitors appear and at what rates. Their competitive narrative, their numbers.</p>
           </div>
         </div>
         <div class="diff-item">
           <div class="diff-check">&#10003;</div>
           <div>
             <h4>Honest Scoring</h4>
-            <p>A prospect running 70B training without InfiniBand doesn't get a polite 60. They get a clear finding and a next step. The honesty builds trust.</p>
+            <p>A prospect running 70B training without InfiniBand doesn't get a polite 60. They get a clear finding and a next step.</p>
           </div>
         </div>
         <div class="diff-item">
           <div class="diff-check">&#10003;</div>
           <div>
             <h4>Opt-In Lead Notifications</h4>
-            <p>When the prospect opts in, your rep gets a full brief — company, workload, recommendation, score, timeline, budget, and findings — by email.</p>
+            <p>When the prospect opts in, the sales rep gets a full brief — company, workload, recommendation, score, timeline, budget, and findings — by email.</p>
           </div>
         </div>
       </div>
 
       <div class="diff-right">
-        <h3>What Your Sales Rep Gets Before the First Call</h3>
+        <h3>Sample Sales Brief</h3>
         <div class="metric-row">
           <span class="metric-label">Recommended GPU</span>
           <span class="metric-value">H100 80GB</span>
@@ -560,28 +556,25 @@
     </div>
   </div>
 
-  <!-- ══════ HOW IT SHIPS ══════ -->
+  <!-- HOW IT SHIPS -->
   <div class="section-dark">
     <div class="section">
       <div class="section-eyebrow">Deployment</div>
-      <h2>You Own the Configuration.</h2>
-      <div class="section-lead">Your name, rates, and GPU catalog. The tool runs on your subdomain with your branding throughout the prospect experience.</div>
+      <h2>Vendor-Branded. Lightweight. Secure.</h2>
+      <div class="section-lead">Runs on the vendor's subdomain with their branding. No servers to manage.</div>
 
       <div class="ship-grid">
         <div class="ship-card">
-          
           <h3>Self-Service Admin Panel</h3>
-          <p>GPU catalog, rates, competitor pricing, compliance certs, topology, CTAs — update and download your config.</p>
+          <p>GPU catalog, rates, competitor pricing, compliance certs, topology, CTAs — update and download the config.</p>
         </div>
         <div class="ship-card">
-          
-          <h3>Lightweight Deployment</h3>
+          <h3>Static Deployment</h3>
           <p>The assessment runs as static files — no vendor-side servers or databases. Lead notifications use a managed serverless Worker.</p>
         </div>
         <div class="ship-card">
-          
           <h3>Signed Access Links</h3>
-          <p>Report links are scoped to your organization and time-bounded. Rotating your key invalidates all outstanding links.</p>
+          <p>Report links are scoped to the vendor's organization and time-bounded. Rotating the key invalidates all outstanding links.</p>
         </div>
       </div>
     </div>
@@ -594,15 +587,15 @@
     <div class="section-lead">From RTX 4090 to B300 — covering inference, training, fine-tuning, and HPC workloads.</div>
 
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
-      <div style="padding:14px 16px; background:#fff; border:1px solid #e2e8f0; border-radius:8px;">
+      <div style="padding:14px 16px; background:#fff; border:1px solid #e2e8f0; border-top:3px solid #7c3aed; border-radius:0 0 8px 8px;">
         <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#1e293b; margin-bottom:10px;">Flagship</div>
         <div style="font-size:14px; color:#1e293b; font-weight:600; line-height:2;">H100 · H200 · B200 · B300 · GH200</div>
       </div>
-      <div style="padding:14px 16px; background:#fff; border:1px solid #e2e8f0; border-radius:8px;">
+      <div style="padding:14px 16px; background:#fff; border:1px solid #e2e8f0; border-top:3px solid #7c3aed; border-radius:0 0 8px 8px;">
         <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#1e293b; margin-bottom:10px;">Professional</div>
         <div style="font-size:14px; color:#1e293b; font-weight:600; line-height:2;">A100 80GB · A100 40GB · L40S · L40 · A6000 · RTX 6000 Ada · RTX Pro 6000</div>
       </div>
-      <div style="padding:14px 16px; background:#fff; border:1px solid #e2e8f0; border-radius:8px;">
+      <div style="padding:14px 16px; background:#fff; border:1px solid #e2e8f0; border-top:3px solid #7c3aed; border-radius:0 0 8px 8px;">
         <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#1e293b; margin-bottom:10px;">Value</div>
         <div style="font-size:14px; color:#1e293b; font-weight:600; line-height:2;">RTX 4090 · RTX 5090 · L4</div>
       </div>
@@ -613,7 +606,7 @@
   <!-- ══════ CTA ══════ -->
   <div class="cta-block" id="contact">
     <h2>See It With Your Rates</h2>
-    <p>We'll load your data and run a live assessment — so you see exactly what your prospects experience.</p>
+    <p>We'll load your data and run a live assessment — so you see what your prospects experience.</p>
     <a href="mailto:cto@soterralabs.ai?subject=GPU%20Navigator%20Demo%20Request" class="cta-btn">Request a Demo</a>
   </div>
 
