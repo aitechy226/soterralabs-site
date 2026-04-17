@@ -93,6 +93,7 @@
     [data-theme="dark"] #services .section-label   { color: #60a5fa; background: rgba(96,165,250,0.10); border-left-color: #3b82f6; }
     [data-theme="dark"] #principles .section-label { color: #fdba74; background: rgba(253,186,116,0.10); border-left-color: #c2410c; }
     [data-theme="dark"] #thinking .section-label   { color: #a5b4fc; background: rgba(165,180,252,0.10); border-left-color: #6366f1; }
+    [data-theme="dark"] .post-card::after { color: #a5b4fc; }
     [data-theme="dark"] #about .section-label      { color: #86efac; background: rgba(134,239,172,0.10); border-left-color: #22c55e; }
 
     [data-theme="dark"] .vertical-tag { color: #cbd5e1; background: #1e293b; border-color: rgba(255,255,255,0.08); }
@@ -625,6 +626,14 @@
       color: var(--dark);
       line-height: 1.4;
       margin-bottom: 8px;
+    }
+    .post-card::after {
+      content: 'Read \2192';
+      display: block;
+      margin-top: 14px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #4338ca;
     }
     .post-card p {
       font-size: 13px;
