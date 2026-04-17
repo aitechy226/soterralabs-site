@@ -1,0 +1,671 @@
+<!--
+  © 2026 Srikanth Samudrla. All rights reserved.
+  GPU Navigator™ — Product Page (Draft for website Products tab).
+  Unauthorized reproduction, distribution, or use of this work is prohibited.
+  Created: April 2026
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="author" content="Srikanth Samudrla" />
+  <meta name="copyright" content="© 2026 Srikanth Samudrla. All rights reserved." />
+  <title>GPU Navigator™ — GPU Assessments That Inform the First Call</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, Arial, sans-serif;
+      background: #fff;
+      color: #1a1a2e;
+      line-height: 1.6;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0f172a 100%);
+      padding: 32px 40px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(74,222,128,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #4ade80;
+      margin-bottom: 12px;
+    }
+
+    .hero h1 {
+      font-size: 36px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 auto 10px;
+      line-height: 1.2;
+    }
+
+    .hero h1 span { color: #4ade80; }
+
+    .hero-sub {
+      font-size: 18px;
+      color: #94a3b8;
+      margin: 0 auto 24px;
+      line-height: 1.6;
+    }
+
+    .hero-cta {
+      display: inline-block;
+      background: #4ade80;
+      color: #0f172a;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 14px 36px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .hero-cta:hover { background: #22c55e; }
+
+    .hero-proof {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #64748b;
+      font-style: italic;
+    }
+
+    /* ── SECTION CONTAINER ── */
+    .section { max-width: 960px; margin: 0 auto; padding: 20px 40px; }
+    .section-dark { background: #f8fafc; }
+
+    .section-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: #4ade80;
+      margin-bottom: 4px;
+    }
+
+    .section h2 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .section-lead {
+      font-size: 16px;
+      color: #475569;
+      margin-bottom: 16px;
+      line-height: 1.65;
+    }
+
+    /* ── PROBLEM BLOCK ── */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    .problem-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-top: 3px solid #ef4444;
+      border-radius: 0 0 8px 8px;
+      padding: 14px 16px;
+    }
+
+    .problem-card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+
+    .problem-card p {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .problem-card .stat {
+      display: block;
+      font-size: 22px;
+      font-weight: 800;
+      color: #ef4444;
+      margin-bottom: 4px;
+      font-family: 'Segoe UI', monospace;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .step-card {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 16px 18px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-left: 3px solid #4ade80;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .step-badge {
+      width: 36px;
+      height: 36px;
+      background: #059669;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 14px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+
+    .step-card p {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.55;
+    }
+
+    .step-card .who {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #059669;
+      margin-bottom: 6px;
+    }
+
+    /* ── OUTPUTS ── */
+    .outputs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .output-card {
+      padding: 18px;
+      border-radius: 8px;
+      border: 1px solid;
+    }
+
+    .output-card.green  { background: #f0fdf4; border-color: #bbf7d0; }
+    .output-card.blue   { background: #eff6ff; border-color: #bfdbfe; }
+    .output-card.amber  { background: #fffbeb; border-color: #fde68a; }
+    .output-card.red    { background: #fef2f2; border-color: #fecaca; }
+    .output-card.purple { background: #f5f3ff; border-color: #ddd6fe; }
+    .output-card.teal   { background: #f0fdfa; border-color: #99f6e4; }
+
+    .output-icon { font-size: 20px; margin-bottom: 8px; display: block; }
+    .output-card h3 { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+    .output-card p { font-size: 13px; color: #64748b; line-height: 1.55; }
+
+    /* ── DIFFERENTIATOR ── */
+    .diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .diff-left h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 12px;
+    }
+
+    .diff-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+
+    .diff-check {
+      width: 22px;
+      height: 22px;
+      background: #059669;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .diff-item h4 { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
+    .diff-item p { font-size: 13px; color: #64748b; line-height: 1.5; }
+
+    .diff-right {
+      background: #0f172a;
+      border-radius: 10px;
+      padding: 20px;
+      color: #fff;
+    }
+
+    .diff-right h3 {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #4ade80;
+      margin-bottom: 10px;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .metric-row:last-child { border-bottom: none; }
+
+    .metric-label { font-size: 13px; color: #94a3b8; }
+    .metric-value { font-size: 18px; font-weight: 700; color: #4ade80; }
+
+    /* ── HOW IT SHIPS ── */
+    .ship-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    .ship-card {
+      padding: 20px 20px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .ship-card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .ship-card p {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.55;
+    }
+
+    .ship-icon {
+      font-size: 20px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    /* ── SOCIAL PROOF / QUOTE ── */
+    .quote-block {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      padding: 24px 40px;
+      text-align: center;
+    }
+
+    .quote-text {
+      font-size: 20px;
+      font-weight: 600;
+      color: #fff;
+      margin: 0 auto 8px;
+      line-height: 1.5;
+      font-style: italic;
+    }
+
+    .quote-attr {
+      font-size: 13px;
+      color: #4ade80;
+      font-weight: 600;
+    }
+
+    /* ── CTA BLOCK ── */
+    .cta-block {
+      background: #f0fdf4;
+      border-top: 3px solid #4ade80;
+      padding: 24px 40px;
+      text-align: center;
+    }
+
+    .cta-block h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .cta-block p {
+      font-size: 15px;
+      color: #475569;
+      margin: 0 auto 16px;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      background: #059669;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 14px 40px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .cta-btn:hover { background: #047857; }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: #0f172a;
+      padding: 24px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer p { font-size: 12px; color: #64748b; }
+    .footer-tag { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(148,163,184,0.5); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 28px; }
+      .problem-grid, .outputs-grid, .ship-grid { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .diff-grid { grid-template-columns: 1fr; }
+      .section { padding: 20px 16px; }
+      .quote-block, .cta-block { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════ HERO ══════ -->
+  <div class="hero">
+    <div class="hero-eyebrow">GTM Intelligence · GPU Navigator™</div>
+    <h1>The Brief <span>Before the Call.</span></h1>
+    <a href="#contact" class="hero-cta">Request a Demo</a>
+    <div class="hero-proof">Vendor-branded. Your rates. Your GPU catalog. Hosted on your subdomain.</div>
+  </div>
+
+  <!-- ══════ THE PROBLEM ══════ -->
+  <div class="section-dark">
+    <div class="section">
+      <div class="section-eyebrow">The Vendor's Problem</div>
+      <h2>Your Sales Rep Starts Most Deals Blind</h2>
+      <div class="section-lead">The prospect filled out a contact form. Your sales rep got a name and a company. Now what?</div>
+
+      <div class="problem-grid">
+        <div class="problem-card">
+          <span class="stat">0</span>
+          <h3>Data Points at Handoff</h3>
+          <p>No workload type, no model size, no budget, no timeline, no technical requirements. Discovery starts from scratch.</p>
+        </div>
+        <div class="problem-card">
+          <span class="stat">3</span>
+          <h3>Meetings Before Sizing</h3>
+          <p>Three conversations to identify the right GPU. Most prospects drop off before meeting two.</p>
+        </div>
+        <div class="problem-card">
+          <span class="stat">72 hrs</span>
+          <h3>Response Lag</h3>
+          <p>Between inquiry and a qualified recommendation. By then, the prospect has two competing quotes.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ HOW IT WORKS ══════ -->
+  <div class="section">
+    <div class="section-eyebrow">What Your Sales Rep Learns</div>
+    <h2>Each Step Feeds the Sales Brief</h2>
+    <div class="section-lead">The prospect completes a short assessment. Here's what each step delivers to your team.</div>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-badge">1</div>
+        <div>
+          <div class="who">From: Their ML Engineer</div>
+          <h3>Workload & GPU Sizing</h3>
+          <p>Your sales rep knows the exact workload, model size, precision class, and GPU-hours demand — before the first call.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-badge">2</div>
+        <div>
+          <div class="who">From: Their DevOps Team</div>
+          <h3>Current Infrastructure</h3>
+          <p>Your sales rep knows what they're running today, what they're paying, and how deep the integration runs. Switching cost is pre-assessed.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-badge">3</div>
+        <div>
+          <div class="who">From: Their Compliance & Legal</div>
+          <h3>Deal Blockers</h3>
+          <p>Data residency, certifications, contract lock-in, networking gaps. Your sales rep sees what could kill the deal — and what's clear.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-badge">4</div>
+        <div>
+          <div class="who">From: Their Budget Owner</div>
+          <h3>Budget & Authority</h3>
+          <p>Timeline, monthly budget, decision authority, payment preferences. Your sales rep knows if this deal can close and who signs.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ WHAT THE PROSPECT GETS ══════ -->
+  <div class="section-dark">
+    <div class="section">
+      <div class="section-eyebrow">Beyond the Report</div>
+      <h2>What the Landing Page Didn't Tell You</h2>
+      <div class="section-lead">The prospect sees a report. Here's what's running underneath — and why a form builder doesn't get you here.</div>
+
+      <div class="outputs-grid">
+        <div class="output-card green">
+          <span class="output-icon">&#127919;</span>
+          <h3>Precision-Aware Sizing</h3>
+          <p>INT8 at 30B gets a different GPU than BF16 at 30B. The recommendation adapts to quantization, not just parameter count.</p>
+        </div>
+        <div class="output-card purple">
+          <span class="output-icon">&#129518;</span>
+          <h3>Topology Detection</h3>
+          <p>When VRAM exceeds single-GPU capacity, the report flags multi-node and specifies NVLink or InfiniBand — automatically.</p>
+        </div>
+        <div class="output-card blue">
+          <span class="output-icon">&#128176;</span>
+          <h3>Competitive Positioning</h3>
+          <p>Your pricing vs competing options — at the prospect's exact GPU type and pricing model. You control which competitors appear and at what rates.</p>
+        </div>
+        <div class="output-card amber">
+          <span class="output-icon">&#128679;</span>
+          <h3>Switching Cost Assessment</h3>
+          <p>Integration depth determines switching cost — classified as High, Medium, or Low with specific steps.</p>
+        </div>
+        <div class="output-card red">
+          <span class="output-icon">&#9888;&#65039;</span>
+          <h3>Blocker Detection</h3>
+          <p>Named findings with specific penalties. A 55 with "contract lock-in (−25)" is actionable. A green checkbox isn't.</p>
+        </div>
+        <div class="output-card teal">
+          <span class="output-icon">&#128200;</span>
+          <h3>TCO as Internal Justification</h3>
+          <p>3-year projection from actual GPU hours. This is the number the prospect's budget owner forwards to procurement.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ WHAT MAKES IT DIFFERENT ══════ -->
+  <div class="section">
+    <div class="section-eyebrow">What You Control</div>
+    <h2>Your Catalog. Your Competitive Story. Your Rules.</h2>
+    <div class="section-lead">The assessment runs your data, not ours. Each deployment is configured to your inventory and market position.</div>
+
+    <div class="diff-grid">
+      <div class="diff-left">
+        <div class="diff-item">
+          <div class="diff-check">&#10003;</div>
+          <div>
+            <h4>GPU Inventory Management</h4>
+            <p>Mark GPUs as active, out of stock, or discontinued. The tool only recommends hardware you can actually deliver.</p>
+          </div>
+        </div>
+        <div class="diff-item">
+          <div class="diff-check">&#10003;</div>
+          <div>
+            <h4>Competitor Rate Positioning</h4>
+            <p>You define which competitors appear and at what rates. Your competitive narrative, your numbers.</p>
+          </div>
+        </div>
+        <div class="diff-item">
+          <div class="diff-check">&#10003;</div>
+          <div>
+            <h4>Honest Scoring</h4>
+            <p>A prospect running 70B training without InfiniBand doesn't get a polite 60. They get a clear finding and a next step. The honesty builds trust.</p>
+          </div>
+        </div>
+        <div class="diff-item">
+          <div class="diff-check">&#10003;</div>
+          <div>
+            <h4>Opt-In Lead Notifications</h4>
+            <p>When the prospect opts in, your rep gets a full brief — company, workload, recommendation, score, timeline, budget, and findings — by email.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="diff-right">
+        <h3>What Your Sales Rep Gets Before the First Call</h3>
+        <div class="metric-row">
+          <span class="metric-label">Recommended GPU</span>
+          <span class="metric-value">H100 80GB</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Workload</span>
+          <span class="metric-value">LLM Training · 70B</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">VRAM Required</span>
+          <span class="metric-value">Multi-Node</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Compatibility</span>
+          <span class="metric-value">82 — Strong Fit</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Budget</span>
+          <span class="metric-value">$50K-100K / mo</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Timeline</span>
+          <span class="metric-value">30 Days</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ QUOTE ══════ -->
+  <div class="quote-block">
+    <div class="quote-text">"By the time the sales rep picks up, they already know: which GPU, how many, for how long, what's blocking, and whether the budget is real."</div>
+    <div class="quote-attr">What changes when discovery happens before the call</div>
+  </div>
+
+  <!-- ══════ HOW IT SHIPS ══════ -->
+  <div class="section-dark">
+    <div class="section">
+      <div class="section-eyebrow">Deployment</div>
+      <h2>Vendor-Branded. You Own the Configuration.</h2>
+      <div class="section-lead">Your name, rates, and GPU catalog. The tool runs on your subdomain with your branding throughout the prospect experience.</div>
+
+      <div class="ship-grid">
+        <div class="ship-card">
+          <span class="ship-icon">&#9881;&#65039;</span>
+          <h3>Self-Service Admin Panel</h3>
+          <p>GPU catalog, rates, competitor pricing, compliance certs, topology, CTAs — update and download your config.</p>
+        </div>
+        <div class="ship-card">
+          <span class="ship-icon">&#128187;</span>
+          <h3>Lightweight Deployment</h3>
+          <p>The assessment runs as static files — no vendor-side servers or databases. Lead notifications use a managed serverless Worker.</p>
+        </div>
+        <div class="ship-card">
+          <span class="ship-icon">&#128274;</span>
+          <h3>Signed Access Links</h3>
+          <p>Report links are scoped to your organization and time-bounded. Rotating your key invalidates all outstanding links.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ GPU COVERAGE ══════ -->
+  <div class="section">
+    <div class="section-eyebrow">Hardware Coverage</div>
+    <h2>Three Tiers of Coverage</h2>
+    <div class="section-lead">From RTX 4090 to B300 — covering inference, training, fine-tuning, and HPC workloads.</div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+      <div style="padding:14px 16px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px;">
+        <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#059669; margin-bottom:10px;">Flagship</div>
+        <div style="font-size:14px; color:#1e293b; font-weight:600; line-height:2;">H100 · H200 · B200 · B300 · GH200</div>
+      </div>
+      <div style="padding:14px 16px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px;">
+        <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#3b82f6; margin-bottom:10px;">Professional</div>
+        <div style="font-size:14px; color:#1e293b; font-weight:600; line-height:2;">A100 80GB · A100 40GB · L40S · L40 · A6000 · RTX 6000 Ada · RTX Pro 6000</div>
+      </div>
+      <div style="padding:14px 16px; background:#f5f3ff; border:1px solid #ddd6fe; border-radius:8px;">
+        <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#7c3aed; margin-bottom:10px;">Value</div>
+        <div style="font-size:14px; color:#1e293b; font-weight:600; line-height:2;">RTX 4090 · RTX 5090 · L4</div>
+      </div>
+    </div>
+    <div style="margin-top:8px; font-size:13px; color:#94a3b8; font-style:italic;">Coverage expands as new accelerators ship. Your catalog config determines what's visible.</div>
+  </div>
+
+  <!-- ══════ CTA ══════ -->
+  <div class="cta-block" id="contact">
+    <h2>See It With Your Rates</h2>
+    <p>We'll load your data and run a live assessment — so you see exactly what your prospects experience.</p>
+    <a href="mailto:cto@soterralabs.ai?subject=GPU%20Navigator%20Demo%20Request" class="cta-btn">Request a Demo</a>
+  </div>
+
+  <!-- ══════ FOOTER ══════ -->
+  <div class="footer">
+    <p>© 2026 Soterra Labs. All rights reserved.</p>
+    <div class="footer-tag">GPU Navigator™</div>
+  </div>
+
+</body>
+</html>
