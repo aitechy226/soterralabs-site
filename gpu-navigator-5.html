@@ -1,0 +1,632 @@
+<!--
+  © 2026 Srikanth Samudrla. All rights reserved.
+  GPU Navigator™ — Product Page (Draft for website Products tab).
+  Unauthorized reproduction, distribution, or use of this work is prohibited.
+  Created: April 2026
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="author" content="Srikanth Samudrla" />
+  <meta name="copyright" content="© 2026 Srikanth Samudrla. All rights reserved." />
+  <title>GPU Navigator™ — GPU Assessments That Inform the First Call</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, Arial, sans-serif;
+      background: #fff;
+      color: #1a1a2e;
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #e5e7eb;
+      padding: 0 24px;
+    }
+    .nav-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 96px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .logo img { height: 72px; width: auto; display: block; }
+    .nav-links {
+      display: flex;
+      gap: 4px;
+      list-style: none;
+      align-items: center;
+    }
+    .nav-links a {
+      position: relative;
+      text-decoration: none;
+      color: #1a1a2e;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      padding: 10px 16px;
+      border-radius: 4px;
+      white-space: nowrap;
+      transition: color 0.2s ease, background 0.2s ease;
+    }
+    .nav-links a:hover { color: #0070c0; background: #e3f2fd; }
+    .nav-links a.active { color: #0070c0; }
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      width: 36px;
+      height: 36px;
+    }
+    .nav-toggle span {
+      display: block;
+      height: 2px;
+      width: 22px;
+      background: #374151;
+      border-radius: 2px;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-toggle.open span:nth-child(2) { opacity: 0; }
+    .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    @media (max-width: 1300px) {
+      .nav-toggle { display: flex; }
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(255,255,255,0.98);
+        border-bottom: 1px solid #e5e7eb;
+        flex-direction: column;
+        gap: 0;
+        padding: 8px 0 12px;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links li a {
+        display: block;
+        padding: 14px 24px;
+        font-size: 12px;
+        border-radius: 0;
+        letter-spacing: 1.5px;
+      }
+    }
+    @media (max-width: 540px) {
+      .nav-inner { height: 72px; }
+      .logo img { height: 52px; }
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0f172a 100%);
+      padding: 32px 40px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(74,222,128,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #4ade80;
+      margin-bottom: 12px;
+    }
+
+    .hero h1 {
+      font-size: 36px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 10px;
+      line-height: 1.2;
+    }
+
+    .hero h1 span { color: #4ade80; }
+
+    .hero-sub {
+      font-size: 18px;
+      color: #94a3b8;
+      margin: 0 0 24px;
+      line-height: 1.6;
+    }
+
+    .hero-cta {
+      display: inline-block;
+      margin-top: 20px;
+      background: #4ade80;
+      color: #0f172a;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 9px 24px;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .hero-cta:hover { background: #22c55e; }
+
+    .hero-proof {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #cbd5e1;
+      font-style: italic;
+    }
+
+    /* ── SECTION CONTAINER ── */
+    .section { max-width: 960px; margin: 0 auto; padding: 20px 40px; }
+    body { background: #edf0f4; }
+    .section-dark { background: #e3e8ef; }
+
+    .section-eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: #059669;
+      margin-bottom: 4px;
+    }
+
+    .section h2 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .section-lead {
+      font-size: 16px;
+      color: #475569;
+      margin-bottom: 16px;
+      line-height: 1.65;
+    }
+
+    /* ── PROBLEM BLOCK ── */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    .problem-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-top: 3px solid #ef4444;
+      border-radius: 0 0 8px 8px;
+      padding: 14px 16px;
+    }
+
+    .problem-card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+
+    .problem-card p {
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+
+    .problem-card .stat {
+      display: block;
+      font-size: 22px;
+      font-weight: 800;
+      color: #ef4444;
+      margin-bottom: 4px;
+      font-family: 'Segoe UI', monospace;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .step-card {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 16px 18px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-top: 3px solid #059669;
+      border-radius: 0 0 8px 8px;
+    }
+
+    .step-badge {
+      width: 36px;
+      height: 36px;
+      background: #059669;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 14px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+
+    .step-card p {
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.55;
+    }
+
+    .step-card .who {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #059669;
+      margin-bottom: 6px;
+    }
+
+    /* ── OUTPUTS ── */
+    .outputs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .output-card {
+      padding: 18px;
+      border-radius: 0 0 8px 8px;
+      border: 1px solid #e2e8f0;
+      border-top: 3px solid #1565c0;
+      background: #fff;
+    }
+
+    .output-card h3 { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+    .output-card p { font-size: 13px; color: #6b7280; line-height: 1.55; }
+
+    /* ── DIFFERENTIATOR ── */
+    .diff-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 0.5fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .diff-left h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 12px;
+    }
+
+    .diff-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+
+    .diff-check {
+      width: 22px;
+      height: 22px;
+      background: #059669;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .diff-item h4 { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
+    .diff-item p { font-size: 13px; color: #6b7280; line-height: 1.5; }
+
+    .diff-right {
+      background: #0f172a;
+      border-radius: 8px;
+      padding: 14px 16px;
+      color: #fff;
+    }
+
+    .diff-right h3 {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #4ade80;
+      margin-bottom: 8px;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .metric-row:last-child { border-bottom: none; }
+
+    .metric-label { font-size: 12px; color: #94a3b8; text-align: left; }
+    .metric-value { font-size: 14px; font-weight: 700; color: #4ade80; text-align: right; }
+
+    /* ── HOW IT SHIPS ── */
+    .ship-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    .ship-card {
+      padding: 20px 20px;
+      border: 1px solid #e2e8f0;
+      border-top: 3px solid #059669;
+      border-radius: 0 0 8px 8px;
+      background: #fff;
+    }
+
+    .ship-card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .ship-card p {
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.55;
+    }
+
+    /* ── CTA BLOCK ── */
+    .cta-block {
+      background: #f0fdf4;
+      border-top: 3px solid #059669;
+      padding: 24px 40px;
+    }
+
+    .cta-block h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .cta-block p {
+      font-size: 15px;
+      color: #475569;
+      margin: 0 0 16px;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      background: #059669;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 9px 24px;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .cta-btn:hover { background: #047857; }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: #0f172a;
+      padding: 24px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer p { font-size: 12px; color: #6b7280; }
+    .footer-tag { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(148,163,184,0.5); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 28px; }
+      .problem-grid, .outputs-grid, .ship-grid { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .diff-grid { grid-template-columns: 1fr; }
+      .section { padding: 20px 16px; }
+      .quote-block, .cta-block { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <img src="logo-lit.svg" alt="Soterra Labs" />
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html#services">Services</a></li>
+        <li><a href="gpu-navigator.html" class="active">Products</a></li>
+        <li><a href="index.html#thinking">Thinking</a></li>
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <script>
+    const toggle = document.getElementById('navToggle');
+    const links = document.getElementById('navLinks');
+    toggle.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      toggle.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', open);
+    });
+  </script>
+
+  <!-- ══════ HERO ══════ -->
+  <div class="hero">
+    <div class="section">
+      <div class="hero-eyebrow">GPU Navigator™ · For GPU Rental Providers</div>
+      <h1>Here's How <span>It Works.</span></h1>
+      <a href="#contact" class="hero-cta">Request a Demo</a>
+    </div>
+  </div>
+
+  <!-- ══════ PART 1: THE VENDOR'S VALUE ══════ -->
+
+  <!-- WHY VENDORS LICENSE THIS -->
+  <div class="section-dark">
+    <div class="section">
+      <div class="section-eyebrow">For GPU Providers</div>
+      <h2>Why Vendors License GPU Navigator.</h2>
+      <div class="section-lead">Here's what the sales process looks like without it.</div>
+
+      <div class="problem-grid">
+        <div class="problem-card">
+          <h3>No Prospect Data at Handoff</h3>
+          <p>The sales rep has the prospect's name and contact info — no information about the workloads, dependencies, and budget. Discovery starts from scratch.</p>
+        </div>
+        <div class="problem-card">
+          <h3>1-2 Weeks Just to Start Discovery</h3>
+          <p>Scheduling the first real conversation takes time. By the time the sales rep sits down with the prospect, the urgency has cooled — or worse, competitors have found a way in.</p>
+        </div>
+        <div class="problem-card">
+          <h3>3-6 Weeks Before the Prospect Decides</h3>
+          <p>Even after multiple conversations, the prospect is matching their requirements to GPUs without the right tool — and may still end up renting the wrong configuration.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT THE VENDOR GETS -->
+  <div class="section">
+    <div class="section-eyebrow">What the Vendor Gets</div>
+    <h2>Their Catalog. Their Rates. Their Reach.</h2>
+    <div class="section-lead">Send a link to a free tool, not a cold call. Prospects try it on their own time, at their own pace — and choose whether to share results with the vendor. No knocking on doors. No spam. A useful tool that earns the conversation.</div>
+
+    <div class="problem-grid">
+      <div class="problem-card" style="border-top-color: #059669;">
+        <h3>Full Catalog Control</h3>
+        <p>Manage the GPU inventory, set rates, and position against competitors — all through a self-service admin panel.</p>
+      </div>
+      <div class="problem-card" style="border-top-color: #059669;">
+        <h3>Vendor-Branded Experience</h3>
+        <p>The tool runs on a Soterra-hosted subdomain with the vendor's branding. The prospect sees the vendor's name and catalog.</p>
+      </div>
+      <div class="problem-card" style="border-top-color: #059669;">
+        <h3>Lead Briefs on Opt-In</h3>
+        <p>When the prospect chooses to share results, the sales rep gets a lead brief by email — workload, recommendation, budget, timeline, and findings.</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- THE PROSPECT'S EXPERIENCE -->
+  <div class="section-dark">
+    <div class="section">
+      <div class="section-eyebrow">The Prospect's Experience</div>
+      <h2>What the Prospect Sees.</h2>
+      <div class="section-lead">The assessment covers workload requirements, current infrastructure, compliance constraints, and budget — and produces a report tailored to the vendor's catalog and rates.</div>
+    </div>
+  </div>
+
+  <!-- WHAT THE REPORT COVERS -->
+  <div class="section">
+    <div class="section-eyebrow">The Report</div>
+    <h2>What the Prospect Walks Away With.</h2>
+
+    <div class="problem-grid">
+      <div class="problem-card" style="border-top-color: #1565c0;">
+        <h3>GPU Recommendation</h3>
+        <p>A specific GPU matched to the prospect's workload — not the cheapest, not the most expensive, the most appropriate one.</p>
+      </div>
+      <div class="problem-card" style="border-top-color: #1565c0;">
+        <h3>Cost Estimate</h3>
+        <p>Projected cost at the vendor's actual rates, based on the prospect's usage profile.</p>
+      </div>
+      <div class="problem-card" style="border-top-color: #1565c0;">
+        <h3>Fit Assessment</h3>
+        <p>How well the vendor's offering matches the prospect's requirements — with findings, not just a score.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ GPU COVERAGE ══════ -->
+  <div class="section">
+    <div class="section-eyebrow">Hardware Coverage</div>
+    <h2>Three Tiers of Coverage</h2>
+    <div class="section-lead">From RTX 4090 to B300 — covering inference, training, fine-tuning, and HPC workloads.</div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+      <div style="padding:14px 16px; background:#fff; border:1px solid #e2e8f0; border-top:3px solid #7c3aed; border-radius:0 0 8px 8px;">
+        <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#1e293b; margin-bottom:10px;">Flagship</div>
+        <div style="font-size:14px; color:#1e293b; font-weight:600; line-height:2;">H100 · H200 · B200 · B300 · GH200</div>
+      </div>
+      <div style="padding:14px 16px; background:#fff; border:1px solid #e2e8f0; border-top:3px solid #7c3aed; border-radius:0 0 8px 8px;">
+        <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#1e293b; margin-bottom:10px;">Professional</div>
+        <div style="font-size:14px; color:#1e293b; font-weight:600; line-height:2;">A100 80GB · A100 40GB · L40S · L40 · A6000 · RTX 6000 Ada · RTX Pro 6000</div>
+      </div>
+      <div style="padding:14px 16px; background:#fff; border:1px solid #e2e8f0; border-top:3px solid #7c3aed; border-radius:0 0 8px 8px;">
+        <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#1e293b; margin-bottom:10px;">Value</div>
+        <div style="font-size:14px; color:#1e293b; font-weight:600; line-height:2;">RTX 4090 · RTX 5090 · L4</div>
+      </div>
+    </div>
+    <div style="margin-top:8px; font-size:13px; color:#94a3b8; font-style:italic;">Coverage expands as new accelerators ship. Your catalog config determines what's visible.</div>
+  </div>
+
+  <!-- ══════ CTA ══════ -->
+  <div class="cta-block" id="contact">
+    <h2>See It With Your Rates</h2>
+    <p>We'll load your data and run a live assessment — so you see what your prospects experience.</p>
+    <a href="mailto:sales@soterralabs.ai?subject=GPU%20Navigator%20Demo%20Request" class="cta-btn">Request a Demo</a>
+  </div>
+
+  <!-- ══════ FOOTER ══════ -->
+  <div class="footer">
+    <p>© 2026 Soterra Labs. All rights reserved.</p>
+    <div class="footer-tag">GPU Navigator™</div>
+  </div>
+
+</body>
+</html>
