@@ -416,6 +416,103 @@
       line-height: 1.55;
     }
 
+    /* ── ASSESSMENT FLOW ── */
+    .flow-container {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 18px 18px 20px;
+    }
+
+    .flow-steps {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+      gap: 6px;
+      align-items: stretch;
+    }
+
+    .flow-step {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 14px 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .flow-step-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .flow-step-desc {
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    .flow-step-tag {
+      font-size: 11px;
+      color: #94a3b8;
+      font-style: italic;
+      margin-top: 8px;
+    }
+
+    .flow-arrow {
+      color: #94a3b8;
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 2px;
+    }
+
+    .flow-report {
+      margin-top: 22px;
+      background: #ecfdf5;
+      border: 1px solid #86efac;
+      border-radius: 6px;
+      padding: 14px 16px;
+      text-align: center;
+      position: relative;
+    }
+
+    .flow-report::before {
+      content: '';
+      position: absolute;
+      top: -11px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 10px solid #cbd5e1;
+    }
+
+    .flow-report-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #047857;
+      margin-bottom: 4px;
+    }
+
+    .flow-report-items {
+      font-size: 13px;
+      color: #334155;
+      margin-bottom: 4px;
+    }
+
+    .flow-report-tags {
+      font-size: 11px;
+      color: #10b981;
+      font-style: italic;
+    }
+
     /* ── CTA BLOCK ── */
     .cta-block {
       background: #f0fdf4;
@@ -470,6 +567,11 @@
       .diff-grid { grid-template-columns: 1fr; }
       .section { padding: 20px 16px; }
       .quote-block, .cta-block { padding: 20px 16px; }
+      .flow-steps {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .flow-arrow { transform: rotate(90deg); padding: 2px 0; }
     }
   </style>
 </head>
@@ -562,24 +664,63 @@
   </div>
 
 
+  <!-- ══════ ASSESSMENT FLOW ══════ -->
+  <div class="section">
+    <div class="section-eyebrow">Assessment Flow — Business View</div>
+    <h2>Four Inputs. One Report.</h2>
+    <div class="section-lead">What the prospect answers, and what they receive.</div>
+
+    <div class="flow-container">
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-step-title">1. Workload</div>
+          <div class="flow-step-desc">Model size, precision, latency tier</div>
+          <div class="flow-step-tag">VRAM computed instantly</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-title">2. Current state</div>
+          <div class="flow-step-desc">Provider, pricing model, migration complexity</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-title">3. Compatibility</div>
+          <div class="flow-step-desc">Data residency, compliance, contracts</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-title">4. Buying context</div>
+          <div class="flow-step-desc">Timeline, budget, decision authority</div>
+        </div>
+      </div>
+
+      <div class="flow-report">
+        <div class="flow-report-title">Generated Report</div>
+        <div class="flow-report-items">GPU recommendation · cost comparison · fit score · findings · next steps</div>
+        <div class="flow-report-tags">Shareable · printable · vendor-branded</div>
+      </div>
+    </div>
+  </div>
+
+
   <!-- WHAT THE REPORT COVERS -->
   <div class="section">
     <div class="section-eyebrow">What the Prospect Gets</div>
-    <h2>Their Match. Their Cost. Their Fit.</h2>
+    <h2>Their Recommendation. Their Cost. Their Fit.</h2>
     <div class="section-lead">Not a marketing pitch. A more informed prospect.</div>
 
     <div class="problem-grid">
       <div class="problem-card" style="border-left-color: #1565c0;">
-        <h3>GPU Recommendation</h3>
-        <p>A specific GPU matched to the prospect's workload. Not the cheapest or the latest, the most appropriate one.</p>
+        <h3>Workload-Based Pick</h3>
+        <p>A specific GPU picked for the prospect's workload, chosen on workload fit rather than price or recency.</p>
       </div>
       <div class="problem-card" style="border-left-color: #1565c0;">
-        <h3>Cost Estimate</h3>
+        <h3>Priced at Your Rates</h3>
         <p>Projected cost at the vendor's actual rates, based on the prospect's usage profile.</p>
       </div>
       <div class="problem-card" style="border-left-color: #1565c0;">
-        <h3>Fit Assessment</h3>
-        <p>How well the vendor's offering matches the prospect's requirements, with findings, not just a score.</p>
+        <h3>Score With Reasoning</h3>
+        <p>A fit score against the prospect's requirements, with the reasoning behind the number.</p>
       </div>
     </div>
   </div>
