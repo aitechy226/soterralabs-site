@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCP in Production, Part 1: Persistent Sessions, Pooling, and Fault Tolerance &mdash; Soterra Labs</title>
+  <meta name="description" content="Five transport-layer decisions — session pooling, eviction, cancel scope isolation, timeouts, and heartbeat design — each driven by a real failure in a KYC onboarding system." />
+  <link rel="stylesheet" href="post.css" />
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="../index.html" class="logo">
+        <img src="../logo-lit.svg" alt="Soterra Labs" />
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="../index.html#services">Services</a></li>
+        <li><a href="../gpu-navigator.html">Products</a></li>
+        <li><a href="index.html" class="active">Thinking</a></li>
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <article class="post">
+    <div class="post-inner">
+      <div class="post-tag">MCP · Production · Resilience</div>
+      <h1>MCP in Production, Part 1: Persistent Sessions, Pooling, and Fault Tolerance</h1>
+      <p class="post-subtitle">Five transport-layer decisions — session pooling, eviction, cancel scope isolation, timeouts, and heartbeat design — each driven by a real failure in a KYC onboarding system.</p>
+      <div class="post-meta">April 1, 2026 &middot; 6 min &middot; Srikanth Samudrla</div>
+      <div class="post-origin">
+        Originally published at <a href="https://aitechy226.github.io/posts/mcp-production-part-1/" target="_blank" rel="noopener nofollow">aitechy226.github.io</a>
+      </div>
+
+      <div class="post-body">
+        <div class="series-banner">
+        <p><span class="series-label">MCP in Production · Part 1 of 2</span>
+        <span class="series-links"><a href="mcp-production-part-2.html">Part
+        2: Authentication, Observability, and Operational Design
+        →</a></span></p>
+        </div>
+        <p>Most MCP client examples open a session, call a tool, and close the
+        session. That pattern is fine for demos. It breaks in production in ways
+        that aren’t obvious until you’re staring at a hung process or a spike in
+        latency.</p>
+        <p>This is Part 1 of a two-part series on what it takes to run an MCP
+        client reliably. I’ll cover the transport layer: sessions, pooling, dead
+        connection recovery, timeouts, and the heartbeat. <a
+        href="mcp-production-part-2.html">Part 2</a> covers the system layer:
+        authentication, observability, and operational design.</p>
+        <p>The context is a KYC Onboarding Orchestrator I built that calls four
+        MCP servers — Moody’s entity data, sanctions/PEP screening, CRM, and
+        document generation — for every onboarding case. Each case makes 8–10
+        tool calls. Every decision below was made in response to something that
+        actually broke.</p>
+        <hr />
+        <h2 id="per-call-connections-dont-scale">Per-Call Connections Don’t
+        Scale</h2>
+        <p>I started with the naive design: open a fresh session per tool call,
+        run the tool, close the session. Simple, stateless, nothing to
+        manage.</p>
+        <p>The problem: every call pays full session establishment cost — TCP
+        connect, MCP <code>initialize</code> handshake, then the actual tool
+        call. Inside a Docker network that’s a few milliseconds. Against a real
+        Moody’s or Refinitiv endpoint over the internet, it’s 3–4 RTTs of
+        latency on every single call, multiplied across 8–10 calls per case.
+        There’s also a server-side cost — every <code>initialize</code>
+        allocates session state that is immediately discarded. I wasn’t
+        prototyping anymore, so I needed to fix this.</p>
+        <p>The fix is obvious: keep sessions open and reuse them.</p>
+        <hr />
+        <h2 id="decision-1-a-pool-not-a-single-session">Decision 1: A Pool, Not
+        a Single Session</h2>
+        <p>My first instinct was one persistent session per server. That fixes
+        the overhead problem but creates a new one: the session becomes a single
+        point of failure. If it dies while a tool call is in flight, everything
+        blocks until the dead session is detected and replaced.</p>
+        <p>A pool tolerates one dead session without impacting callers on other
+        sessions. I went with a pool of two per server — enough to survive one
+        failure without blocking, without flooding a small server with idle
+        connections.</p>
+        <p>One design detail I’m glad I got right upfront: the pool fill uses a
+        partial-failure policy. If the server is reachable but only opens one
+        session successfully, the caller gets that one session and proceeds. A
+        pool of one is still a pool. Failing hard when you could degrade
+        gracefully is the wrong call.</p>
+        <p>Round-robin selection across the pool also means a dead session gets
+        discovered within at most two calls — not after some arbitrary
+        delay.</p>
+        <hr />
+        <h2 id="decision-2-evict-the-session-not-the-server">Decision 2: Evict
+        the Session, Not the Server</h2>
+        <p>When a server restarts, the pool holds stale session objects pointing
+        at dead TCP connections. The next call fails. My first implementation
+        evicted the entire pool entry for that server — which worked fine with
+        one session, but caused a problem under a pool.</p>
+        <p>If two sessions to the same server die simultaneously, two concurrent
+        callers both try to evict. If eviction removes the whole server entry,
+        the second caller finds nothing and may open duplicate sessions. The
+        correct fix is to evict the specific dead session and guard against the
+        second caller — if the session is already gone by the time the second
+        caller tries, just return cleanly.</p>
+        <p>One thing that bit me here: the transport layer fires its own
+        cancellation when a connection dies, and
+        <code>asyncio.CancelledError</code> is a <code>BaseException</code>, not
+        an <code>Exception</code>. My original eviction handler caught
+        <code>Exception</code> — which meant the cancellation escaped the
+        handler and the session was never removed from the pool. Adding
+        <code>asyncio.CancelledError</code> to the catch fixed it. Obvious in
+        hindsight, not obvious when you’re looking at a session that should be
+        evicted but isn’t.</p>
+        <hr />
+        <h2 id="decision-3-timeout-exponential-backoff">Decision 3: Timeout +
+        Exponential Backoff</h2>
+        <p>Two more failure modes I hit that needed explicit fixes:</p>
+        <p><strong>In-flight hang.</strong> When <code>docker stop</code> kills
+        a container, the network namespace stays alive but nothing is listening.
+        A tool call in flight at that moment waits for a TCP response that will
+        never arrive. Without a timeout, the asyncio task blocks indefinitely
+        and the case stays stuck. A per-call timeout bounds every tool call —
+        when it fires, the session is evicted and the retry cycle begins.</p>
+        <p><strong>Thundering herd on restart.</strong> I originally used a
+        fixed retry delay. Under concurrency, every failed caller wakes up at
+        exactly the same moment and hammers the recovering server
+        simultaneously. The fix is exponential backoff with jitter:</p>
+        <pre><code>delay = min(BASE * 2^attempt + random(0, 1), MAX)</code></pre>
+        <p>The jitter — that <code>random(0, 1)</code> — is the part that
+        actually matters. It desynchronizes callers so the recovering server
+        sees a trickle rather than a burst. I expose the base and max as
+        environment variables so they can be tuned per deployment without
+        touching code.</p>
+        <hr />
+        <h2
+        id="decision-4-the-heartbeat-probe-must-test-the-real-code-path">Decision
+        4: The Heartbeat Probe Must Test the Real Code Path</h2>
+        <p>The reactive eviction handles failures after they hit. I added a
+        background heartbeat to catch them proactively — a task that pings every
+        session in the pool on a fixed interval and evicts any that fail before
+        real traffic reaches them.</p>
+        <p>The probe design mattered more than I expected. My first version used
+        <code>list_tools()</code> as the ping. It seemed reasonable — if the
+        server can respond to a discovery call, it’s alive. But
+        <code>list_tools()</code> is never called in production. My graph nodes
+        call tools by hardcoded name. I was testing an operation that didn’t
+        exist in the real flow.</p>
+        <p>I replaced it with a dedicated <code>ping</code> tool on each server
+        that returns <code>"pong"</code> immediately with no I/O. The heartbeat
+        calls it through the exact same function every production tool call
+        uses. If that path is broken, the session gets evicted. Testing the
+        wrong path gives you false confidence.</p>
+        <p>The ping also needs its own timeout. When a container is gracefully
+        stopped, Docker keeps the network namespace alive but stops accepting
+        connections — without a timeout, the ping hangs forever. Five seconds is
+        enough because the <code>ping</code> tool has no I/O. If a no-I/O tool
+        takes more than 5 seconds to respond, the server has a real problem.</p>
+        <h3 id="the-prerequisite-i-almost-missed">The Prerequisite I Almost
+        Missed</h3>
+        <p>A heartbeat only works if the server can respond to a ping while
+        another tool is in progress. FastMCP runs on uvicorn — a single async
+        event loop. If any tool function makes a synchronous I/O call, it blocks
+        the entire loop. My document generation server originally used the
+        synchronous Anthropic client for LLM calls. A 15-second LLM call meant
+        the heartbeat ping waited 15 seconds and timed out, falsely evicting a
+        healthy session.</p>
+        <p>Switching to the async Anthropic client fixed it. This isn’t a
+        performance optimization — it’s a correctness requirement for any async
+        server making I/O calls.</p>
+        <hr />
+        <h2 id="summary">Summary</h2>
+        <p>Each decision came from something that broke:</p>
+        <table>
+        <colgroup>
+        <col style="width: 64%" />
+        <col style="width: 35%" />
+        </colgroup>
+        <thead>
+        <tr>
+        <th>Problem</th>
+        <th>Fix</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td>Per-call handshake overhead</td>
+        <td>Persistent session pool</td>
+        </tr>
+        <tr>
+        <td>Single session = single point of failure</td>
+        <td>Pool with round-robin selection</td>
+        </tr>
+        <tr>
+        <td>Dead sessions block callers</td>
+        <td>Per-session eviction with <code>CancelledError</code> catch</td>
+        </tr>
+        <tr>
+        <td>In-flight hang on server stop</td>
+        <td>Per-call timeout</td>
+        </tr>
+        <tr>
+        <td>Thundering herd on restart</td>
+        <td>Exponential backoff with jitter</td>
+        </tr>
+        <tr>
+        <td>Dead sessions hit before detected</td>
+        <td>Background heartbeat</td>
+        </tr>
+        <tr>
+        <td>Heartbeat tests wrong code path</td>
+        <td>Dedicated <code>ping</code> tool on real call stack</td>
+        </tr>
+        <tr>
+        <td>Blocking I/O breaks heartbeat</td>
+        <td>Async I/O in all server tool functions</td>
+        </tr>
+        </tbody>
+        </table>
+        <p><a href="mcp-production-part-2.html">Part 2</a> covers the
+        system-level concerns: protecting PII-carrying tool calls in transit,
+        making 8–10 calls across 4 servers traceable to a single case, and the
+        operational decisions that make this deployable on a client system.</p>
+        <hr />
+        <p><em>Part 2: <a href="mcp-production-part-2.html">Authentication,
+        Observability, and Operational Design →</a></em></p>
+      </div>
+
+      <div class="post-footer">
+        <a href="index.html">&larr; More posts</a>
+      </div>
+    </div>
+  </article>
+
+  <footer>
+    <p>&copy; 2026 <span>Soterra Labs</span> &mdash; From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&#8482;</sup></p>
+  </footer>
+
+  <script>
+    const toggle = document.getElementById('navToggle');
+    const links  = document.getElementById('navLinks');
+    toggle.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      toggle.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', open);
+    });
+    links.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        links.classList.remove('open');
+        toggle.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  </script>
+
+</body>
+</html>

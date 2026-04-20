@@ -5,6 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Soterra Labs — From GPU to Revenue.</title>
   <meta name="description" content="Soterra Labs delivers production-grade AI for any business — from bare metal GPU infrastructure to agentic AI applications that generate business value." />
+
+  <!-- Schema.org entity graph: Organization + Founder (Person) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Soterra Labs",
+    "url": "https://soterralabs.ai",
+    "logo": "https://soterralabs.ai/logo-lit.svg",
+    "description": "Production-grade AI engineering: GTM intelligence tools, agentic systems on LangGraph, and GPU infrastructure for enterprise vendors and VARs.",
+    "areaServed": "Global",
+    "foundingDate": "2026-03",
+    "founder": {
+      "@type": "Person",
+      "name": "Srikanth Samudrla",
+      "jobTitle": "Founder & CTO",
+      "description": "30 years production engineering across Bell Labs, Lehman Brothers, JPMorgan Chase, Dell Technologies, and SHI International.",
+      "sameAs": [
+        "https://www.linkedin.com/in/srikanthsamudrla/",
+        "https://aitechy226.github.io"
+      ]
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "Sales",
+      "email": "sales@soterralabs.ai"
+    }
+  }
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -719,25 +748,25 @@
       </p>
       <div class="blog-grid">
 
-        <a class="post-card" href="https://aitechy226.github.io/posts/gpu-infrastructure-five-calculations/" target="_blank" rel="noopener">
+        <a class="post-card" href="thinking/gpu-infrastructure-five-calculations.html">
           <div class="post-tag">GPU · Infrastructure · TCO</div>
           <h4>GPU Infrastructure: The Five Calculations That Actually Matter</h4>
           <p>$/hr is the last number to calculate. VRAM fit, quantization impact, multi-node threshold, egress cost, and real TCO, in that order.</p>
         </a>
 
-        <a class="post-card" href="https://aitechy226.github.io/posts/enterprise-rag-trust-layer/" target="_blank" rel="noopener">
+        <a class="post-card" href="thinking/enterprise-rag-trust-layer.html">
           <div class="post-tag">RAG · FSI · Production</div>
           <h4>The Trust Layer: What Separates Good RAG from Enterprise RAG</h4>
           <p>Four bugs found while hardening a RAG system for FSI, and what they reveal about the gap between a working system and a trustworthy one.</p>
         </a>
 
-        <a class="post-card" href="https://aitechy226.github.io/posts/agentic-hype-vs-reality/" target="_blank" rel="noopener">
+        <a class="post-card" href="thinking/agentic-hype-vs-reality.html">
           <div class="post-tag">Agents · Architecture</div>
           <h4>Why Your AI Agent Demo Looks Great and Your Production System Doesn't</h4>
           <p>The gap between the demo and production: the reliability argument, the auditability argument, and which one survives model improvements.</p>
         </a>
 
-        <a class="post-card" href="https://aitechy226.github.io/posts/mcp-service-to-service/" target="_blank" rel="noopener">
+        <a class="post-card" href="thinking/mcp-service-to-service.html">
           <div class="post-tag">MCP · LangGraph · KYC</div>
           <h4>I Used MCP as a Service-to-Service Protocol. Here's What I Learned.</h4>
           <p>MCP was designed as an LLM-to-tool protocol. The tradeoffs of using it as a service layer between a LangGraph orchestrator and integration servers.</p>
@@ -745,7 +774,7 @@
 
       </div>
       <p class="blog-cta">
-        <a href="https://aitechy226.github.io" target="_blank" rel="noopener">More posts →</a>
+        <a href="thinking/index.html">More posts →</a>
       </p>
     </div>
   </section>

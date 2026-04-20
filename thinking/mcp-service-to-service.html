@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>I Used MCP as a Service-to-Service Protocol. Here's What I Learned. &mdash; Soterra Labs</title>
+  <meta name="description" content="MCP was designed as an LLM-to-tool protocol. I used it as a service-to-service layer between a LangGraph orchestrator and independently deployable integration servers. It worked — with real tradeoffs." />
+  <link rel="stylesheet" href="post.css" />
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="../index.html" class="logo">
+        <img src="../logo-lit.svg" alt="Soterra Labs" />
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="../index.html#services">Services</a></li>
+        <li><a href="../gpu-navigator.html">Products</a></li>
+        <li><a href="index.html" class="active">Thinking</a></li>
+        <li><a href="../index.html#about">About</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <article class="post">
+    <div class="post-inner">
+      <div class="post-tag">MCP · LangGraph · KYC</div>
+      <h1>I Used MCP as a Service-to-Service Protocol. Here's What I Learned.</h1>
+      <p class="post-subtitle">MCP was designed as an LLM-to-tool protocol. I used it as a service-to-service layer between a LangGraph orchestrator and independently deployable integration servers. It worked — with real tradeoffs.</p>
+      <div class="post-meta">March 31, 2026 &middot; 5 min &middot; Srikanth Samudrla</div>
+      <div class="post-origin">
+        Originally published at <a href="https://aitechy226.github.io/posts/mcp-service-to-service/" target="_blank" rel="noopener nofollow">aitechy226.github.io</a>
+      </div>
+
+      <div class="post-body">
+        <p>When I designed the architecture for my KYC onboarding orchestrator,
+        I made a deliberate choice: use MCP not as an LLM-to-tool protocol — the
+        way it was originally designed — but as a service-to-service protocol
+        between a LangGraph orchestrator and a set of independently deployable
+        integration servers.</p>
+        <p>It worked. But it came with real tradeoffs I want to document,
+        because I don’t think this pattern is well understood yet.</p>
+        <hr />
+        <h2 id="background-what-i-built">Background: What I Built</h2>
+        <p>The system onboards corporate clients through a fixed sequence of
+        checks — entity profile retrieval, credit rating, sanctions screening,
+        PEP check, CRM update, document generation. Each of those integrations
+        runs as a separate MCP server. A LangGraph graph orchestrates the
+        sequence by calling MCP tools directly from its nodes.</p>
+        <p>Four MCP servers. One orchestrator. No LLM in the routing path.</p>
+        <hr />
+        <h2 id="the-two-patterns">The Two Patterns</h2>
+        <p>Before getting into tradeoffs, it’s worth being precise about what
+        distinguishes these patterns.</p>
+        <p><strong>The original MCP pattern — LLM-to-tool:</strong> The LLM
+        reads available tool schemas at runtime via <code>list_tools()</code>,
+        decides which tool to call, executes it, interprets the result, and
+        decides the next step. The LLM is the orchestrator. This is how Claude
+        Desktop works with MCP servers.</p>
+        <p><strong>My pattern — service-to-service:</strong> A LangGraph node
+        calls specific tools by hardcoded name in a fixed sequence. The LLM
+        never sees the tool schemas. MCP is purely the transport layer between
+        services.</p>
+        <hr />
+        <h2 id="tradeoff-1-predictability-vs-flexibility">Tradeoff 1:
+        Predictability vs Flexibility</h2>
+        <p>In my architecture, the call sequence is defined in the graph and
+        cannot deviate. <code>run_compliance_checks</code> always follows
+        <code>fetch_company_data</code>. A BLOCKED case always skips CRM. This
+        is testable, traceable, and reproducible — the same entity run twice
+        produces the same sequence of tool calls.</p>
+        <p>The cost is rigidity. If a new entity type requires a different check
+        sequence, I have to change the graph. In the LLM-to-tool pattern, the
+        LLM could theoretically adapt its tool use based on what it finds at
+        runtime.</p>
+        <p>In practice I view that flexibility as a risk, not a feature. LLMs do
+        not reliably honor sequencing rules given in system prompts. I made the
+        deliberate choice to move routing logic into the graph precisely because
+        the LLM cannot be trusted to enforce it consistently under all
+        conditions. I traded flexibility for guarantees, and I’d make the same
+        call again.</p>
+        <hr />
+        <h2 id="tradeoff-2-auditability-vs-discoverability">Tradeoff 2:
+        Auditability vs Discoverability</h2>
+        <p>My pattern produces a complete, deterministic audit trail. Every tool
+        call maps to a specific node, with specific inputs from state, producing
+        specific outputs written back to state. When something fails, I know
+        exactly where.</p>
+        <p>What I gave up is discoverability. The <code>list_tools()</code>
+        mechanism — which lets a client dynamically learn what tools a server
+        exposes — is never called in my system. Nodes call tools by hardcoded
+        name directly.</p>
+        <p>I’m carrying the full weight of the MCP discovery mechanism —
+        handshake, capability negotiation, schema generation — and using none of
+        it. Discoverability matters when an LLM is the client and needs to learn
+        what’s available at runtime. When the caller is a graph node written by
+        a developer, that mechanism adds overhead without value.</p>
+        <hr />
+        <h2 id="tradeoff-3-integration-contracts-vs-protocol-overhead">Tradeoff
+        3: Integration Contracts vs Protocol Overhead</h2>
+        <p>This is where my choice is most defensible.</p>
+        <p>Each MCP server defines an explicit, schema-enforced contract for its
+        tools — generated automatically from Python type hints. The mock servers
+        in the current build will eventually be replaced with real production
+        integrations — real Moody’s API, real Refinitiv World-Check, real
+        Salesforce. When that happens, the tool names, argument shapes, and
+        response structures must stay identical. My orchestration layer changes
+        nothing. MCP enforces that contract at the boundary.</p>
+        <p>The cost is protocol overhead I wouldn’t otherwise pay. Each tool
+        call carries a <code>tools/call</code> JSON-RPC envelope over HTTP. That
+        overhead is real but manageable with persistent pooled sessions — the
+        connection and MCP handshake are established once and reused across all
+        calls to that server, so a case with 8–10 tool calls pays the handshake
+        cost twice (one per pool slot), not once per call. Even so, plain HTTP
+        REST between containers would carry less overhead for the same job.</p>
+        <p>REST with a well-defined API contract would have been the simpler
+        choice. I chose MCP because I wanted a single standardized protocol
+        across all four servers rather than four bespoke REST APIs — and because
+        the tool schema generation from Python type hints gave me the contract
+        enforcement for free.</p>
+        <p>MCP earns its keep here not because of transport efficiency, but
+        because of what it enables at integration time: a stable, versioned
+        contract that makes the mock-to-production swap possible without
+        touching the orchestration layer.</p>
+        <hr />
+        <h2 id="when-this-pattern-makes-sense">When This Pattern Makes
+        Sense</h2>
+        <p><strong>Use MCP as LLM-to-tool when:</strong> - The LLM needs to
+        dynamically discover and sequence tools at runtime - The tool set is not
+        fully known at build time - Flexibility in tool selection matters more
+        than sequencing guarantees</p>
+        <p><strong>Use MCP as service-to-service (my approach) when:</strong> -
+        You need stable contracts across independently replaceable integrations
+        - Routing and sequencing must be deterministic and auditable - Services
+        are deployed independently and you want a standardized protocol rather
+        than bespoke REST APIs per integration</p>
+        <p><strong>Use neither — just REST or direct function calls
+        when:</strong> - The integrations are internal and will never be swapped
+        - You control both sides of every call - The protocol overhead isn’t
+        justified by any real integration boundary</p>
+        <hr />
+        <h2 id="the-honest-summary">The Honest Summary</h2>
+        <p>Using MCP as a service-to-service protocol is not the natural fit for
+        the protocol. You pay for discovery you don’t use. But the contract
+        enforcement at integration boundaries is real, and for a system designed
+        to swap mock integrations for production ones, that contract is exactly
+        what you need.</p>
+        <p>The pattern works. Just go in clear-eyed about what you’re getting
+        and what you’re giving up.</p>
+        <hr />
+        <p><em>Building production-grade agentic AI systems for regulated
+        industries. If any of this connects with work you’re doing, reach me on
+        <a
+        href="https://www.linkedin.com/in/srikanthsamudrla/">LinkedIn</a>.</em></p>
+      </div>
+
+      <div class="post-footer">
+        <a href="index.html">&larr; More posts</a>
+      </div>
+    </div>
+  </article>
+
+  <footer>
+    <p>&copy; 2026 <span>Soterra Labs</span> &mdash; From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&#8482;</sup></p>
+  </footer>
+
+  <script>
+    const toggle = document.getElementById('navToggle');
+    const links  = document.getElementById('navLinks');
+    toggle.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      toggle.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', open);
+    });
+    links.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        links.classList.remove('open');
+        toggle.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  </script>
+
+</body>
+</html>
