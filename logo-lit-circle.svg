@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 290 50" fill="none">
+  <!--
+    Soterra Labs — wordmark with circular mark (vector)
+    Variant of logo-lit.svg: stack replaced by circle-mark, 2 shades darker than v1.
+  -->
+
+  <defs>
+    <radialGradient id="dot-glow-lit" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#4ade80" stop-opacity="0.55"/>
+      <stop offset="40%"  stop-color="#4ade80" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#4ade80" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="lit-circle-clip">
+      <circle cx="256" cy="256" r="210"/>
+    </clipPath>
+  </defs>
+
+  <!-- ── MARK (circular, vector) — vertical centre aligns with cap-centre of wordmark ── -->
+  <svg x="0" y="2.5" width="40" height="40" viewBox="0 0 512 512">
+    <g clip-path="url(#lit-circle-clip)">
+      <rect x="0" y="0" width="512" height="512" fill="#d1d5db"/>
+
+      <g transform="translate(96, 76) scale(8)">
+        <!-- Layer 1 — top -->
+        <polygon points="20,10 29,13.5 20,17 11,13.5"  fill="#93c5fd"/>
+        <polygon points="11,13.5 20,17 20,19 11,15.5"  fill="#60a5fa"/>
+        <polygon points="29,13.5 20,17 20,19 29,15.5"  fill="#3b82f6"/>
+
+        <!-- Layer 2 — middle -->
+        <polygon points="20,19 31,23 20,27 9,23"       fill="#60a5fa"/>
+        <polygon points="9,23 20,27 20,29 9,25"        fill="#3b82f6"/>
+        <polygon points="31,23 20,27 20,29 31,25"      fill="#2563eb"/>
+
+        <!-- Layer 3 — bottom -->
+        <polygon points="20,29 36,33.5 20,38 4,33.5"   fill="#3b82f6"/>
+        <polygon points="4,33.5 20,38 20,40 4,35.5"    fill="#2563eb"/>
+        <polygon points="36,33.5 20,38 20,40 36,35.5"  fill="#1d4ed8"/>
+
+        <!-- Apex dot: soft glow halo + solid core -->
+        <circle cx="20" cy="7" r="8"   fill="url(#dot-glow-lit)"/>
+        <circle cx="20" cy="7" r="2.5" fill="#4ade80"/>
+      </g>
+    </g>
+  </svg>
+
+  <!-- ── WORDMARK ── -->
+
+  <text x="42" y="30"
+    font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
+    font-size="22" font-weight="600" letter-spacing="2.5"
+    fill="#111827">SOTERRA LABS</text>
+
+  <line x1="238" y1="12" x2="238" y2="34" stroke="#d1d5db" stroke-width="1"/>
+
+  <text x="246" y="30"
+    font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
+    font-size="22" font-weight="600" letter-spacing="2.5"
+    fill="#4ade80">AI</text>
+
+</svg>
