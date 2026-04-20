@@ -18,7 +18,7 @@
   <!-- ── MARK (circular, vector) — vertical centre aligns with cap-centre of wordmark ── -->
   <svg x="0" y="2.5" width="40" height="40" viewBox="0 0 512 512">
     <g clip-path="url(#lit-circle-clip)">
-      <rect x="0" y="0" width="512" height="512" fill="#9ca3af"/>
+      <rect x="0" y="0" width="512" height="512" fill="#f9fafb"/>
 
       <g transform="translate(96, 76) scale(8)">
         <!-- Layer 1 — top -->
@@ -42,8 +42,8 @@
       </g>
     </g>
 
-    <!-- Circle border — 2 notches darker than the fill (gray-600) -->
-    <circle cx="256" cy="256" r="210" fill="none" stroke="#4b5563" stroke-width="12"/>
+    <!-- Circle border — 2 notches darker than the fill (gray-200) -->
+    <circle cx="256" cy="256" r="210" fill="none" stroke="#e5e7eb" stroke-width="12"/>
   </svg>
 
   <!-- ── WORDMARK ── -->
