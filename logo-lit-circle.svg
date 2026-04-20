@@ -48,14 +48,14 @@
 
   <!-- ── WORDMARK ── -->
 
-  <text x="42" y="30"
+  <text x="47" y="30"
     font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
     font-size="22" font-weight="600" letter-spacing="2.5"
     fill="#111827">SOTERRA LABS</text>
 
-  <line x1="238" y1="12" x2="238" y2="34" stroke="#d1d5db" stroke-width="1"/>
+  <line x1="243" y1="12" x2="243" y2="34" stroke="#d1d5db" stroke-width="1"/>
 
-  <text x="246" y="30"
+  <text x="251" y="30"
     font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
     font-size="22" font-weight="600" letter-spacing="2.5"
     fill="#4ade80">AI</text>
