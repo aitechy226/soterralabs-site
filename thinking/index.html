@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Thinking — Soterra Labs</title>
   <meta name="description" content="Production AI engineering notes: retrieval, agents, GPU infrastructure, MCP in production. The failures, the fixes, and the architecture that survives contact with a real environment." />
+  <link rel="canonical" href="https://soterralabs.ai/thinking/" />
   <link rel="stylesheet" href="post.css" />
 </head>
 <body>
@@ -12,18 +13,18 @@
   <!-- NAV -->
   <nav>
     <div class="nav-inner">
-      <a href="../index.html" class="logo">
+      <a href="/" class="logo">
         <img src="../logo-lit.svg" alt="Soterra Labs" />
       </a>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
       <ul class="nav-links" id="navLinks">
-        <li><a href="../index.html#services">Services</a></li>
-        <li><a href="../gpu-navigator.html">Products</a></li>
-        <li><a href="index.html" class="active">Thinking</a></li>
-        <li><a href="../index.html#about">About</a></li>
-        <li><a href="../index.html#contact">Contact</a></li>
+        <li><a href="/#services">Services</a></li>
+        <li><a href="/gpu-navigator">Products</a></li>
+        <li><a href="/thinking/" class="active">Thinking</a></li>
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#contact">Contact</a></li>
       </ul>
     </div>
   </nav>
@@ -41,49 +42,49 @@
   <section class="archive-list">
     <div class="archive-list-inner">
 
-      <a class="archive-post" href="gpu-infrastructure-five-calculations.html">
+      <a class="archive-post" href="/thinking/gpu-infrastructure-five-calculations">
         <div class="archive-date">APRIL 10, 2026 · 11 MIN</div>
         <h2>GPU Infrastructure: The Five Calculations That Actually Matter</h2>
         <p>VRAM fit, quantization impact, multi-node thresholds, egress cost, and real TCO &mdash; the five calculations that determine whether a GPU deployment actually works.</p>
       </a>
 
-      <a class="archive-post" href="enterprise-rag-trust-layer.html">
+      <a class="archive-post" href="/thinking/enterprise-rag-trust-layer">
         <div class="archive-date">APRIL 8, 2026 · 6 MIN</div>
         <h2>The Trust Layer: What Separates Good RAG from Enterprise RAG</h2>
         <p>Four bugs found while hardening a RAG system for FSI and life sciences &mdash; and what they reveal about the gap between a working system and a trustworthy one.</p>
       </a>
 
-      <a class="archive-post" href="benchmarking-ai-devices.html">
+      <a class="archive-post" href="/thinking/benchmarking-ai-devices">
         <div class="archive-date">APRIL 5, 2026 · 6 MIN</div>
         <h2>The AI PC Buying Problem Every Enterprise Needs to Solve</h2>
         <p>The vendor numbers are real. The benchmarks are valid. And the procurement question still does not have a clean answer &mdash; here is the gap I kept running into.</p>
       </a>
 
-      <a class="archive-post" href="mcp-production-part-1.html">
+      <a class="archive-post" href="/thinking/mcp-production-part-1">
         <div class="archive-date">APRIL 1, 2026 · 6 MIN</div>
         <h2>MCP in Production, Part 1: Persistent Sessions, Pooling, and Fault Tolerance</h2>
         <p>Five transport-layer decisions &mdash; session pooling, eviction, cancel scope isolation, timeouts, and heartbeat design &mdash; each driven by a real failure in a KYC onboarding system.</p>
       </a>
 
-      <a class="archive-post" href="mcp-production-part-2.html">
+      <a class="archive-post" href="/thinking/mcp-production-part-2">
         <div class="archive-date">APRIL 1, 2026 · 5 MIN</div>
         <h2>MCP in Production, Part 2: Authentication, Observability, and Operational Design</h2>
         <p>Bearer token auth at the transport layer, correlation IDs across four servers, lazy session init, and clean shutdown &mdash; the system-level decisions that make an MCP client deployable.</p>
       </a>
 
-      <a class="archive-post" href="professional-digital-twin.html">
+      <a class="archive-post" href="/thinking/professional-digital-twin">
         <div class="archive-date">MARCH 31, 2026 · 5 MIN</div>
         <h2>Designing a Professional Digital Twin: The Architecture</h2>
         <p>Most professional knowledge lives in people's heads. Here's what it looks like when you structure it as an agentic system &mdash; personas, tools, skills, rules, and memory.</p>
       </a>
 
-      <a class="archive-post" href="mcp-service-to-service.html">
+      <a class="archive-post" href="/thinking/mcp-service-to-service">
         <div class="archive-date">MARCH 31, 2026 · 5 MIN</div>
         <h2>I Used MCP as a Service-to-Service Protocol. Here's What I Learned.</h2>
         <p>MCP was designed as an LLM-to-tool protocol. I used it as a service-to-service layer between a LangGraph orchestrator and independently deployable integration servers. It worked &mdash; with real tradeoffs.</p>
       </a>
 
-      <a class="archive-post" href="agentic-hype-vs-reality.html">
+      <a class="archive-post" href="/thinking/agentic-hype-vs-reality">
         <div class="archive-date">MARCH 31, 2026 · 7 MIN</div>
         <h2>Why Your AI Agent Demo Looks Great and Your Production System Doesn't</h2>
         <p>Why ReAct agents struggle in production, why deterministic orchestration (LangGraph, Temporal) is the pattern that ships in regulated workflows (KYC, lending), and why the auditability argument outlives model improvements.</p>

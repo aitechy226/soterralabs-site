@@ -5,24 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MCP in Production, Part 2: Authentication, Observability, and Operational Design &mdash; Soterra Labs</title>
   <meta name="description" content="Bearer token auth at the transport layer, correlation IDs across four servers, lazy session init, and clean shutdown — the system-level decisions that make an MCP client deployable." />
+  <link rel="canonical" href="https://soterralabs.ai/thinking/mcp-production-part-2" />
   <link rel="stylesheet" href="post.css" />
 </head>
 <body>
 
   <nav>
     <div class="nav-inner">
-      <a href="../index.html" class="logo">
+      <a href="/" class="logo">
         <img src="../logo-lit.svg" alt="Soterra Labs" />
       </a>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
       <ul class="nav-links" id="navLinks">
-        <li><a href="../index.html#services">Services</a></li>
-        <li><a href="../gpu-navigator.html">Products</a></li>
-        <li><a href="index.html" class="active">Thinking</a></li>
-        <li><a href="../index.html#about">About</a></li>
-        <li><a href="../index.html#contact">Contact</a></li>
+        <li><a href="/#services">Services</a></li>
+        <li><a href="/gpu-navigator">Products</a></li>
+        <li><a href="/thinking/" class="active">Thinking</a></li>
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#contact">Contact</a></li>
       </ul>
     </div>
   </nav>
@@ -40,10 +41,10 @@
       <div class="post-body">
         <div class="series-banner">
         <p><span class="series-label">MCP in Production · Part 2 of 2</span>
-        <span class="series-links"><a href="mcp-production-part-1.html">←
+        <span class="series-links"><a href="/thinking/mcp-production-part-1">←
         Part 1: Persistent Sessions, Pooling, and Fault Tolerance</a></span></p>
         </div>
-        <p><a href="mcp-production-part-1.html">Part 1</a> covered the
+        <p><a href="/thinking/mcp-production-part-1">Part 1</a> covered the
         transport layer — keeping sessions alive, recovering from failures, and
         a few edge cases that only surface when you’re running a real pool under
         real failure conditions. This part covers what I’d call system
@@ -168,12 +169,12 @@
         reading a resilience checklist upfront. Build it, break it, understand
         why, fix it. That’s the loop.</p>
         <hr />
-        <p><em>← <a href="mcp-production-part-1.html">Part 1: Persistent
+        <p><em>← <a href="/thinking/mcp-production-part-1">Part 1: Persistent
         Sessions, Pooling, and Fault Tolerance</a></em></p>
       </div>
 
       <div class="post-footer">
-        <a href="index.html">&larr; More posts</a>
+        <a href="/thinking/">&larr; More posts</a>
       </div>
     </div>
   </article>

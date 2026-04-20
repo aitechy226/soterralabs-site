@@ -5,24 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MCP in Production, Part 1: Persistent Sessions, Pooling, and Fault Tolerance &mdash; Soterra Labs</title>
   <meta name="description" content="Five transport-layer decisions — session pooling, eviction, cancel scope isolation, timeouts, and heartbeat design — each driven by a real failure in a KYC onboarding system." />
+  <link rel="canonical" href="https://soterralabs.ai/thinking/mcp-production-part-1" />
   <link rel="stylesheet" href="post.css" />
 </head>
 <body>
 
   <nav>
     <div class="nav-inner">
-      <a href="../index.html" class="logo">
+      <a href="/" class="logo">
         <img src="../logo-lit.svg" alt="Soterra Labs" />
       </a>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
       <ul class="nav-links" id="navLinks">
-        <li><a href="../index.html#services">Services</a></li>
-        <li><a href="../gpu-navigator.html">Products</a></li>
-        <li><a href="index.html" class="active">Thinking</a></li>
-        <li><a href="../index.html#about">About</a></li>
-        <li><a href="../index.html#contact">Contact</a></li>
+        <li><a href="/#services">Services</a></li>
+        <li><a href="/gpu-navigator">Products</a></li>
+        <li><a href="/thinking/" class="active">Thinking</a></li>
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#contact">Contact</a></li>
       </ul>
     </div>
   </nav>
@@ -40,7 +41,7 @@
       <div class="post-body">
         <div class="series-banner">
         <p><span class="series-label">MCP in Production · Part 1 of 2</span>
-        <span class="series-links"><a href="mcp-production-part-2.html">Part
+        <span class="series-links"><a href="/thinking/mcp-production-part-2">Part
         2: Authentication, Observability, and Operational Design
         →</a></span></p>
         </div>
@@ -51,7 +52,7 @@
         <p>This is Part 1 of a two-part series on what it takes to run an MCP
         client reliably. I’ll cover the transport layer: sessions, pooling, dead
         connection recovery, timeouts, and the heartbeat. <a
-        href="mcp-production-part-2.html">Part 2</a> covers the system layer:
+        href="/thinking/mcp-production-part-2">Part 2</a> covers the system layer:
         authentication, observability, and operational design.</p>
         <p>The context is a KYC Onboarding Orchestrator I built that calls four
         MCP servers — Moody’s entity data, sanctions/PEP screening, CRM, and
@@ -219,17 +220,17 @@
         </tr>
         </tbody>
         </table>
-        <p><a href="mcp-production-part-2.html">Part 2</a> covers the
+        <p><a href="/thinking/mcp-production-part-2">Part 2</a> covers the
         system-level concerns: protecting PII-carrying tool calls in transit,
         making 8–10 calls across 4 servers traceable to a single case, and the
         operational decisions that make this deployable on a client system.</p>
         <hr />
-        <p><em>Part 2: <a href="mcp-production-part-2.html">Authentication,
+        <p><em>Part 2: <a href="/thinking/mcp-production-part-2">Authentication,
         Observability, and Operational Design →</a></em></p>
       </div>
 
       <div class="post-footer">
-        <a href="index.html">&larr; More posts</a>
+        <a href="/thinking/">&larr; More posts</a>
       </div>
     </div>
   </article>
