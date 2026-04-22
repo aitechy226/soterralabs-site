@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Products — Soterra Labs</title>
+  <meta name="description" content="AI-powered tools from Soterra Labs — built to work before your sales team does." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    .tm { font-size: 0.5em; vertical-align: super; font-weight: 500; margin-left: 1px; }
+
+    :root {
+      --teal:       #0070c0;
+      --teal-light: #e3f2fd;
+      --teal-deep:  #0a1f44;
+      --accent:     #7ec8e3;
+      --dark:       #1a1a2e;
+      --mid:        #374151;
+      --muted:      #6b7280;
+      --border:     #e5e7eb;
+      --bg-card:    #ffffff;
+      --shadow-sm:  0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.04);
+      --shadow-md:  0 2px 6px rgba(0,0,0,0.05), 0 8px 20px rgba(0,0,0,0.06);
+      --shadow-lg:  0 4px 10px rgba(0,0,0,0.06), 0 14px 36px rgba(10,31,68,0.10);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: var(--dark);
+      background: #f5f7fa;
+      line-height: 1.6;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+    }
+    .nav-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 96px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .logo img { height: 72px; width: auto; display: block; }
+    .nav-links {
+      display: flex;
+      gap: 4px;
+      list-style: none;
+      align-items: center;
+    }
+    .nav-links a {
+      position: relative;
+      text-decoration: none;
+      color: var(--dark);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      padding: 10px 16px;
+      border-radius: 4px;
+      white-space: nowrap;
+      transition: color 0.2s ease, background 0.2s ease;
+    }
+    .nav-links a:hover {
+      color: var(--teal);
+      background: var(--teal-light);
+    }
+    .nav-links a.active {
+      color: var(--teal);
+    }
+
+    /* hamburger */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      width: 36px;
+      height: 36px;
+    }
+    .nav-toggle span {
+      display: block;
+      height: 2px;
+      width: 22px;
+      background: var(--mid);
+      border-radius: 2px;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-toggle.open span:nth-child(2) { opacity: 0; }
+    .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    @media (max-width: 1300px) {
+      .nav-toggle { display: flex; }
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(255,255,255,0.98);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        gap: 0;
+        padding: 8px 0 12px;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links li a {
+        display: block;
+        padding: 14px 24px;
+        font-size: 12px;
+        border-radius: 0;
+        letter-spacing: 1.5px;
+      }
+    }
+    @media (max-width: 540px) {
+      .nav-inner { height: 72px; }
+      .logo img { height: 52px; }
+    }
+
+    /* ── HERO ── */
+    .page-hero {
+      background: linear-gradient(135deg, #0a1f44 0%, #0070c0 100%);
+      padding: 56px 24px 48px;
+      color: #fff;
+    }
+    .page-hero .inner { max-width: 780px; margin: 0 auto; }
+    .page-hero-label {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: #7ec8e3;
+      background: rgba(255,255,255,0.08);
+      padding: 5px 12px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    .page-hero h1 {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    .page-hero p {
+      font-size: 17px;
+      color: rgba(255,255,255,0.78);
+      line-height: 1.6;
+      max-width: 600px;
+    }
+
+    /* ── PRODUCT GRID ── */
+    .products-section {
+      padding: 56px 24px 72px;
+      background: #f5f7fa;
+    }
+    .products-inner {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 24px;
+    }
+    @media (max-width: 480px) {
+      .products-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── PRODUCT CARD ── */
+    .product-card {
+      background: var(--bg-card);
+      border: none;
+      border-top: 4px solid var(--teal);
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+    .product-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 10px;
+    }
+    .product-card h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .product-card h2 sup {
+      font-size: 0.5em;
+      font-weight: 600;
+      vertical-align: super;
+    }
+    .product-card .product-one-liner {
+      font-size: 15px;
+      color: var(--mid);
+      line-height: 1.6;
+      margin-bottom: 20px;
+      flex-grow: 1;
+    }
+    .product-card .product-details {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .product-card .product-details strong {
+      color: var(--dark);
+    }
+    .product-cta {
+      display: inline-block;
+      background: var(--teal);
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.15s;
+      align-self: flex-start;
+    }
+    .product-cta:hover { background: #005a9e; }
+
+    /* ── COMING SOON CARD ── */
+    .product-card.coming-soon {
+      border-top-color: var(--border);
+      opacity: 0.55;
+    }
+    .product-card.coming-soon:hover {
+      transform: none;
+      box-shadow: var(--shadow-md);
+    }
+    .coming-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: #f0f2f5;
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--dark);
+      border-top: 1px solid #1f2937;
+      padding: 24px;
+      text-align: center;
+    }
+    footer p {
+      font-size: 13px;
+      color: #4b5563;
+    }
+    footer span { color: #2563eb; }
+    footer .footer-sep { color: #374151; margin: 0 8px; }
+    footer .footer-link { color: #4b5563; text-decoration: none; }
+    footer .footer-link:hover { color: #2563eb; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <img src="logo-lit-circle.svg" alt="Soterra Labs" />
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html#services">Services</a></li>
+        <li><a href="products.html" class="active">Products</a></li>
+        <li><a href="index.html#thinking">Thinking</a></li>
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <script>
+    const toggle = document.getElementById('navToggle');
+    const links  = document.getElementById('navLinks');
+    toggle.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      toggle.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', open);
+    });
+  </script>
+
+  <!-- HERO -->
+  <div class="page-hero">
+    <div class="inner">
+      <div class="page-hero-label">Products</div>
+      <h1>What we ship.</h1>
+      <p>Pre-sale intelligence tools and production AI systems. Each one built for a specific problem, deployed in your environment.</p>
+    </div>
+  </div>
+
+  <!-- PRODUCT GRID -->
+  <div class="products-section">
+    <div class="products-inner">
+      <div class="products-grid">
+
+        <!-- GPU NAVIGATOR -->
+        <div class="product-card">
+          <div class="product-tag">GTM Intelligence</div>
+          <h2>GPU Navigator<sup class="tm">&#8482;</sup></h2>
+          <div class="product-one-liner">
+            Most GPU vendors show a catalog and a price. GPU Navigator<sup class="tm">&#8482;</sup> starts with the workload and works backward to the right GPU — so the prospect arrives at the first call already qualified.
+          </div>
+          <div class="product-details">
+            <strong>Built for:</strong> GPU infrastructure vendors<br/>
+            <strong>Prospect time:</strong> 5 minutes<br/>
+            <strong>Output:</strong> Personalized GPU recommendation, VRAM fit analysis, multi-GPU detection, cost estimate at your rates<br/>
+            <strong>Sales rep gets:</strong> Full brief by email before the first call
+          </div>
+          <a href="gpu-navigator.html" class="product-cta">See how it works &rarr;</a>
+        </div>
+
+        <!-- AI SYSTEMS -->
+        <div class="product-card" style="border-top-color: #2563eb;">
+          <div class="product-tag" style="color: #2563eb;">AI Systems</div>
+          <h2>Custom AI — Packaged to Run</h2>
+          <div class="product-one-liner">
+            Document processing, intelligent search, multi-agent workflows, automated pipelines — scoped to your problem, deployed in your environment, delivered as a running system.
+          </div>
+          <div class="product-details">
+            <strong>Built for:</strong> Teams replacing manual work with AI<br/>
+            <strong>Includes:</strong> RAG systems, agentic workflows, document intelligence, workflow automation<br/>
+            <strong>Delivery:</strong> Production-ready, deployed in your infrastructure
+          </div>
+          <a href="index.html#contact" class="product-cta" style="background: #2563eb;">Start a conversation &rarr;</a>
+        </div>
+
+        <!-- YOUR PROBLEM HERE -->
+        <div class="product-card coming-soon">
+          <div class="coming-badge">Your Problem Here</div>
+          <h2>Something we should build?</h2>
+          <div class="product-one-liner">
+            Every product on this page started as a conversation about a real problem. If you have one, we'd like to hear it.
+          </div>
+          <div class="product-details"></div>
+          <a href="index.html#contact" class="product-cta" style="background: var(--mid);">Start a conversation &rarr;</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2026 <span>Soterra Labs</span> &mdash; From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&#8482;</sup><span class="footer-sep">&middot;</span><a href="/legal/" class="footer-link">Legal</a></p>
+  </footer>
+
+</body>
+</html>
