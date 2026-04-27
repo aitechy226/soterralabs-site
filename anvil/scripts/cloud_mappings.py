@@ -39,11 +39,28 @@ AWS_INSTANCE_TO_GPU: dict[str, dict] = {
 }
 
 # Azure VM SKU → canonical GPU + count
+# Verified against the live Retail Prices API 2026-04-27 — the
+# placeholder SKU names from Wave 1 (e.g. `Standard_ND_H100_v5`) don't
+# exist in Azure's catalog. Real ND-series SKUs encode core count +
+# variant suffix (`is`, `isr`, `noIB`, `flex`).
 AZURE_INSTANCE_TO_GPU: dict[str, dict] = {
-    "Standard_ND_H100_v5":   {"gpu": "nvidia-hopper-h100", "count": 8},
-    "Standard_ND_H200_v5":   {"gpu": "nvidia-hopper-h200", "count": 8},
-    "Standard_ND_MI300X_v5": {"gpu": "amd-cdna3-mi300x",   "count": 8},
-    "Standard_NC_A100_v4":   {"gpu": "nvidia-ampere-a100", "count": 1},
+    # H100 — 8-GPU ND series. `isr` = with InfiniBand (production-typical
+    # for distributed training); `is` = same hardware, no IB fabric.
+    "Standard_ND96isr_H100_v5":       {"gpu": "nvidia-hopper-h100",     "count": 8},
+    "Standard_ND96is_H100_v5":        {"gpu": "nvidia-hopper-h100",     "count": 8},
+    # H100 — smaller NC variants (1× and 2× GPU)
+    "Standard_NC40ads_H100_v5":       {"gpu": "nvidia-hopper-h100",     "count": 1},
+    "Standard_NC80adis_H100_v5":      {"gpu": "nvidia-hopper-h100",     "count": 2},
+    # H200 — 8-GPU ND with InfiniBand
+    "Standard_ND96isr_H200_v5":       {"gpu": "nvidia-hopper-h200",     "count": 8},
+    # MI300X — 8-GPU ND series (with + without IB)
+    "Standard_ND96isr_MI300X_v5":     {"gpu": "amd-cdna3-mi300x",       "count": 8},
+    "Standard_ND96is_MI300X_v5":      {"gpu": "amd-cdna3-mi300x",       "count": 8},
+    # A100 — 8-GPU ND series
+    "Standard_ND96asr_A100_v4":       {"gpu": "nvidia-ampere-a100",     "count": 8},
+    # NOTE: Standard_ND128isr_NDR_GB200_v6 deliberately unmapped pending
+    # GPU-count verification (Azure docs unclear; fetcher will warn-alert
+    # so an engineer can confirm before adding).
 }
 
 # GCP exposes individual GPU SKUs by description. Match with regex,

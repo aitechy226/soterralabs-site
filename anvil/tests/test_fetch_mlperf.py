@@ -140,7 +140,7 @@ def test_derive_canonical_unmapped_returns_reason() -> None:
 
 def test_derive_metric_uses_explicit_units() -> None:
     metric, reason = fetch_mlperf.derive_metric(_row(Performance_Units="Tokens/s"))
-    assert metric == "tokens_per_s"
+    assert metric == "tokens_per_second"  # `_per_s` → `_per_second` normalizer
     assert reason is None
 
 
@@ -195,7 +195,7 @@ def test_process_row_happy_path_inserts_clean(in_memory_mlperf_db) -> None:
     r = rows[0]
     assert r["round"] == "v5.1"
     assert r["gpu"] == "nvidia-hopper-h100"
-    assert r["metric"] == "tokens_per_s"  # explicit "Tokens/s" normalized
+    assert r["metric"] == "tokens_per_second"  # explicit "Tokens/s" → long form
     assert r["quarantined"] == 0
 
 
@@ -411,11 +411,15 @@ def test_load_audited_rounds_filters_unaudited(tmp_path: Path) -> None:
     assert ids == ["v5.0"]
 
 
-def test_load_audited_rounds_real_yaml_currently_empty() -> None:
-    """The shipped registry has both rounds schema_audited=False —
-    fetcher correctly discovers nothing to do."""
+def test_load_audited_rounds_real_yaml_lists_audited() -> None:
+    """The shipped registry has v5.0 + v5.1 audited as of 2026-04-27
+    (post Wave 1.5 schema audit). Both should be returned."""
     audited = fetch_mlperf.load_audited_rounds()
-    assert audited == []
+    ids = {r["id"] for r in audited}
+    assert "v5.0" in ids
+    assert "v5.1" in ids
+    for entry in audited:
+        assert entry["schema_audited"] is True
 
 
 def test_load_tracked_pairs_real_yaml() -> None:

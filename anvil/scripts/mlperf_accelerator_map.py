@@ -30,6 +30,9 @@ MLPERF_TO_GPU_PATTERNS: list[tuple[str, str]] = [
     (r"NVIDIA GB200",                "nvidia-blackwell-gb200"),
     (r"NVIDIA B200",                 "nvidia-blackwell-b200"),
     (r"NVIDIA B100",                 "nvidia-blackwell-b100"),
+    # NVIDIA Grace Hopper Superchip — CPU+GPU SoC (per spec §4.4
+    # canonical convention: 3-segment, family=grace, model=gh200).
+    (r"NVIDIA GH200",                "nvidia-grace-gh200"),
     # NVIDIA Hopper — H200 and H100 SKU variants
     (r"NVIDIA H200[- ]SXM",          "nvidia-hopper-h200"),
     (r"NVIDIA H200",                 "nvidia-hopper-h200"),

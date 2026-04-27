@@ -39,7 +39,7 @@
   "headline": "Live Cloud GPU Pricing",
   "description": "Current list-price hourly rates for GPU instances on AWS, Azure, and GCP, refreshed daily.",
   "url": "https://soterralabs.ai/anvil/pricing",
-  "dateModified": "2026-04-27T12:14:32.777994+00:00",
+  "dateModified": "2026-04-27T21:14:56.697543+00:00",
   "publisher": {"@type": "Organization", "name": "Soterra Labs"}
 }
 </script>
@@ -53,7 +53,7 @@
   "creator": {"@type": "Organization", "name": "Soterra Labs"},
   "license": "https://soterralabs.ai/legal/",
   "isAccessibleForFree": true,
-  "dateModified": "2026-04-27T12:14:32.777994+00:00",
+  "dateModified": "2026-04-27T21:14:56.697543+00:00",
   "keywords": "GPU pricing, cloud GPU, AWS GPU pricing, Azure GPU pricing, GCP GPU pricing, H100, H200, B200, MI300X"
 }
 </script>
@@ -107,8 +107,8 @@
     </p>
     
     <p class="freshness">
-      Last refreshed: <time datetime="2026-04-27T12:14:32.777994+00:00">April 27, 2026 at 12:14 UTC</time>
-      <span class="muted">(8 hours ago)</span>
+      Last refreshed: <time datetime="2026-04-27T21:14:56.697543+00:00">April 27, 2026 at 21:14 UTC</time>
+      <span class="muted">(4 minutes ago)</span>
     </p>
     
   </div>
@@ -133,8 +133,6 @@
     <a href="#nvidia-ada-l40s">L40S</a>
     
     <a href="#nvidia-ampere-a100">Ampere A100</a>
-    
-    <a href="#nvidia-blackwell-b200">Blackwell B200</a>
     
     <a href="#nvidia-hopper-h100">Hopper H100</a>
     
@@ -162,10 +160,18 @@
           
           <tr>
             <td><span class="cloud-tag">Azure</span></td>
-            <td>us-east</td>
-            <td>Standard_ND_MI300X_v5 (8&times;) <a href="https://example.demo/azure-mi300x" class="source-link" rel="nofollow noopener">[src]</a></td>
-            <td class="num">$54.00</td>
-            <td class="num">$6.75</td>
+            <td>eastus2</td>
+            <td>Standard_ND96is_MI300X_v5 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$48.00</td>
+            <td class="num">$6.00</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>eastus2</td>
+            <td>Standard_ND96isr_MI300X_v5 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$48.00</td>
+            <td class="num">$6.00</td>
           </tr>
           
         </tbody>
@@ -189,11 +195,19 @@
         <tbody>
           
           <tr>
-            <td><span class="cloud-tag">GCP</span></td>
-            <td>us-central1</td>
-            <td>g2-standard-4 (1&times;) <a href="https://example.demo/gcp-g2" class="source-link" rel="nofollow noopener">[src]</a></td>
-            <td class="num">$0.71</td>
-            <td class="num">$0.71</td>
+            <td><span class="cloud-tag">AWS</span></td>
+            <td>us-east-1</td>
+            <td>g6.xlarge (1&times;) <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260427201118/us-east-1/index.json" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$0.80</td>
+            <td class="num">$0.80</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">AWS</span></td>
+            <td>us-west-2</td>
+            <td>g6.xlarge (1&times;) <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260427201118/us-west-2/index.json" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$0.80</td>
+            <td class="num">$0.80</td>
           </tr>
           
         </tbody>
@@ -219,9 +233,33 @@
           <tr>
             <td><span class="cloud-tag">AWS</span></td>
             <td>us-east-1</td>
-            <td>g6e.xlarge (1&times;) <a href="https://example.demo/aws-g6e" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td>g6e.xlarge (1&times;) <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260427201118/us-east-1/index.json" class="source-link" rel="nofollow noopener">[src]</a></td>
             <td class="num">$1.86</td>
             <td class="num">$1.86</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">AWS</span></td>
+            <td>us-west-2</td>
+            <td>g6e.xlarge (1&times;) <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260427201118/us-west-2/index.json" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$1.86</td>
+            <td class="num">$1.86</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">AWS</span></td>
+            <td>us-east-1</td>
+            <td>g6e.2xlarge (1&times;) <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260427201118/us-east-1/index.json" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$2.24</td>
+            <td class="num">$2.24</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">AWS</span></td>
+            <td>us-west-2</td>
+            <td>g6e.2xlarge (1&times;) <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260427201118/us-west-2/index.json" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$2.24</td>
+            <td class="num">$2.24</td>
           </tr>
           
         </tbody>
@@ -245,47 +283,75 @@
         <tbody>
           
           <tr>
-            <td><span class="cloud-tag">GCP</span></td>
-            <td>us-central1</td>
-            <td>a2-highgpu-8g (8&times;) <a href="https://example.demo/gcp-a2" class="source-link" rel="nofollow noopener">[src]</a></td>
-            <td class="num">$29.39</td>
-            <td class="num">$3.67</td>
+            <td><span class="cloud-tag">AWS</span></td>
+            <td>us-west-2</td>
+            <td>p4d.24xlarge (8&times;) <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260427201118/us-west-2/index.json" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$21.96</td>
+            <td class="num">$2.74</td>
           </tr>
           
           <tr>
             <td><span class="cloud-tag">AWS</span></td>
             <td>us-east-1</td>
-            <td>p4d.24xlarge (8&times;) <a href="https://example.demo/aws-p4d" class="source-link" rel="nofollow noopener">[src]</a></td>
-            <td class="num">$32.77</td>
-            <td class="num">$4.10</td>
+            <td>p4d.24xlarge (8&times;) <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260427201118/us-east-1/index.json" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$21.96</td>
+            <td class="num">$2.74</td>
           </tr>
           
-        </tbody>
-      </table>
-    </div>
-  </section>
-  
-  <section class="pricing-section" id="nvidia-blackwell-b200">
-    <h2>NVIDIA Blackwell B200 <span class="canonical-id">nvidia-blackwell-b200</span></h2>
-    <div class="table-scroll">
-      <table class="pricing-table">
-        <thead>
           <tr>
-            <th>Cloud</th>
-            <th>Region</th>
-            <th>Instance</th>
-            <th class="num">$/hr</th>
-            <th class="num">$/GPU/hr</th>
+            <td><span class="cloud-tag">AWS</span></td>
+            <td>eu-west-1</td>
+            <td>p4d.24xlarge (8&times;) <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260427201118/eu-west-1/index.json" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$23.72</td>
+            <td class="num">$2.96</td>
           </tr>
-        </thead>
-        <tbody>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>eastus</td>
+            <td>Standard_ND96asr_A100_v4 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$27.20</td>
+            <td class="num">$3.40</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>westus2</td>
+            <td>Standard_ND96asr_A100_v4 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$27.20</td>
+            <td class="num">$3.40</td>
+          </tr>
           
           <tr>
             <td><span class="cloud-tag">AWS</span></td>
             <td>us-east-1</td>
-            <td>p6.48xlarge (8&times;) <a href="https://example.demo/aws-p6" class="source-link" rel="nofollow noopener">[src]</a></td>
-            <td class="num">$98.50</td>
-            <td class="num">$12.31</td>
+            <td>p4de.24xlarge (8&times;) <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260427201118/us-east-1/index.json" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$27.45</td>
+            <td class="num">$3.43</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">AWS</span></td>
+            <td>us-west-2</td>
+            <td>p4de.24xlarge (8&times;) <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260427201118/us-west-2/index.json" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$27.45</td>
+            <td class="num">$3.43</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>southcentralus</td>
+            <td>Standard_ND96asr_A100_v4 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$32.63</td>
+            <td class="num">$4.08</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>westeurope</td>
+            <td>Standard_ND96asr_A100_v4 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$35.36</td>
+            <td class="num">$4.42</td>
           </tr>
           
         </tbody>
@@ -309,35 +375,179 @@
         <tbody>
           
           <tr>
-            <td><span class="cloud-tag">GCP</span></td>
-            <td>us-central1</td>
-            <td>a3-highgpu-8g (8&times;) <a href="https://example.demo/gcp-a3" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td><span class="cloud-tag">AWS</span></td>
+            <td>us-east-1</td>
+            <td>p5.48xlarge (8&times;) <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260427201118/us-east-1/index.json" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$55.04</td>
+            <td class="num">$6.88</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">AWS</span></td>
+            <td>us-west-2</td>
+            <td>p5.48xlarge (8&times;) <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260427201118/us-west-2/index.json" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$55.04</td>
+            <td class="num">$6.88</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>eastus</td>
+            <td>Standard_NC40ads_H100_v5 (1&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$6.98</td>
+            <td class="num">$6.98</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>eastus</td>
+            <td>Standard_NC80adis_H100_v5 (2&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$13.96</td>
+            <td class="num">$6.98</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>eastus2</td>
+            <td>Standard_NC40ads_H100_v5 (1&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$6.98</td>
+            <td class="num">$6.98</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>eastus2</td>
+            <td>Standard_NC80adis_H100_v5 (2&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$13.96</td>
+            <td class="num">$6.98</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>westus2</td>
+            <td>Standard_NC40ads_H100_v5 (1&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$6.98</td>
+            <td class="num">$6.98</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>westus2</td>
+            <td>Standard_NC80adis_H100_v5 (2&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$13.96</td>
+            <td class="num">$6.98</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>southcentralus</td>
+            <td>Standard_NC40ads_H100_v5 (1&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$8.38</td>
+            <td class="num">$8.38</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>southcentralus</td>
+            <td>Standard_NC80adis_H100_v5 (2&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$16.76</td>
+            <td class="num">$8.38</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>westeurope</td>
+            <td>Standard_NC40ads_H100_v5 (1&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$9.08</td>
+            <td class="num">$9.08</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>westeurope</td>
+            <td>Standard_NC80adis_H100_v5 (2&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$18.16</td>
+            <td class="num">$9.08</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>eastus</td>
+            <td>Standard_ND96is_H100_v5 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
             <td class="num">$88.49</td>
             <td class="num">$11.06</td>
           </tr>
           
           <tr>
             <td><span class="cloud-tag">Azure</span></td>
-            <td>us-east</td>
-            <td>Standard_ND_H100_v5 (8&times;) <a href="https://example.demo/azure-h100" class="source-link" rel="nofollow noopener">[src]</a></td>
-            <td class="num">$89.50</td>
-            <td class="num">$11.19</td>
+            <td>eastus2</td>
+            <td>Standard_ND96is_H100_v5 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$88.49</td>
+            <td class="num">$11.06</td>
           </tr>
           
           <tr>
-            <td><span class="cloud-tag">AWS</span></td>
-            <td>us-east-1</td>
-            <td>p5.48xlarge (8&times;) <a href="https://example.demo/aws-p5" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>westus2</td>
+            <td>Standard_ND96is_H100_v5 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$88.49</td>
+            <td class="num">$11.06</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>eastus</td>
+            <td>Standard_ND96isr_H100_v5 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
             <td class="num">$98.32</td>
             <td class="num">$12.29</td>
           </tr>
           
           <tr>
-            <td><span class="cloud-tag">AWS</span></td>
-            <td>eu-west-1</td>
-            <td>p5.48xlarge (8&times;) <a href="https://example.demo/aws-p5-eu" class="source-link" rel="nofollow noopener">[src]</a></td>
-            <td class="num">$112.45</td>
-            <td class="num">$14.06</td>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>eastus2</td>
+            <td>Standard_ND96isr_H100_v5 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$98.32</td>
+            <td class="num">$12.29</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>westus2</td>
+            <td>Standard_ND96isr_H100_v5 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$98.32</td>
+            <td class="num">$12.29</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>southcentralus</td>
+            <td>Standard_ND96is_H100_v5 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$106.17</td>
+            <td class="num">$13.27</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>westeurope</td>
+            <td>Standard_ND96is_H100_v5 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$115.03</td>
+            <td class="num">$14.38</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>southcentralus</td>
+            <td>Standard_ND96isr_H100_v5 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$117.97</td>
+            <td class="num">$14.75</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>westeurope</td>
+            <td>Standard_ND96isr_H100_v5 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$127.82</td>
+            <td class="num">$15.98</td>
           </tr>
           
         </tbody>
@@ -361,19 +571,35 @@
         <tbody>
           
           <tr>
-            <td><span class="cloud-tag">Azure</span></td>
-            <td>us-east</td>
-            <td>Standard_ND_H200_v5 (8&times;) <a href="https://example.demo/azure-h200" class="source-link" rel="nofollow noopener">[src]</a></td>
-            <td class="num">$76.80</td>
-            <td class="num">$9.60</td>
+            <td><span class="cloud-tag">AWS</span></td>
+            <td>us-east-1</td>
+            <td>p5en.48xlarge (8&times;) <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260427201118/us-east-1/index.json" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$63.30</td>
+            <td class="num">$7.91</td>
           </tr>
           
           <tr>
             <td><span class="cloud-tag">AWS</span></td>
-            <td>us-east-1</td>
-            <td>p5e.48xlarge (8&times;) <a href="https://example.demo/aws-p5e" class="source-link" rel="nofollow noopener">[src]</a></td>
-            <td class="num">$84.30</td>
-            <td class="num">$10.54</td>
+            <td>us-west-2</td>
+            <td>p5en.48xlarge (8&times;) <a href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260427201118/us-west-2/index.json" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$63.30</td>
+            <td class="num">$7.91</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>eastus2</td>
+            <td>Standard_ND96isr_H200_v5 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$84.80</td>
+            <td class="num">$10.60</td>
+          </tr>
+          
+          <tr>
+            <td><span class="cloud-tag">Azure</span></td>
+            <td>westus2</td>
+            <td>Standard_ND96isr_H200_v5 (8&times;) <a href="https://prices.azure.com/api/retail/prices" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td class="num">$84.80</td>
+            <td class="num">$10.60</td>
           </tr>
           
         </tbody>

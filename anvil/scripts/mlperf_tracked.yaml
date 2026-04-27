@@ -26,5 +26,7 @@ tracked:
   - { model: "mixtral-8x7b",        scenarios: ["Server"] }
   - { model: "llama3.1-405b",       scenarios: ["Server"] }
   - { model: "stable-diffusion-xl", scenarios: ["Offline"] }
-  - { model: "bert-99",             scenarios: ["Server"] }
   - { model: "gptj-99",             scenarios: ["Offline"] }
+  # bert-99 dropped 2026-04-27 — doesn't appear in v5.0 or v5.1
+  # datacenter+closed surfaces. Kept in metric_plausibility +
+  # _metric_inference as forward-prep in case it returns.

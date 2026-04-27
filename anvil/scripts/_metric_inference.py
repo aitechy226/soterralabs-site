@@ -75,9 +75,18 @@ def infer_metric(
 
 
 def _normalize_units(raw: str) -> str:
-    """Lower + space-to-underscore + slash-to-_per_. Mirrors the
-    spec's normalization rule."""
-    return raw.strip().lower().replace(" ", "_").replace("/", "_per_")
+    """Lower + space-to-underscore + slash-to-_per_, then collapse a
+    trailing `_per_s` to `_per_second` so the explicit-units path
+    converges with the lookup-table form. MLCommons publishes the
+    abbreviated 'Tokens/s' / 'Samples/s' / 'Queries/s' shapes; the
+    lookup-table fallback uses the long form. Both paths must yield
+    the same normalized string so downstream display helpers
+    (`metric_unit_short`, `metric_unit_display`) work uniformly.
+    """
+    norm = raw.strip().lower().replace(" ", "_").replace("/", "_per_")
+    if norm.endswith("_per_s"):
+        norm = norm[:-len("_per_s")] + "_per_second"
+    return norm
 
 
 def tracked_metric_pairs() -> set[tuple[str, str]]:

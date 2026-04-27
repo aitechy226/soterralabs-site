@@ -24,26 +24,29 @@ from scripts._metric_inference import (
 @pytest.mark.parametrize(
     "raw,expected",
     [
-        ("Tokens/s",    "tokens_per_s"),
-        ("Samples/s",   "samples_per_s"),
-        ("Queries/s",   "queries_per_s"),
-        ("tokens/s",    "tokens_per_s"),
-        ("TOKENS/S",    "tokens_per_s"),
-        # Spec-defined normalization is literal: lowercase, space→_, /→_per_,
-        # in that order. So "Tokens / s" → "tokens / s" → "tokens_/_s" →
-        # "tokens__per__s". Producers should send "Tokens/s" (no inner
-        # spaces); this case is documented behaviour, not a target form.
+        # MLCommons abbreviated form → long canonical form so explicit
+        # units converge with the lookup-table fallback (both yield
+        # `*_per_second` and downstream display helpers work uniformly).
+        ("Tokens/s",    "tokens_per_second"),
+        ("Samples/s",   "samples_per_second"),
+        ("Queries/s",   "queries_per_second"),
+        ("tokens/s",    "tokens_per_second"),
+        ("TOKENS/S",    "tokens_per_second"),
+        # Inner-space input doesn't trigger the `_per_s` → `_per_second`
+        # collapse (the produced suffix is `__s`, not `_s`). Producers
+        # should send the abbreviated `Tokens/s` form; this case is
+        # documented behaviour, not a target output.
         ("Tokens / s",  "tokens__per__s"),
     ],
 )
 def test_explicit_units_normalize(raw: str, expected: str) -> None:
     """When MLCommons publishes Performance_Units, that wins.
-    Normalization is deterministic and literal."""
+    Normalization is deterministic and converges to the long form."""
     assert infer_metric("any-model", "Server", explicit_units=raw) == expected
 
 
 def test_explicit_units_strips_surrounding_whitespace() -> None:
-    assert infer_metric("any", "Server", explicit_units="  Tokens/s  ") == "tokens_per_s"
+    assert infer_metric("any", "Server", explicit_units="  Tokens/s  ") == "tokens_per_second"
 
 
 def test_explicit_units_overrides_lookup_table() -> None:

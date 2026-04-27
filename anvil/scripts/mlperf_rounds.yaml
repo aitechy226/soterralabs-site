@@ -26,9 +26,9 @@ rounds:
   - id: v5.0
     results_url: https://raw.githubusercontent.com/mlcommons/inference_results_v5.0/main/summary_results.json
     published_at: "2025-04-02"
-    schema_audited: false   # Wave 2A initial state — flips to true after first successful ingest + human spot-check
+    schema_audited: true    # Audited 2026-04-27 — keys verified against parser: Submitter, System, Accelerator, a#, Model, Scenario, Performance_Result, Performance_Units, Suite, Category, Accuracy
 
   - id: v5.1
     results_url: https://raw.githubusercontent.com/mlcommons/inference_results_v5.1/main/summary_results.json
     published_at: "2025-09-09"
-    schema_audited: false   # Wave 2A initial state
+    schema_audited: true    # Audited 2026-04-27 — same keys as v5.0; new scenario "Interactive" not in tracked.yaml so naturally filtered out

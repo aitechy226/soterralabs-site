@@ -83,6 +83,7 @@ GPU_DISPLAY_NAMES: dict[str, str] = {
     "amd-cdna3-mi300x":        "AMD Instinct MI300X",
     "amd-cdna3-mi325x":        "AMD Instinct MI325X",
     "intel-habana-gaudi3":     "Intel Gaudi 3",
+    "nvidia-grace-gh200":      "NVIDIA Grace Hopper GH200",
 }
 
 
@@ -143,6 +144,7 @@ _GPU_SHORT_NAMES: dict[str, str] = {
     "amd-cdna3-mi300x":        "MI300X",
     "amd-cdna3-mi325x":        "MI325X",
     "intel-habana-gaudi3":     "Gaudi 3",
+    "nvidia-grace-gh200":      "GH200",
 }
 
 
