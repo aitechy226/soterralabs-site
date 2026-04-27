@@ -297,6 +297,25 @@ def _round_freshness(
     )
 
 
+def _accuracy_track_display(model: str) -> str:
+    """Parse the MLPerf accuracy-track designator from the model name
+    suffix. MLCommons encodes the track in the model id:
+      llama2-70b-99    → '99%'    (cleared 99% of reference accuracy)
+      llama2-70b-99.9  → '99.9%'  (stricter 'very-high-accuracy' track)
+      mixtral-8x7b     → '—'      (no track concept for this workload)
+
+    The raw `Accuracy` field MLCommons publishes is a verbose
+    submitter-debugging string (ROUGE1/2/L, FID, F1, etc.) and is
+    confusing on a buyer-facing page. We surface the track only;
+    the verbose string stays in raw_row JSON for forensic replay.
+    """
+    if model.endswith("-99.9"):
+        return "99.9%"
+    if model.endswith("-99"):
+        return "99%"
+    return "—"
+
+
 def _row_to_mlperf_result(row: tuple) -> MlperfResult:
     """Map a DB row to a typed MlperfResult.
 
@@ -308,14 +327,13 @@ def _row_to_mlperf_result(row: tuple) -> MlperfResult:
     display_gpu = (
         gpu_display_name(gpu_canonical) if gpu_canonical else accelerator
     )
-    accuracy_raw = row[9]
     return MlperfResult(
         display_gpu=display_gpu,
         submitter=row[5],
         system_name=row[6],
         accelerator_count=int(row[4]),
         metric_value=float(row[8]),
-        accuracy=accuracy_raw if accuracy_raw else "—",
+        accuracy=_accuracy_track_display(row[0]),
         submission_url=row[10],
     )
 

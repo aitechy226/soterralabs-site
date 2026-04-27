@@ -250,13 +250,34 @@ def test_display_gpu_falls_back_to_accelerator_when_canonical_none(
 
 # ---- accuracy fallback ----
 
-def test_accuracy_empty_string_renders_em_dash(in_memory_mlperf_db) -> None:
-    """Pipeline pre-computes the em-dash literal so the template can
-    write {{ r.accuracy }} unconditionally."""
-    _seed_mlperf(in_memory_mlperf_db, accuracy=None)
+def test_accuracy_track_parsed_from_model_name(in_memory_mlperf_db) -> None:
+    """The accuracy column shows the MLPerf track designator (99% /
+    99.9%) parsed from the model id suffix — NOT the raw verbose
+    accuracy string MLCommons publishes (ROUGE1/2/L, FID, etc.).
+    Verbose string stays in raw_row for forensic replay."""
+    _seed_mlperf(in_memory_mlperf_db, model="llama2-70b-99",   accuracy=None)
+    _seed_mlperf(in_memory_mlperf_db, model="llama2-70b-99.9", accuracy=None)
+    _seed_mlperf(in_memory_mlperf_db, model="mixtral-8x7b",    accuracy=None)
     in_memory_mlperf_db.commit()
     ctx = build.build_mlperf_context(in_memory_mlperf_db, NOW)
-    assert ctx.workloads[0].results[0].accuracy == "—"
+    by_model = {w.model: w.results[0].accuracy for w in ctx.workloads}
+    assert by_model["llama2-70b-99"]   == "99%"
+    assert by_model["llama2-70b-99.9"] == "99.9%"
+    assert by_model["mixtral-8x7b"]    == "—"
+
+
+def test_accuracy_track_ignores_raw_verbose_string(in_memory_mlperf_db) -> None:
+    """Even when MLCommons publishes a long ROUGE/FID string, we
+    surface only the parsed track. Display is consistent regardless
+    of what the submitter reported."""
+    _seed_mlperf(
+        in_memory_mlperf_db,
+        model="llama2-70b-99",
+        accuracy="ROUGE1: 44.75  ROUGE2: 22.36  ROUGEL: 29.14  TOKENS_PER_SAMPLE: 274.3",
+    )
+    in_memory_mlperf_db.commit()
+    ctx = build.build_mlperf_context(in_memory_mlperf_db, NOW)
+    assert ctx.workloads[0].results[0].accuracy == "99%"
 
 
 # ---- is_round_stale ----
