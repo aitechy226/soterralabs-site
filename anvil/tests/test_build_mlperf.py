@@ -200,8 +200,7 @@ def test_build_mlperf_workloads_sort_alphabetically(in_memory_mlperf_db) -> None
 # ---- sort within workload ----
 
 def test_results_sorted_desc_by_metric_value(in_memory_mlperf_db) -> None:
-    """Highest metric_value at top of each workload — readers scan from
-    top so the leader board ordering matters."""
+    """Within one chip family, fastest submission first."""
     _seed_mlperf(in_memory_mlperf_db, submitter="Slow",  metric_value=10_000.0)
     _seed_mlperf(in_memory_mlperf_db, submitter="Fast",  metric_value=50_000.0)
     _seed_mlperf(in_memory_mlperf_db, submitter="Mid",   metric_value=25_000.0)
@@ -209,6 +208,47 @@ def test_results_sorted_desc_by_metric_value(in_memory_mlperf_db) -> None:
     ctx = build.build_mlperf_context(in_memory_mlperf_db, NOW)
     submitters = [r.submitter for r in ctx.workloads[0].results]
     assert submitters == ["Fast", "Mid", "Slow"]
+
+
+def test_results_grouped_by_gpu_family(in_memory_mlperf_db) -> None:
+    """Across chip families: rows for one GPU sit together; chip
+    family with the highest single submission goes first.
+
+    Pure metric-DESC mixed B200 with H200 with H100 etc. — buyers
+    couldn't scan the GPU column. Group-then-rank fixes that.
+    """
+    # H100 family — top result 30k
+    _seed_mlperf(in_memory_mlperf_db, submitter="H100-A",  gpu="nvidia-hopper-h100",   metric_value=30_000.0)
+    _seed_mlperf(in_memory_mlperf_db, submitter="H100-B",  gpu="nvidia-hopper-h100",   metric_value=22_000.0)
+    # B200 family — top result 100k (highest overall → goes first)
+    _seed_mlperf(in_memory_mlperf_db, submitter="B200-A",  gpu="nvidia-blackwell-b200", metric_value=100_000.0)
+    _seed_mlperf(in_memory_mlperf_db, submitter="B200-B",  gpu="nvidia-blackwell-b200", metric_value=80_000.0)
+    # H200 family — top result 50k (between B200 and H100)
+    _seed_mlperf(in_memory_mlperf_db, submitter="H200-A",  gpu="nvidia-hopper-h200",   metric_value=50_000.0)
+    in_memory_mlperf_db.commit()
+    ctx = build.build_mlperf_context(in_memory_mlperf_db, NOW)
+    order = [(r.submitter, r.display_gpu) for r in ctx.workloads[0].results]
+    # B200 block first (top 100k), then H200 (50k), then H100 (30k).
+    # Within each block: fastest-first.
+    assert order == [
+        ("B200-A", "NVIDIA Blackwell B200"),
+        ("B200-B", "NVIDIA Blackwell B200"),
+        ("H200-A", "NVIDIA Hopper H200"),
+        ("H100-A", "NVIDIA Hopper H100"),
+        ("H100-B", "NVIDIA Hopper H100"),
+    ]
+
+
+def test_unmapped_gpu_rows_sort_last_in_workload(in_memory_mlperf_db) -> None:
+    """gpu IS NULL rows (unmapped accelerator) should not jump above
+    every mapped chip even when their metric_value happens to be high."""
+    _seed_mlperf(in_memory_mlperf_db, submitter="Mapped",   gpu="nvidia-hopper-h100", metric_value=20_000.0)
+    _seed_mlperf(in_memory_mlperf_db, submitter="Unmapped", gpu=None,                  metric_value=80_000.0,
+                 accelerator="Some Strange Future Chip")
+    in_memory_mlperf_db.commit()
+    ctx = build.build_mlperf_context(in_memory_mlperf_db, NOW)
+    order = [r.submitter for r in ctx.workloads[0].results]
+    assert order == ["Mapped", "Unmapped"]  # mapped first, even at lower throughput
 
 
 # ---- top-result display ----

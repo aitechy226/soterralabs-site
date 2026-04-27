@@ -396,6 +396,31 @@ def _build_workload(
     )
 
 
+def _group_rows_by_gpu(rows: list[tuple]) -> list[tuple]:
+    """Re-order one workload's rows so submissions on the same GPU sit
+    together; chip families ranked by their best result.
+
+    Within a chip-family block, fastest submission first (already the
+    DESC order from the SQL). Between blocks, the chip with the
+    highest single result goes first — so B200 (Blackwell) lands above
+    H200 (Hopper), which lands above A100 (Ampere). Unmapped (gpu IS
+    NULL) rows sort last.
+
+    Position 2 in each row tuple is the canonical GPU id (or None).
+    Position 8 is metric_value.
+    """
+    by_gpu: dict[str | None, list[tuple]] = {}
+    for r in rows:
+        by_gpu.setdefault(r[2], []).append(r)
+    # Rank chip families by max metric_value DESC; None goes last.
+    def chip_rank(gpu_id: str | None) -> tuple[int, float]:
+        if gpu_id is None:
+            return (1, 0.0)  # Unmapped goes after every mapped chip
+        return (0, -max(float(r[8]) for r in by_gpu[gpu_id]))
+    ordered_gpus = sorted(by_gpu.keys(), key=chip_rank)
+    return [r for gpu in ordered_gpus for r in by_gpu[gpu]]
+
+
 def build_mlperf_context(
     conn: sqlite3.Connection, now: datetime,
 ) -> MlperfContext | None:
@@ -445,6 +470,14 @@ def build_mlperf_context(
         key = (r[0], r[1])
         groups.setdefault(key, []).append(r)
         metric_per_group.setdefault(key, r[7])
+
+    # Re-order each workload's rows: group by GPU (chip family with the
+    # highest top-end first), then metric_value DESC within each chip.
+    # Pure global metric-DESC mixed B200 rows in with H200/H100 rows
+    # and made the table hard to scan — the GPU column has more
+    # buyer-relevance than the absolute throughput rank.
+    for key in groups:
+        groups[key] = _group_rows_by_gpu(groups[key])
 
     workloads = tuple(
         _build_workload(idx, model, scenario, groups[(model, scenario)],
