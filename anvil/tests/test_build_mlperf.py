@@ -253,6 +253,31 @@ def test_unmapped_gpu_rows_sort_last_in_workload(in_memory_mlperf_db) -> None:
 
 # ---- top-result display ----
 
+def test_system_paren_split_into_stack_column(in_memory_mlperf_db) -> None:
+    """The MLCommons `System` field often packs topology + software
+    stack into a parenthetical suffix. The pipeline splits these so
+    the System cell stays clean and the parenthetical lives in its
+    own Stack column."""
+    _seed_mlperf(
+        in_memory_mlperf_db,
+        system_name="ASUSTeK ESC N8 H200 (8x H200-SXM-141GB, TensorRT)",
+    )
+    _seed_mlperf(
+        in_memory_mlperf_db,
+        submitter="OtherSub",
+        system_name="Supermicro AS-8125GS-TNMR2",  # no parens
+    )
+    in_memory_mlperf_db.commit()
+    ctx = build.build_mlperf_context(in_memory_mlperf_db, NOW)
+    by_sub = {r.submitter: r for r in ctx.workloads[0].results}
+    asustek = by_sub["NVIDIA"]   # default submitter from _seed_mlperf
+    assert asustek.system_name == "ASUSTeK ESC N8 H200"
+    assert asustek.stack       == "8x H200-SXM-141GB, TensorRT"
+    other = by_sub["OtherSub"]
+    assert other.system_name == "Supermicro AS-8125GS-TNMR2"
+    assert other.stack       == "—"   # no parens → em-dash
+
+
 def test_top_result_display_format(in_memory_mlperf_db) -> None:
     _seed_mlperf(
         in_memory_mlperf_db,

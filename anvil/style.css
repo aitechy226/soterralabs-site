@@ -385,6 +385,12 @@ main { padding: 0; }
   font-weight: 600;
   color: var(--teal-deep);
 }
+.mlperf-table .stack-cell {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  max-width: 280px;
+}
 .pricing-table .source-link, .mlperf-table .submission-link {
   font-size: 11px;
   color: var(--gray-soft);

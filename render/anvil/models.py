@@ -70,7 +70,8 @@ class MlperfResult(_Frozen):
     """
     display_gpu: str                    # PRE-COMPUTED: gpu OR accelerator
     submitter: str
-    system_name: str
+    system_name: str                    # PRE-COMPUTED: clean name, parens stripped
+    stack: str                          # PRE-COMPUTED: parenthetical detail (topology + software) or '—'
     accelerator_count: int
     metric_value: float
     accuracy: str                       # PRE-COMPUTED: actual value or '—' em-dash

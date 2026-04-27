@@ -347,6 +347,29 @@ def _accuracy_track_display(model: str) -> str:
     return "—"
 
 
+def _split_system_stack(raw_system: str) -> tuple[str, str]:
+    """Split MLCommons `System` into (clean name, stack note).
+
+    MLCommons packs topology + memory + software-stack into a
+    parenthetical suffix on `System` for many submissions:
+
+      'ASUSTeK ESC N8 H200 (8x H200-SXM-141GB, TensorRT)'
+        → ('ASUSTeK ESC N8 H200', '8x H200-SXM-141GB, TensorRT')
+
+      'Supermicro AS-8125GS-TNMR2'
+        → ('Supermicro AS-8125GS-TNMR2', '—')
+
+    The parenthetical content travels in its own table column so the
+    System cell stays narrow and the (buyer-relevant) software-stack
+    piece is scannable. Trailing `)` is stripped; em-dash for
+    submissions with no parens.
+    """
+    if "(" not in raw_system:
+        return raw_system.strip(), "—"
+    head, _, tail = raw_system.partition("(")
+    return head.strip(), tail.rstrip(") ").strip() or "—"
+
+
 def _row_to_mlperf_result(row: tuple, band: int) -> MlperfResult:
     """Map a DB row to a typed MlperfResult.
 
@@ -361,10 +384,12 @@ def _row_to_mlperf_result(row: tuple, band: int) -> MlperfResult:
     display_gpu = (
         gpu_display_name(gpu_canonical) if gpu_canonical else accelerator
     )
+    system_clean, stack = _split_system_stack(row[6])
     return MlperfResult(
         display_gpu=display_gpu,
         submitter=row[5],
-        system_name=row[6],
+        system_name=system_clean,
+        stack=stack,
         accelerator_count=int(row[4]),
         metric_value=float(row[8]),
         accuracy=_accuracy_track_display(row[0]),
