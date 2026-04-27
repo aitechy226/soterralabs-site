@@ -148,6 +148,23 @@ def submission_url_for(row: dict[str, Any], round_id: str) -> str:
 
 # ---- DB insert ----
 
+def _total_accelerator_count(row: dict[str, Any]) -> int:
+    """Compute total chip count for a submission.
+
+    MLCommons publishes `a#` as the PER-NODE accelerator count and
+    `Nodes` separately. Total chips that produced the throughput is
+    `a# × Nodes`. Single-node submissions report Nodes=1 so total
+    equals a#; multi-node clusters need the multiplier.
+
+    Without this multiplier the table mis-reports a 4-node Cisco
+    submission as 8 H100s (per-node) when it actually used 32 H100s
+    end-to-end — which throws every cross-system comparison.
+    """
+    per_node = int(row.get("a#", 0) or 0)
+    nodes = int(row.get("Nodes", 1) or 1)
+    return per_node * nodes
+
+
 def _insert_row(
     conn: sqlite3.Connection,
     *,
@@ -173,7 +190,7 @@ def _insert_row(
             row.get("Submitter", ""),
             row.get("System", ""),
             row.get("Accelerator", ""),
-            int(row.get("a#", 0) or 0),
+            _total_accelerator_count(row),
             canonical,
             row.get("Model", ""),
             row.get("Scenario", ""),

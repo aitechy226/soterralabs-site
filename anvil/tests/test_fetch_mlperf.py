@@ -492,6 +492,41 @@ def test_main_one_round_failure_does_not_block_others(disk_db: Path, capsys) -> 
     assert "inserted=1" in captured.out  # v5.1 succeeded
 
 
+# ---- _total_accelerator_count ----
+
+def test_total_accelerator_count_single_node() -> None:
+    """Nodes=1 (or absent) → total equals per-node count."""
+    assert fetch_mlperf._total_accelerator_count({"a#": 8, "Nodes": 1}) == 8
+    assert fetch_mlperf._total_accelerator_count({"a#": 8}) == 8  # missing key → default 1
+
+
+def test_total_accelerator_count_multi_node() -> None:
+    """4-node × 8/node = 32 — matches the Cisco HPF HGX scar."""
+    assert fetch_mlperf._total_accelerator_count({"a#": 8, "Nodes": 4}) == 32
+
+
+def test_total_accelerator_count_handles_string_nodes() -> None:
+    """MLCommons sometimes returns Nodes as a string. int() coerces."""
+    assert fetch_mlperf._total_accelerator_count({"a#": 8, "Nodes": "4"}) == 32
+
+
+def test_total_accelerator_count_handles_null_nodes() -> None:
+    """Nodes=null in JSON → fall back to 1."""
+    assert fetch_mlperf._total_accelerator_count({"a#": 8, "Nodes": None}) == 8
+
+
+def test_total_accelerator_count_inserted_into_db(in_memory_mlperf_db) -> None:
+    """End-to-end: process_row stores the multiplied total, not the
+    per-node a#. The Cisco HPF HGX scar (32 chips reported as 8)."""
+    row = _row(**{"a#": 8})
+    row["Nodes"] = 4
+    fetch_mlperf.process_row(in_memory_mlperf_db, row, "v5.1", now_fn=NOW_FN)
+    stored = in_memory_mlperf_db.execute(
+        "SELECT accelerator_count FROM mlperf_results"
+    ).fetchone()["accelerator_count"]
+    assert stored == 32
+
+
 # ---- submission_url shape ----
 
 def test_submission_url_for_round_repo() -> None:
