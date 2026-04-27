@@ -338,6 +338,36 @@ def test_legal_sha_match_yields_no_finding() -> None:
     assert findings == []
 
 
+def test_visible_text_decodes_entities_via_selectolax() -> None:
+    """Per Wave 4B.3 reviewer concern: smarty-rendered markdown produces
+    HTML entities (&ldquo;, &rdquo;, &mdash;); the existing thinking/
+    *.html files use raw Unicode for the same typographic chars
+    (verified 2026-04-27: thinking/agentic-hype-vs-reality.html carries
+    “left-curly” quotes and — em-dash directly). For the
+    Wave 4C harness to pass, BOTH forms must compare equal post entity
+    decoding. Selectolax's .text() decodes entities to Unicode; this
+    test pins that contract end-to-end against a real round-trip
+    scenario.
+    """
+    # Pre-migration: existing HTML with Unicode chars directly (matches
+    # the actual on-disk thinking/*.html shape).
+    pre = _html(body_text='He said “hello” — really.')
+    # Post-migration: same content rendered from markdown via smarty,
+    # which emits HTML entities.
+    post = pre.replace(
+        'He said “hello” — really.',
+        'He said &ldquo;hello&rdquo; &mdash; really.',
+    )
+    findings = diff_html(pre, post)
+    text_findings = [f for f in findings if "visible body text" in f.field]
+    assert text_findings == [], (
+        f"harness fired on entity-vs-decoded-unicode equivalence: "
+        f"{text_findings}. Wave 4C thinking-post migration WILL fail "
+        f"unless this is fixed — smarty produces entities; pre-migration "
+        f"HTML has the equivalent Unicode codepoints."
+    )
+
+
 def test_legal_sha_drift_yields_finding() -> None:
     """When the extracted body has changed, the SHA mismatch surfaces
     — counsel re-review trigger."""

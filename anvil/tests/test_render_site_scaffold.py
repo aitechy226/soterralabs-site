@@ -58,16 +58,6 @@ def test_render_site_make_jinja_env_default_mlperf_ready_is_false() -> None:
     assert env.globals["mlperf_ready"] is False
 
 
-def test_load_post_stub_raises_not_implemented() -> None:
-    """Wave 4A.3 sentinel — Wave 4B replaces this with a real loader.
-    When Wave 4B lands, this test fails; rewrite to assert the loader
-    actually parses a .md file."""
-    from pathlib import Path
-    from render.site.loaders.markdown import load_post
-    with pytest.raises(NotImplementedError):
-        load_post(Path("/nonexistent.md"))
-
-
 def test_load_post_index_stub_raises_not_implemented() -> None:
     from render.site.loaders.pydantic import load_post_index
     with pytest.raises(NotImplementedError):

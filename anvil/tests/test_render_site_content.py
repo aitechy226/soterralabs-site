@@ -258,3 +258,123 @@ def test_gpu_navigator_body_preserves_dom_contract() -> None:
         f"frozen DOM contract — embedded JS may break:\n  "
         + "\n  ".join(sorted(missing))
     )
+
+
+# --------------------------------------------------------------------------
+# 4B.3 — markdown loader (thinking posts; reads from upstream blogs/)
+# --------------------------------------------------------------------------
+
+
+_FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
+_SYNTHETIC_POST = _FIXTURES_DIR / "synthetic_post.md"
+
+
+def test_markdown_loader_parses_synthetic_fixture_cleanly() -> None:
+    """Unit-tier: load_post against a hand-crafted .md exercises every
+    branch of the parser without depending on the upstream blogs/
+    checkout. Same path-tier the Wave 4C migration runs through."""
+    from render.site.loaders.markdown import _parse_post_file
+
+    post = _parse_post_file(_SYNTHETIC_POST, "synthetic-test-post")
+    assert post.headline.startswith("Synthetic Test Post")
+    assert post.publish_date_iso == "2026-04-27"
+    # smarty extension converts " → curly quotes; em-dash preserved
+    assert "&ldquo;this text&rdquo;" in post.body_html, (
+        "smarty extension didn't convert straight quotes to curly — "
+        f"body excerpt: {post.body_html[:300]}"
+    )
+    # fenced_code extension produces <pre><code>...</code></pre>
+    assert "<pre><code" in post.body_html
+    # tables extension produces <table>
+    assert "<table>" in post.body_html
+    # Body must NOT contain the frontmatter delimiters (parsing succeeded)
+    assert "---" not in post.body_html.split("\n")[0:3], (
+        "frontmatter delimiters leaked into body — frontmatter parse failed"
+    )
+
+
+def test_markdown_loader_seo_metadata_carries_through() -> None:
+    """SeoMeta fields must reflect the .md frontmatter exactly. Catches
+    a typo'd frontmatter key + the canonical-URL formatter."""
+    from render.site.loaders.markdown import _parse_post_file
+    post = _parse_post_file(_SYNTHETIC_POST, "synthetic-test-post")
+    assert post.seo.title.startswith("Synthetic Test Post")
+    assert post.seo.canonical == "https://soterralabs.ai/thinking/synthetic-test-post"
+    assert post.seo.og_type == "article"
+    assert post.seo.og_title == post.seo.title
+    assert post.seo.description.startswith("A handcrafted markdown")
+
+
+def test_markdown_loader_missing_frontmatter_raises() -> None:
+    """A .md file missing the required title/date/description must
+    fail loudly — not silently produce a malformed SitePost."""
+    from render.site.loaders.markdown import _parse_post_file
+    bad_path = _FIXTURES_DIR / "_bad_post.md"
+    bad_path.write_text(
+        "---\ntitle: only-a-title\n---\n\nBody.\n", encoding="utf-8",
+    )
+    try:
+        with pytest.raises(KeyError):
+            _parse_post_file(bad_path, "bad-post")
+    finally:
+        bad_path.unlink(missing_ok=True)
+
+
+def test_markdown_loader_malformed_yaml_names_the_file() -> None:
+    """Per Wave 4B.3 reviewer: a YAML typo in any post must produce a
+    ValueError that names the file. Without the wrap, PyYAML's stack
+    trace receives the loaded string and can't surface the path —
+    diagnosis takes minutes instead of seconds."""
+    from render.site.loaders.markdown import _parse_post_file
+    bad_path = _FIXTURES_DIR / "_malformed_yaml.md"
+    # Unmatched quote in a YAML value — guaranteed scanner error.
+    bad_path.write_text(
+        '---\ntitle: "unmatched\ndate: 2026-04-27\n---\n\nBody.\n',
+        encoding="utf-8",
+    )
+    try:
+        with pytest.raises(ValueError, match="YAML frontmatter parse error"):
+            _parse_post_file(bad_path, "malformed-yaml")
+    finally:
+        bad_path.unlink(missing_ok=True)
+
+
+def test_load_post_unknown_slug_raises_filenotfound() -> None:
+    """Slug that doesn't match any .md in BLOGS_POSTS_DIR fails loudly,
+    naming the expected path so a missing checkout is diagnosable."""
+    from render.site.loaders.markdown import load_post
+    with pytest.raises(FileNotFoundError, match="thinking post not found"):
+        load_post("nonexistent-slug-xyz")
+
+
+# --------------------------------------------------------------------------
+# Integration: the 8 published thinking posts load cleanly
+# --------------------------------------------------------------------------
+
+from render.site.loaders.markdown import (
+    BLOGS_POSTS_DIR,
+    published_post_slugs,
+)
+
+
+@pytest.mark.skipif(
+    not BLOGS_POSTS_DIR.exists(),
+    reason=(
+        "blogs/practical-ai-builder not checked out at expected sibling path — "
+        "this is an integration test that requires Sri's local layout. "
+        "Unit tests above cover the loader logic without this dependency."
+    ),
+)
+@pytest.mark.parametrize("slug", published_post_slugs())
+def test_each_published_thinking_post_loads_cleanly(slug: str) -> None:
+    """Integration: every published post in published_post_slugs() must
+    load via load_post() without errors. Catches frontmatter drift in
+    upstream blogs/ that would break the Wave 4C migration."""
+    from render.site.loaders.markdown import load_post
+    post = load_post(slug)
+    assert post.headline, f"{slug}: empty headline"
+    assert post.body_html, f"{slug}: empty rendered body"
+    assert len(post.body_html) > 500, (
+        f"{slug}: body suspiciously short ({len(post.body_html)} bytes)"
+    )
+    assert post.seo.canonical == f"https://soterralabs.ai/thinking/{slug}"

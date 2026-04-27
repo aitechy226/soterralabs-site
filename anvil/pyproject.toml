@@ -9,6 +9,10 @@ dependencies = [
     "Jinja2>=3.1.6,<3.2.0",
     "PyYAML>=6.0.0,<7.0.0",
     "selectolax>=0.3.0,<0.4.0",
+    # Wave 4B.3 — thinking-post markdown loader (render/site/loaders/markdown.py).
+    # Sri-approved 2026-04-27 per supply-chain rule.
+    "markdown>=3.5.0,<4.0.0",
+    "python-frontmatter>=1.1.0,<2.0.0",
 ]
 
 [project.optional-dependencies]
