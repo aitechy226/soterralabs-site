@@ -31,12 +31,6 @@ def test_render_site_build_imports_cleanly() -> None:
     assert TEMPLATES_DIR.name == "templates"
 
 
-def test_render_site_build_is_noop_in_wave_4a() -> None:
-    """Wave 4A.3 stub: build() returns empty dict."""
-    from render.site.build import build
-    assert build() == {}
-
-
 def test_render_site_make_jinja_env_does_not_set_section_anvil() -> None:
     """Per Jake's design call: public-site rendering must NOT carry
     section='anvil'. The Reference dropdown shows only when section ==

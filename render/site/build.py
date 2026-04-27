@@ -1,11 +1,13 @@
 """Main-site (soterralabs.ai) build orchestrator.
 
 Wave 4A.3 ships the SKELETON. Wave 4B fills loaders + content data.
-Wave 4C wires per-page templates. Wave 4D integrates with sitemap +
-robots + the render-diff harness gate.
+Wave 4C wires per-page templates one at a time, gated by the render-
+diff harness. Wave 4D integrates sitemap + robots + the full pre-merge
+crawl comparison.
 
-Until then, build() is a no-op that returns an empty dict — ensures
-the scaffolding compiles + can be imported without rendering anything.
+Wave 4C.1 lands the /legal/ migration: shared chrome + verbatim legal
+body. Future Wave 4C commits append more pages to the build()
+function's per-page rendering.
 """
 from __future__ import annotations
 
@@ -20,6 +22,10 @@ REPO_ROOT = THIS_DIR.parent.parent
 TEMPLATES_DIR = THIS_DIR / "templates"
 SHARED_TEMPLATES_DIR = REPO_ROOT / "render" / "shared"
 CONTENT_DIR = THIS_DIR / "content"
+
+# Output paths (committed to repo per the Anvil pattern; Cloudflare Pages
+# serves the committed static HTML).
+OUT_LEGAL = REPO_ROOT / "legal" / "index.html"
 
 
 def make_jinja_env(mlperf_ready: bool = False) -> Environment:
@@ -39,14 +45,57 @@ def make_jinja_env(mlperf_ready: bool = False) -> Environment:
     return env
 
 
+def render_legal_page() -> str:
+    """Render /legal/ — shared chrome + verbatim legal body block.
+
+    The body is loaded via render.site.loaders.pydantic.load_legal_body
+    (which reads from render/site/content/legal_body.html, frozen by
+    SHA-256). The page-specific CSS is inlined from
+    render/site/content/legal_styles.css until Wave 4D unifies CSS
+    site-wide.
+
+    Returns the full HTML string. Caller writes to OUT_LEGAL.
+    """
+    from render.site.loaders.pydantic import load_legal_body
+
+    legal_body = load_legal_body()
+    legal_css = (CONTENT_DIR / "legal_styles.css").read_text(encoding="utf-8")
+
+    env = make_jinja_env()
+    return env.get_template("legal.html.j2").render(
+        legal_body=legal_body,
+        legal_inline_css=legal_css,
+        active_nav=None,  # legal isn't surfaced in main nav
+    )
+
+
+def write_atomic(path: Path, content: str) -> None:
+    """Write content to path atomically; no-op if content unchanged.
+    Mirrors render.anvil.build.write_atomic."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists() and path.read_text(encoding="utf-8") == content:
+        return
+    path.write_text(content, encoding="utf-8")
+
+
 def build(now: datetime | None = None) -> dict[str, bool]:
     """Run the main-site build. Returns {output_name: was_written}.
 
-    Wave 4A.3 stub — returns empty dict. Wave 4B/4C populate.
+    Wave 4C.1: only /legal/. Future Wave 4C commits append home,
+    products, gpu-navigator, thinking-index, and 8 thinking posts.
     """
     if now is None:
         now = datetime.now(timezone.utc)
-    return {}
+
+    written: dict[str, bool] = {}
+
+    # /legal/
+    legal_html = render_legal_page()
+    pre_existing = OUT_LEGAL.exists() and OUT_LEGAL.read_text(encoding="utf-8") == legal_html
+    write_atomic(OUT_LEGAL, legal_html)
+    written["legal"] = not pre_existing
+
+    return written
 
 
 def main() -> int:

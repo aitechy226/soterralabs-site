@@ -9,7 +9,30 @@
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
   <link rel="apple-touch-icon" href="/favicon.png" />
-  <style>
+
+  
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Legal — Soterra Labs" />
+  <meta property="og:description" content="Soterra Labs terms of service and privacy policy." />
+  <meta property="og:url" content="https://soterralabs.ai/legal/" />
+  <meta property="og:site_name" content="Soterra Labs" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Legal — Soterra Labs" />
+  <meta name="twitter:description" content="Soterra Labs terms of service and privacy policy." />
+
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Soterra Labs",
+    "legalName": "Soterra Labs LLC",
+    "url": "https://soterralabs.ai",
+    "logo": "https://soterralabs.ai/logo-lit-circle.svg"
+  }
+  </script>
+  
+<style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -163,20 +186,29 @@
       .nav-inner { height: 64px; }
       .logo img { height: 32px; }
     }
-  </style>
+
+</style>
+
 </head>
 <body>
 
-  <!-- NAV -->
-  <nav>
+  <nav class="site-nav">
     <div class="nav-inner">
       <a href="/" class="logo" aria-label="Soterra Labs home">
         <img src="/logo-lit-circle.svg" alt="Soterra Labs" />
       </a>
+      <ul class="nav-links">
+        <li><a href="/#services">Services</a></li>
+        <li><a href="/products">Products</a></li>
+        <li><a href="/#thinking">Thinking</a></li>
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
     </div>
   </nav>
 
   <main>
+    
 
     <div class="page-header">
       <div class="eyebrow">Soterra Labs LLC</div>
@@ -228,11 +260,13 @@
       </div>
     </section>
 
+
+
   </main>
 
-  <!-- FOOTER -->
-  <footer>
-    <p>&copy; 2026 <span>Soterra Labs</span> &mdash; From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&#8482;</sup></p>
+  <footer class="site-footer">
+    <p>&copy; 2026 <span>Soterra Labs</span> &mdash; From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&trade;</sup>
+<span class="footer-sep">&middot;</span><a href="/legal/" class="footer-link">Legal</a></p>
   </footer>
 
 </body>

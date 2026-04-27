@@ -1,0 +1,28 @@
+{#- Legal page template — Wave 4C.1 migration.
+    Extends the shared site base; injects the verbatim legal body from
+    render/site/content/legal_body.html (frozen by SHA-256 baseline at
+    render/site/harness/baselines/legal-body-sha256.txt).
+
+    Per Mara's pressure-test recommendation: the legal prose body is
+    NOT transformed by Jinja — passed through with `| safe` so HTML
+    entities, em-dashes, and clause structure render identically to
+    pre-migration. The chrome (head + nav + footer) updates to the
+    shared site standard, which adds the 5-item public nav + Legal
+    footer link. Those chrome additions are intentional per the Wave 4
+    consistency goal and explicitly not a regression.
+-#}
+{% extends "_base.html.j2" %}
+
+{% block title %}Legal — Soterra Labs{% endblock %}
+{% block description %}Soterra Labs terms of service and privacy policy.{% endblock %}
+{% block canonical %}https://soterralabs.ai/legal/{% endblock %}
+
+{% block style_link %}
+<style>
+{{ legal_inline_css | safe }}
+</style>
+{% endblock %}
+
+{% block content %}
+{{ legal_body | safe }}
+{% endblock %}
