@@ -1,0 +1,159 @@
+{
+  "formatVersion": "v1.0",
+  "publicationDate": "2026-04-26T00:00:00Z",
+  "products": {
+    "P5SKU48XL": {
+      "sku": "P5SKU48XL",
+      "productFamily": "Compute Instance",
+      "attributes": {
+        "instanceType": "p5.48xlarge",
+        "operatingSystem": "Linux",
+        "tenancy": "Shared",
+        "preInstalledSw": "NA",
+        "capacitystatus": "Used",
+        "regionCode": "us-east-1"
+      }
+    },
+    "P5SKU48XLWIN": {
+      "sku": "P5SKU48XLWIN",
+      "productFamily": "Compute Instance",
+      "attributes": {
+        "instanceType": "p5.48xlarge",
+        "operatingSystem": "Windows",
+        "tenancy": "Shared",
+        "preInstalledSw": "NA",
+        "regionCode": "us-east-1"
+      }
+    },
+    "P4DSKU24XL": {
+      "sku": "P4DSKU24XL",
+      "productFamily": "Compute Instance",
+      "attributes": {
+        "instanceType": "p4d.24xlarge",
+        "operatingSystem": "Linux",
+        "tenancy": "Shared",
+        "preInstalledSw": "NA",
+        "capacitystatus": "Used",
+        "regionCode": "us-east-1"
+      }
+    },
+    "P6FUTURESKU": {
+      "sku": "P6FUTURESKU",
+      "productFamily": "Compute Instance",
+      "attributes": {
+        "instanceType": "p6.48xlarge",
+        "operatingSystem": "Linux",
+        "tenancy": "Shared",
+        "preInstalledSw": "NA",
+        "capacitystatus": "Used",
+        "regionCode": "us-east-1"
+      }
+    },
+    "G6ESKU": {
+      "sku": "G6ESKU",
+      "productFamily": "Compute Instance",
+      "attributes": {
+        "instanceType": "g6e.xlarge",
+        "operatingSystem": "Linux",
+        "tenancy": "Shared",
+        "preInstalledSw": "NA",
+        "capacitystatus": "Used",
+        "regionCode": "us-east-1"
+      }
+    },
+    "M5SKU": {
+      "sku": "M5SKU",
+      "productFamily": "Compute Instance",
+      "attributes": {
+        "instanceType": "m5.4xlarge",
+        "operatingSystem": "Linux",
+        "tenancy": "Shared",
+        "preInstalledSw": "NA",
+        "regionCode": "us-east-1"
+      }
+    },
+    "P5DEDICATEDSKU": {
+      "sku": "P5DEDICATEDSKU",
+      "productFamily": "Compute Instance",
+      "attributes": {
+        "instanceType": "p5.48xlarge",
+        "operatingSystem": "Linux",
+        "tenancy": "Dedicated",
+        "preInstalledSw": "NA",
+        "regionCode": "us-east-1"
+      }
+    }
+  },
+  "terms": {
+    "OnDemand": {
+      "P5SKU48XL": {
+        "P5SKU48XL.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "P5SKU48XL",
+          "priceDimensions": {
+            "P5SKU48XL.JRTCKXETXF.6YS6EN2CT7": {
+              "rateCode": "P5SKU48XL.JRTCKXETXF.6YS6EN2CT7",
+              "description": "$98.32 per On Demand Linux p5.48xlarge Instance Hour",
+              "unit": "Hrs",
+              "pricePerUnit": {"USD": "98.3200000000"}
+            }
+          }
+        }
+      },
+      "P5SKU48XLWIN": {
+        "P5SKU48XLWIN.JRTCKXETXF": {
+          "priceDimensions": {
+            "P5SKU48XLWIN.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "120.50"}
+            }
+          }
+        }
+      },
+      "P4DSKU24XL": {
+        "P4DSKU24XL.JRTCKXETXF": {
+          "priceDimensions": {
+            "P4DSKU24XL.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "32.7726000000"}
+            }
+          }
+        }
+      },
+      "P6FUTURESKU": {
+        "P6FUTURESKU.JRTCKXETXF": {
+          "priceDimensions": {
+            "P6FUTURESKU.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "150.00"}
+            }
+          }
+        }
+      },
+      "G6ESKU": {
+        "G6ESKU.JRTCKXETXF": {
+          "priceDimensions": {
+            "G6ESKU.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "1.8610000000"}
+            }
+          }
+        }
+      },
+      "M5SKU": {
+        "M5SKU.JRTCKXETXF": {
+          "priceDimensions": {
+            "M5SKU.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "0.768"}
+            }
+          }
+        }
+      },
+      "P5DEDICATEDSKU": {
+        "P5DEDICATEDSKU.JRTCKXETXF": {
+          "priceDimensions": {
+            "P5DEDICATEDSKU.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "108.15"}
+            }
+          }
+        }
+      }
+    }
+  }
+}
