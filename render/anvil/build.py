@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import re
 import shutil
 import sqlite3
 import sys
@@ -347,6 +348,70 @@ def _accuracy_track_display(model: str) -> str:
     return "—"
 
 
+_VERSION_TAIL_RE = re.compile(r"\s+(?=v?\d)")
+
+# Substring-matched against MLCommons Software field — first hit wins.
+# Order matters: longer/more-specific names first so "TensorRT-LLM"
+# isn't shadowed by "TensorRT". Vendor-marketing engine names
+# ("Mango LLMBoost AI Enterprise Platform") get collapsed to a
+# scannable canonical short via this allowlist.
+_KNOWN_ENGINES: tuple[str, ...] = (
+    # Vendor-orchestration platforms first — they often wrap a common
+    # underlying engine (vLLM, etc.). MangoBoost LLMBoost contains
+    # 'vllm-0.9' as the engine it embeds; the buyer-relevant signal
+    # is the orchestration layer. Match orchestration first.
+    "LLMBoost",
+    "TheStageAI",
+    "shark-ai",
+    # Then specific-then-generic for engine SDKs (TensorRT-LLM is the
+    # LLM-tuned variant of TensorRT — longer/more-specific first so
+    # it doesn't get shadowed).
+    "TensorRT-LLM",
+    "TensorRT",
+    "vLLM",
+    "DeepSpeed",
+    "SGLang",
+    "MIGraphX",
+    "Triton Inference Server",
+    "Habana",
+    "ONNX Runtime",
+    "OpenVINO",
+    "PyTorch",
+)
+
+
+def _engine_short(software: str | None) -> str:
+    """Extract the inference engine name from MLCommons' verbose
+    `Software` field.
+
+    Strategy:
+      1. Substring-match against `_KNOWN_ENGINES` (longest-first
+         order) — first hit wins. Handles vendor-marketing names
+         like 'Mango LLMBoost AI Enterprise Platform' → 'LLMBoost'.
+      2. Fallback for unknown engines: take the first comma-
+         separated piece and strip a trailing version suffix.
+      3. Empty / None / em-dash → '—'.
+
+    Examples:
+      'vLLM 0.9.0.2.dev108'                    → 'vLLM'
+      'TensorRT-LLM v0.13'                     → 'TensorRT-LLM'
+      'Mango LLMBoost AI Enterprise Platform…' → 'LLMBoost'
+      'TheStageAI'                             → 'TheStageAI'
+      'Some Future Engine 1.2'                 → 'Some Future Engine'
+    """
+    if not software or not software.strip() or software == "—":
+        return "—"
+    haystack = software.lower()
+    for engine in _KNOWN_ENGINES:
+        if engine.lower() in haystack:
+            return engine
+    # Fallback for unrecognized engines.
+    first_piece = software.split(",")[0].strip()
+    if not first_piece:
+        return "—"
+    return _VERSION_TAIL_RE.split(first_piece, maxsplit=1)[0].strip() or "—"
+
+
 def _split_system_stack(raw_system: str) -> tuple[str, str]:
     """Split MLCommons `System` into (clean name, stack note).
 
@@ -375,7 +440,7 @@ def _row_to_mlperf_result(row: tuple, band: int) -> MlperfResult:
 
     Row positions: model, scenario, gpu, accelerator, accelerator_count,
                    submitter, system_name, metric, metric_value, accuracy,
-                   submission_url
+                   submission_url, software (json_extract from raw_row)
 
     `band` (0 or 1) alternates per GPU group for the zebra-shading the
     template renders — caller assigns it from chip-family index.
@@ -385,11 +450,13 @@ def _row_to_mlperf_result(row: tuple, band: int) -> MlperfResult:
         gpu_display_name(gpu_canonical) if gpu_canonical else accelerator
     )
     system_clean, stack = _split_system_stack(row[6])
+    software = row[11] if len(row) > 11 else None
     return MlperfResult(
         display_gpu=display_gpu,
         submitter=row[5],
         system_name=system_clean,
         stack=stack,
+        engine=_engine_short(software),
         accelerator_count=int(row[4]),
         metric_value=float(row[8]),
         accuracy=_accuracy_track_display(row[0]),
@@ -505,7 +572,8 @@ def build_mlperf_context(
     rows = conn.execute("""
         SELECT model, scenario, gpu, accelerator, accelerator_count,
                submitter, system_name, metric, metric_value, accuracy,
-               submission_url
+               submission_url,
+               json_extract(raw_row, '$.Software') AS software
           FROM mlperf_results
          WHERE round = ? AND quarantined = 0
          ORDER BY model, scenario, metric_value DESC

@@ -25,6 +25,7 @@ from render.anvil.build import (  # noqa: F401 — re-export
     TEMPLATES_DIR,
     THIS_DIR,
     _compute_style_version,
+    _engine_short,
     build,
     build_landing_context,
     build_mlperf_context,

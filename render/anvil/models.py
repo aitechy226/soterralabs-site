@@ -72,6 +72,7 @@ class MlperfResult(_Frozen):
     submitter: str
     system_name: str                    # PRE-COMPUTED: clean name, parens stripped
     stack: str                          # PRE-COMPUTED: parenthetical detail (topology + software) or '—'
+    engine: str                         # PRE-COMPUTED: short serving-engine name (TensorRT-LLM, vLLM, ...) or '—'
     accelerator_count: int
     metric_value: float
     accuracy: str                       # PRE-COMPUTED: actual value or '—' em-dash

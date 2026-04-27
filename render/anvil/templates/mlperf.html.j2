@@ -90,8 +90,9 @@
         The <strong>-99</strong> / <strong>-99.9</strong> suffix is the accuracy track (see below).
       </li>
       <li><strong>Server vs Offline</strong> &mdash; MLPerf's two scenario types. <strong>Server</strong> simulates real-time traffic with per-query latency limits (the system has to keep up with arriving requests). <strong>Offline</strong> is batch processing with no latency constraint &mdash; pure peak throughput. The same hardware will score differently on each.</li>
-      <li><strong>Stack</strong> &mdash; topology + serving-software stack the submitter used (e.g. <code>8x H200-SXM-141GB, TensorRT</code>). Throughput often differs more between stacks than between hardware variants of the same chip; the column is here so a buyer can spot whether a top result rode on a tuned proprietary stack (LLMBoost, vendor-internal) versus a common one (TensorRT, vLLM).</li>
-      <li><strong># Accelerators</strong> &mdash; how many GPU/AI chips the submitted system used. All throughput metrics below are for the whole system, not per chip.</li>
+      <li><strong>Stack</strong> &mdash; topology + memory layout the submitter used (e.g. <code>8x H200-SXM-141GB</code>, <code>4x8x MI300X-192GB</code>). Useful for spotting multi-node clusters and HBM variants; redundant with the GPU + #Accelerators columns for single-node submissions.</li>
+      <li><strong>Engine</strong> &mdash; the inference / serving software (TensorRT-LLM, vLLM, LLMBoost, etc.). Throughput often differs more between engines than between hardware variants of the same chip — a top result on LLMBoost or a vendor-internal stack means the buyer would need that same stack to reproduce. Pulled from MLCommons' Software field; version numbers stripped.</li>
+      <li><strong># Accelerators</strong> &mdash; total GPU/AI chips the submission used (per-node count &times; nodes). All throughput metrics below are for the whole system, not per chip.</li>
       <li><strong>Tokens/s, Samples/s, Queries/s</strong> &mdash; total system throughput. Higher is faster. Different workloads use different units (LLMs report tokens/s; image generation reports samples/s; classifiers report queries/s).</li>
       <li><strong>Accuracy: 99.0% vs 99.9%</strong> &mdash; MLPerf's two accuracy tiers per workload. Both mean the submission cleared a quality bar relative to a reference baseline; <strong>99.9%</strong> is the stricter "very-high-accuracy" track. This is <em>not</em> the model's absolute accuracy &mdash; it's which accuracy track the submitter chose.</li>
     </ul>
@@ -122,6 +123,7 @@
               <th>Submitter</th>
               <th>System</th>
               <th>Stack</th>
+              <th>Engine</th>
               <th class="num"># Accelerators</th>
               <th class="num">{{ w.metric_unit_display }}</th>
               <th class="num">Accuracy</th>
@@ -135,6 +137,7 @@
               <td>{{ r.submitter }}</td>
               <td>{{ r.system_name }}</td>
               <td class="stack-cell">{{ r.stack }}</td>
+              <td class="engine-cell">{{ r.engine }}</td>
               <td class="num">{{ r.accelerator_count }}</td>
               <td class="num">{{ "{:,.1f}".format(r.metric_value) }}</td>
               <td class="num">{{ r.accuracy }}</td>

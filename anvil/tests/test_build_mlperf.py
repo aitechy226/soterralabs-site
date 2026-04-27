@@ -253,6 +253,32 @@ def test_unmapped_gpu_rows_sort_last_in_workload(in_memory_mlperf_db) -> None:
 
 # ---- top-result display ----
 
+def test_engine_short_strips_version_suffix() -> None:
+    """The serving-engine column extracts a buyer-friendly engine
+    name from MLCommons' verbose Software field."""
+    fn = build._engine_short
+    assert fn("vLLM 0.9.0.2.dev108+g71faa1880.d20250730.rocm641, Pytorch 2.7.0") == "vLLM"
+    assert fn("TensorRT-LLM v0.13") == "TensorRT-LLM"
+    assert fn("TensorRT") == "TensorRT"
+    assert fn("PyTorch 2.7.0+gitf717b2a") == "PyTorch"
+
+
+def test_engine_short_handles_missing() -> None:
+    fn = build._engine_short
+    assert fn(None) == "—"
+    assert fn("") == "—"
+    assert fn("—") == "—"
+    assert fn("   ") == "—"
+
+
+def test_engine_short_preserves_multiword_no_version() -> None:
+    """Engines without a version are preserved whole. Lookahead
+    only fires before a digit / v-then-digit."""
+    fn = build._engine_short
+    assert fn("Triton Inference Server") == "Triton Inference Server"
+    assert fn("LLMBoost") == "LLMBoost"
+
+
 def test_system_paren_split_into_stack_column(in_memory_mlperf_db) -> None:
     """The MLCommons `System` field often packs topology + software
     stack into a parenthetical suffix. The pipeline splits these so

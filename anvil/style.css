@@ -391,6 +391,23 @@ main { padding: 0; }
   font-family: 'SF Mono', Menlo, Consolas, monospace;
   max-width: 280px;
 }
+/* Submitter + System: compact to match Stack's width footprint;
+   System names + submitter brands range up to ~30 chars and were
+   eating row real estate with default sizing. */
+.mlperf-table td:nth-child(2),
+.mlperf-table td:nth-child(3) {
+  font-size: 12px;
+  max-width: 200px;
+  word-break: break-word;
+}
+/* Engine: short pill of identifying tag — TensorRT, vLLM, LLMBoost. */
+.mlperf-table .engine-cell {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--teal-deep);
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  white-space: nowrap;
+}
 .pricing-table .source-link, .mlperf-table .submission-link {
   font-size: 11px;
   color: var(--gray-soft);
