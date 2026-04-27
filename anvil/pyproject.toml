@@ -23,15 +23,18 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["scripts", "render"]
+packages = ["scripts"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["."]
+# After Wave 4A, render/ moved to repo root. Tests need both:
+#   "."  → anvil/  (so `from scripts.foo` resolves)
+#   ".." → repo root  (so `from render.anvil.foo` resolves)
+pythonpath = [".", ".."]
 addopts = "-q --strict-markers"
 
 [tool.coverage.run]
-source = ["scripts", "render"]
+source = ["scripts", "../render/anvil"]
 omit = ["tests/*"]
 
 [tool.coverage.report]

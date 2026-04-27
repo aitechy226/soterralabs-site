@@ -1,0 +1,19 @@
+{#- Anvil-specific base template — extends the shared site base.
+    Sets the Anvil CSS path; section is set globally to "anvil" in
+    render/anvil/build.py make_jinja_env(), which makes the shared
+    base render the Reference dropdown.
+
+    Page-level templates (landing/pricing/mlperf) extend THIS template
+    via `{% extends "base.html.j2" %}`. The shared template layout
+    follows the FileSystemLoader's multi-path setup — Anvil templates
+    win on name collision because TEMPLATES_DIR comes first.
+-#}
+{% extends "_base.html.j2" %}
+
+{% block style_link %}
+  <link rel="stylesheet" href="/anvil/style.css?v={{ style_version }}" />
+{%- endblock %}
+
+{%- block title %}Soterra Labs Anvil{% endblock %}
+{%- block description %}Soterra Labs Anvil — free public reference data for AI infrastructure decisions.{% endblock %}
+{%- block canonical %}https://soterralabs.ai/anvil/{% endblock %}

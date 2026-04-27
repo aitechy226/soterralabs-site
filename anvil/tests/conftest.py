@@ -9,9 +9,13 @@ from pathlib import Path
 
 import pytest
 
-# Make `scripts` and `site` importable from tests without a package install
+# Make `scripts` (under anvil/) and `render.anvil` (under repo root) importable
+# from tests without a package install. Wave 4A relocated the renderer to
+# repo-root render/anvil/, so both paths must be on sys.path.
 ANVIL_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = ANVIL_ROOT.parent
 sys.path.insert(0, str(ANVIL_ROOT))
+sys.path.insert(0, str(REPO_ROOT))
 
 
 @pytest.fixture

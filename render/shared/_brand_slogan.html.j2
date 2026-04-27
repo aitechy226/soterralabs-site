@@ -1,0 +1,10 @@
+{#- Trademark-bearing slogan partial. Per Sri's `feedback_trademark_rules.md`:
+    every user-facing use of "From GPU to Revenue" MUST carry the TM mark.
+    This partial is the SSOT for the slogan; never copy the literal string.
+
+    Default rendering matches the existing footer treatment (small ™
+    superscript). Callers can override the styling by passing `tm_style`
+    if a larger/smaller TM is appropriate for the surrounding type.
+-#}
+{%- set tm_style = tm_style|default("font-size:0.6em; vertical-align:super;") -%}
+From GPU to Revenue<sup style="{{ tm_style }}">&trade;</sup>

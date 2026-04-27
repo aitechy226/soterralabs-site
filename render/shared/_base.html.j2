@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Soterra Labs{% endblock %}</title>
+  <meta name="description" content="{% block description %}Soterra Labs.{% endblock %}" />
+  <link rel="canonical" href="{% block canonical %}https://soterralabs.ai/{% endblock %}" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
+
+  {# Open Graph + Twitter Card — strong SEO signal for shares + crawlers #}
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}" />
+  <meta property="og:title" content="{% block og_title %}{{ self.title() }}{% endblock %}" />
+  <meta property="og:description" content="{% block og_description %}{{ self.description() }}{% endblock %}" />
+  <meta property="og:url" content="{{ self.canonical() }}" />
+  <meta property="og:site_name" content="Soterra Labs" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{{ self.og_title() }}" />
+  <meta name="twitter:description" content="{{ self.og_description() }}" />
+
+  {# Schema.org — Organization once site-wide, page-specific structured data per template #}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Soterra Labs",
+    "legalName": "Soterra Labs LLC",
+    "url": "https://soterralabs.ai",
+    "logo": "https://soterralabs.ai/logo-lit-circle.svg"
+  }
+  </script>
+  {% block extra_schema %}{% endblock %}
+
+  {%- block style_link %}{% endblock %}
+</head>
+<body{% if body_class %} class="{{ body_class }}"{% endif %}{% if active_nav %} data-active-nav="{{ active_nav }}"{% endif %}>
+
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a href="/" class="logo" aria-label="Soterra Labs home">
+        <img src="/logo-lit-circle.svg" alt="Soterra Labs" />
+      </a>
+      <ul class="nav-links">
+        <li><a href="/#services">Services</a></li>
+        <li><a href="/products">Products</a></li>
+        {%- if section == "anvil" %}
+        <li class="has-children">
+          <a href="/anvil/" {% if active_nav == 'reference' %}class="active"{% endif %}>Reference</a>
+          <ul class="dropdown">
+            <li><a href="/anvil/pricing">Cloud GPU Pricing</a></li>
+            {%- if mlperf_ready %}
+            <li><a href="/anvil/mlperf">MLPerf Inference Results</a></li>
+            {%- endif %}
+          </ul>
+        </li>
+        {%- endif %}
+        <li><a href="/#thinking">Thinking</a></li>
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 <span>Soterra Labs</span> &mdash; {% include "_brand_slogan.html.j2" %}<span class="footer-sep">&middot;</span><a href="/legal/" class="footer-link">Legal</a></p>
+  </footer>
+
+</body>
+</html>

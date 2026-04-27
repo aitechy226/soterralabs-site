@@ -59,7 +59,9 @@ def test_compute_style_version_changes_on_one_byte_css_change(
     css_a.write_text("body { color: red; }\n")
     css_b.write_text("body { color: red; }")  # one-byte change: trailing newline removed
 
-    import render.build as build_module
+    # Patch the canonical module — _compute_style_version reads STYLE_CSS
+    # from render.anvil.build's namespace, not the back-compat shim's.
+    import render.anvil.build as build_module
     monkeypatch.setattr(build_module, "STYLE_CSS", css_a)
     hash_a = _compute_style_version()
 
@@ -83,7 +85,7 @@ def test_compute_style_version_matches_sha256_first_8_hex(
 
     expected = hashlib.sha256(content).hexdigest()[:8]
 
-    import render.build as build_module
+    import render.anvil.build as build_module
     monkeypatch.setattr(build_module, "STYLE_CSS", css)
     assert _compute_style_version() == expected
 
