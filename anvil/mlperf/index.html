@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MLPerf Inference Results — Soterra Labs Anvil</title>
+  <meta name="description" content="Latest MLPerf Inference Datacenter results, filtered to common workloads. Every row links to its official MLCommons submission." />
+  <link rel="canonical" href="https://soterralabs.ai/anvil/mlperf" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
+
+  
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="MLPerf Inference Results — Soterra Labs Anvil" />
+  <meta property="og:description" content="Latest MLPerf Inference Datacenter results, filtered to common workloads. Every row links to its official MLCommons submission." />
+  <meta property="og:url" content="https://soterralabs.ai/anvil/mlperf" />
+  <meta property="og:site_name" content="Soterra Labs" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="MLPerf Inference Results — Soterra Labs Anvil" />
+  <meta name="twitter:description" content="Latest MLPerf Inference Datacenter results, filtered to common workloads. Every row links to its official MLCommons submission." />
+
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Soterra Labs",
+    "legalName": "Soterra Labs LLC",
+    "url": "https://soterralabs.ai",
+    "logo": "https://soterralabs.ai/logo-lit-circle.svg"
+  }
+  </script>
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "MLPerf Inference Results",
+  "description": "Latest schema-audited MLPerf Inference Datacenter results, filtered to common workloads.",
+  "url": "https://soterralabs.ai/anvil/mlperf",
+  "dateModified": "2026-04-27T20:27:57.145184+00:00",
+  "publisher": {"@type": "Organization", "name": "Soterra Labs"}
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "MLPerf Inference Results — Soterra Labs Anvil",
+  "description": "Weekly snapshot of public MLPerf Inference Datacenter submission results.",
+  "url": "https://soterralabs.ai/anvil/mlperf",
+  "creator": {"@type": "Organization", "name": "Soterra Labs"},
+  "license": "https://soterralabs.ai/legal/",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-04-27T20:27:57.145184+00:00",
+  "keywords": "MLPerf, MLPerf Inference, MLCommons benchmarks, llama2, mixtral, stable diffusion, BERT, gpt-j, H100, H200, B200, MI300X"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://soterralabs.ai/"},
+    {"@type": "ListItem", "position": 2, "name": "Reference", "item": "https://soterralabs.ai/anvil/"},
+    {"@type": "ListItem", "position": 3, "name": "MLPerf Inference Results", "item": "https://soterralabs.ai/anvil/mlperf"}
+  ]
+}
+</script>
+
+  <link rel="stylesheet" href="/anvil/style.css?v=3e48260d" />
+</head>
+<body data-active-nav="reference">
+
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a href="/" class="logo" aria-label="Soterra Labs home">
+        <img src="/logo-lit-circle.svg" alt="Soterra Labs" />
+      </a>
+      <ul class="nav-links">
+        <li><a href="/#services">Services</a></li>
+        <li><a href="/products">Products</a></li>
+        <li class="has-children">
+          <a href="/anvil/" class="active">Reference</a>
+          <ul class="dropdown">
+            <li><a href="/anvil/pricing">Cloud GPU Pricing</a></li>
+            <li><a href="/anvil/mlperf">MLPerf Inference Results</a></li>
+          </ul>
+        </li>
+        <li><a href="/#thinking">Thinking</a></li>
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="eyebrow">Soterra Labs Anvil &middot; MLPerf Results</div>
+    <h1>MLPerf Inference Results <span class="round-tag">Round v5.1</span></h1>
+    <p class="lead">
+      Published MLPerf Inference Datacenter results for common workloads, sourced from MLCommons. Every row links to the official submission detail page.
+    </p>
+    <p class="round-published">
+      Round published: <time datetime="2025-09-09">September 9, 2025</time>
+    </p>
+    
+    <p class="freshness">
+      Ingested: <time datetime="2026-04-27T20:27:57.145184+00:00">April 27, 2026 at 20:27 UTC</time>
+      <span class="muted">(8 minutes ago)</span>
+    </p>
+    
+  </div>
+</div>
+
+<div class="body-section">
+
+  
+
+  <p class="caveat">
+    <strong>About these numbers.</strong> MLPerf submissions are tuned by vendors for the benchmark and run on highly optimized configurations &mdash; specific batch sizes, quantization choices, and serving stacks selected to maximize the metric. Production workloads with different traffic patterns, accuracy requirements, or stack constraints will measure differently. Use these results to compare systems against each other on a common task, not to size capacity for your own deployment.
+  </p>
+
+  <div class="info-card">
+    <h3>How to read these tables</h3>
+    <ul>
+      <li><strong>Workloads</strong> &mdash;
+        <strong>llama2-70b-99</strong> (Meta Llama 2 70B chat),
+        <strong>llama3.1-405b</strong> (Meta Llama 3.1 405B &mdash; the largest tracked model),
+        <strong>mixtral-8x7b</strong> (Mistral Mixtral mixture-of-experts),
+        <strong>stable-diffusion-xl</strong> (text-to-image),
+        <strong>bert-99</strong> (BERT-Large encoder for text classification),
+        <strong>gptj-99</strong> (GPT-J 6B text generation).
+        The <strong>-99</strong> / <strong>-99.9</strong> suffix is the accuracy track (see below).
+      </li>
+      <li><strong>Server vs Offline</strong> &mdash; MLPerf's two scenario types. <strong>Server</strong> simulates real-time traffic with per-query latency limits (the system has to keep up with arriving requests). <strong>Offline</strong> is batch processing with no latency constraint &mdash; pure peak throughput. The same hardware will score differently on each.</li>
+      <li><strong># Accelerators</strong> &mdash; how many GPU/AI chips the submitted system used. All throughput metrics below are for the whole system, not per chip.</li>
+      <li><strong>Tokens/s, Samples/s, Queries/s</strong> &mdash; total system throughput. Higher is faster. Different workloads use different units (LLMs report tokens/s; image generation reports samples/s; classifiers report queries/s).</li>
+      <li><strong>Accuracy: 99.0% vs 99.9%</strong> &mdash; MLPerf's two accuracy tiers per workload. Both mean the submission cleared a quality bar relative to a reference baseline; <strong>99.9%</strong> is the stricter "very-high-accuracy" track. This is <em>not</em> the model's absolute accuracy &mdash; it's which accuracy track the submitter chose.</li>
+    </ul>
+  </div>
+
+  
+  <nav class="anchor-nav workloads" aria-label="Jump to workload">
+    <span class="label">Jump to:</span>
+    
+    <a href="#bert-99-server">bert-99 — Server</a>
+    
+    <a href="#gptj-99-offline">gptj-99 — Offline</a>
+    
+    <a href="#llama2-70b-99-offline">llama2-70b-99 — Offline</a>
+    
+    <a href="#llama2-70b-99-server">llama2-70b-99 — Server</a>
+    
+    <a href="#llama3-1-405b-server">llama3.1-405b — Server</a>
+    
+    <a href="#mixtral-8x7b-server">mixtral-8x7b — Server</a>
+    
+    <a href="#stable-diffusion-xl-offline">stable-diffusion-xl — Offline</a>
+    
+  </nav>
+
+  <p class="scroll-hint">Scroll table sideways to see all columns &rarr;</p>
+
+  
+  <details class="workload" id="bert-99-server" open>
+    <summary>
+      <span class="wl-name">bert-99 — Server</span>
+      <span class="wl-meta">2 submissions <span class="top">&middot; top: 142,000 q/s (NVIDIA 8× H200)</span></span>
+    </summary>
+    <div class="wl-body">
+      <div class="table-scroll">
+        <table class="mlperf-table">
+          <thead>
+            <tr>
+              <th>GPU</th>
+              <th>Submitter</th>
+              <th>System</th>
+              <th class="num"># Accelerators</th>
+              <th class="num">Queries/s</th>
+              <th class="num">Accuracy</th>
+              <th>Submission</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>NVIDIA</td>
+              <td>DGX H200</td>
+              <td class="num">8</td>
+              <td class="num">142,000.0</td>
+              <td class="num">99%</td>
+              <td><a href="https://github.com/mlcommons/inference_results_v5.1" class="submission-link" rel="nofollow noopener">[link]</a></td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">Intel Gaudi 3</td>
+              <td>Intel</td>
+              <td>Habana Gaudi3 8-way</td>
+              <td class="num">8</td>
+              <td class="num">86,500.0</td>
+              <td class="num">99%</td>
+              <td><a href="https://github.com/mlcommons/inference_results_v5.1" class="submission-link" rel="nofollow noopener">[link]</a></td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+  
+  <details class="workload" id="gptj-99-offline">
+    <summary>
+      <span class="wl-name">gptj-99 — Offline</span>
+      <span class="wl-meta">1 submissions <span class="top">&middot; top: 2,840 smp/s (Supermicro 8× H100)</span></span>
+    </summary>
+    <div class="wl-body">
+      <div class="table-scroll">
+        <table class="mlperf-table">
+          <thead>
+            <tr>
+              <th>GPU</th>
+              <th>Submitter</th>
+              <th>System</th>
+              <th class="num"># Accelerators</th>
+              <th class="num">Samples/s</th>
+              <th class="num">Accuracy</th>
+              <th>Submission</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H100</td>
+              <td>Supermicro</td>
+              <td>AS-4125GS-TNRT</td>
+              <td class="num">8</td>
+              <td class="num">2,840.0</td>
+              <td class="num">99%</td>
+              <td><a href="https://github.com/mlcommons/inference_results_v5.1" class="submission-link" rel="nofollow noopener">[link]</a></td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+  
+  <details class="workload" id="llama2-70b-99-offline">
+    <summary>
+      <span class="wl-name">llama2-70b-99 — Offline</span>
+      <span class="wl-meta">3 submissions <span class="top">&middot; top: 94,300 tok/s (NVIDIA 8× B200)</span></span>
+    </summary>
+    <div class="wl-body">
+      <div class="table-scroll">
+        <table class="mlperf-table">
+          <thead>
+            <tr>
+              <th>GPU</th>
+              <th>Submitter</th>
+              <th>System</th>
+              <th class="num"># Accelerators</th>
+              <th class="num">Tokens/s</th>
+              <th class="num">Accuracy</th>
+              <th>Submission</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>NVIDIA</td>
+              <td>DGX B200</td>
+              <td class="num">8</td>
+              <td class="num">94,300.0</td>
+              <td class="num">99%</td>
+              <td><a href="https://github.com/mlcommons/inference_results_v5.1" class="submission-link" rel="nofollow noopener">[link]</a></td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>HPE</td>
+              <td>ProLiant XD685</td>
+              <td class="num">8</td>
+              <td class="num">41,200.0</td>
+              <td class="num">99%</td>
+              <td><a href="https://github.com/mlcommons/inference_results_v5.1" class="submission-link" rel="nofollow noopener">[link]</a></td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H100</td>
+              <td>Lenovo</td>
+              <td>ThinkSystem SR675 V3</td>
+              <td class="num">8</td>
+              <td class="num">34,500.0</td>
+              <td class="num">99%</td>
+              <td><a href="https://github.com/mlcommons/inference_results_v5.1" class="submission-link" rel="nofollow noopener">[link]</a></td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+  
+  <details class="workload" id="llama2-70b-99-server">
+    <summary>
+      <span class="wl-name">llama2-70b-99 — Server</span>
+      <span class="wl-meta">4 submissions <span class="top">&middot; top: 58,400 tok/s (NVIDIA 8× B200)</span></span>
+    </summary>
+    <div class="wl-body">
+      <div class="table-scroll">
+        <table class="mlperf-table">
+          <thead>
+            <tr>
+              <th>GPU</th>
+              <th>Submitter</th>
+              <th>System</th>
+              <th class="num"># Accelerators</th>
+              <th class="num">Tokens/s</th>
+              <th class="num">Accuracy</th>
+              <th>Submission</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>NVIDIA</td>
+              <td>DGX B200</td>
+              <td class="num">8</td>
+              <td class="num">58,400.0</td>
+              <td class="num">99%</td>
+              <td><a href="https://github.com/mlcommons/inference_results_v5.1" class="submission-link" rel="nofollow noopener">[link]</a></td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Dell</td>
+              <td>PowerEdge XE9680</td>
+              <td class="num">8</td>
+              <td class="num">34,800.0</td>
+              <td class="num">99%</td>
+              <td><a href="https://github.com/mlcommons/inference_results_v5.1" class="submission-link" rel="nofollow noopener">[link]</a></td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H100</td>
+              <td>Supermicro</td>
+              <td>SYS-821GE-TNHR</td>
+              <td class="num">8</td>
+              <td class="num">22,900.0</td>
+              <td class="num">99%</td>
+              <td><a href="https://github.com/mlcommons/inference_results_v5.1" class="submission-link" rel="nofollow noopener">[link]</a></td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI300X</td>
+              <td>AMD</td>
+              <td>MI300X 8-way</td>
+              <td class="num">8</td>
+              <td class="num">18,700.0</td>
+              <td class="num">99%</td>
+              <td><a href="https://github.com/mlcommons/inference_results_v5.1" class="submission-link" rel="nofollow noopener">[link]</a></td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+  
+  <details class="workload" id="llama3-1-405b-server">
+    <summary>
+      <span class="wl-name">llama3.1-405b — Server</span>
+      <span class="wl-meta">2 submissions <span class="top">&middot; top: 14,200 tok/s (NVIDIA 72× GB200)</span></span>
+    </summary>
+    <div class="wl-body">
+      <div class="table-scroll">
+        <table class="mlperf-table">
+          <thead>
+            <tr>
+              <th>GPU</th>
+              <th>Submitter</th>
+              <th>System</th>
+              <th class="num"># Accelerators</th>
+              <th class="num">Tokens/s</th>
+              <th class="num">Accuracy</th>
+              <th>Submission</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell GB200</td>
+              <td>NVIDIA</td>
+              <td>GB200 NVL72</td>
+              <td class="num">72</td>
+              <td class="num">14,200.0</td>
+              <td class="num">99%</td>
+              <td><a href="https://github.com/mlcommons/inference_results_v5.1" class="submission-link" rel="nofollow noopener">[link]</a></td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Dell</td>
+              <td>PowerEdge XE9712</td>
+              <td class="num">8</td>
+              <td class="num">2,140.0</td>
+              <td class="num">99%</td>
+              <td><a href="https://github.com/mlcommons/inference_results_v5.1" class="submission-link" rel="nofollow noopener">[link]</a></td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+  
+  <details class="workload" id="mixtral-8x7b-server">
+    <summary>
+      <span class="wl-name">mixtral-8x7b — Server</span>
+      <span class="wl-meta">2 submissions <span class="top">&middot; top: 71,500 tok/s (NVIDIA 8× H200)</span></span>
+    </summary>
+    <div class="wl-body">
+      <div class="table-scroll">
+        <table class="mlperf-table">
+          <thead>
+            <tr>
+              <th>GPU</th>
+              <th>Submitter</th>
+              <th>System</th>
+              <th class="num"># Accelerators</th>
+              <th class="num">Tokens/s</th>
+              <th class="num">Accuracy</th>
+              <th>Submission</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>NVIDIA</td>
+              <td>DGX H200</td>
+              <td class="num">8</td>
+              <td class="num">71,500.0</td>
+              <td class="num">99%</td>
+              <td><a href="https://github.com/mlcommons/inference_results_v5.1" class="submission-link" rel="nofollow noopener">[link]</a></td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H100</td>
+              <td>Supermicro</td>
+              <td>AS-8125GS-TNHR</td>
+              <td class="num">8</td>
+              <td class="num">49,800.0</td>
+              <td class="num">99%</td>
+              <td><a href="https://github.com/mlcommons/inference_results_v5.1" class="submission-link" rel="nofollow noopener">[link]</a></td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+  
+  <details class="workload" id="stable-diffusion-xl-offline">
+    <summary>
+      <span class="wl-name">stable-diffusion-xl — Offline</span>
+      <span class="wl-meta">2 submissions <span class="top">&middot; top: 28 smp/s (ASUSTeK 8× H200)</span></span>
+    </summary>
+    <div class="wl-body">
+      <div class="table-scroll">
+        <table class="mlperf-table">
+          <thead>
+            <tr>
+              <th>GPU</th>
+              <th>Submitter</th>
+              <th>System</th>
+              <th class="num"># Accelerators</th>
+              <th class="num">Samples/s</th>
+              <th class="num">Accuracy</th>
+              <th>Submission</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>ASUSTeK</td>
+              <td>ESC-N8-E11</td>
+              <td class="num">8</td>
+              <td class="num">27.8</td>
+              <td class="num">99%</td>
+              <td><a href="https://github.com/mlcommons/inference_results_v5.1" class="submission-link" rel="nofollow noopener">[link]</a></td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H100</td>
+              <td>NVIDIA</td>
+              <td>DGX H100</td>
+              <td class="num">8</td>
+              <td class="num">21.4</td>
+              <td class="num">99%</td>
+              <td><a href="https://github.com/mlcommons/inference_results_v5.1" class="submission-link" rel="nofollow noopener">[link]</a></td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+  
+  
+
+  <footer class="methodology">
+    <h2>How this page is built</h2>
+    <p>
+      Rebuilt weekly from MLCommons-published CSVs. No human edits results on this page. New rounds appear after a one-time schema check by Soterra Labs to confirm the source columns have not changed; this typically takes a few days after MLCommons publishes. For current cloud GPU pricing, see <a href="/anvil/pricing">our pricing tracker</a>.
+    </p>
+    <p class="footer-disclaimer">
+      MLPerf and MLCommons are trademarks of MLCommons. Soterra Labs is not affiliated with MLCommons. Results are reproduced from public MLCommons publications; refer to the linked submission pages for full system configuration. Soterra Labs has no commercial relationship with NVIDIA, AMD, Intel, or any submitter shown. See <a href="/legal/" target="_blank" rel="noopener">Terms</a>.
+    </p>
+  </footer>
+
+  <div class="soterra-attribution">
+    Built and maintained by <strong>Soterra Labs</strong> &mdash; From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&trade;</sup>. We help vendors and enterprises make defensible GPU infrastructure decisions. See our <a href="/products">products</a> or <a href="/thinking/">recent thinking</a>.
+  </div>
+
+</div>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 <span>Soterra Labs</span> &mdash; From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&trade;</sup>
+<span class="footer-sep">&middot;</span><a href="/legal/" class="footer-link">Legal</a></p>
+  </footer>
+
+</body>
+</html>

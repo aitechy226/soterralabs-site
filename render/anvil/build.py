@@ -29,15 +29,23 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import yaml
 from jinja2 import Environment, FileSystemLoader
 
-from anvil.scripts._constants import STALE_THRESHOLD_HOURS, TIMESTAMP_DISPLAY_FORMAT
+from anvil.scripts._constants import (
+    STALE_ROUND_MONTHS,
+    STALE_THRESHOLD_HOURS,
+    TIMESTAMP_DISPLAY_FORMAT,
+)
 from render.anvil.models import (
     AssetCard,
     GpuGroup,
     LandingContext,
+    MlperfContext,
+    MlperfResult,
     PricingContext,
     Quote,
+    Workload,
 )
 
 # Path anchors after the Wave 4A package move:
@@ -52,6 +60,7 @@ SHARED_TEMPLATES_DIR = REPO_ROOT / "render" / "shared"
 STYLE_CSS = THIS_DIR / "style.css"
 PRICING_DB = ANVIL_ROOT / "data" / "pricing.sqlite"
 MLPERF_DB = ANVIL_ROOT / "data" / "mlperf.sqlite"
+MLPERF_ROUNDS_YAML = ANVIL_ROOT / "scripts" / "mlperf_rounds.yaml"
 
 # Output paths (committed to repo per D2)
 OUT_LANDING = REPO_ROOT / "anvil" / "index.html"
@@ -106,6 +115,53 @@ def format_relative_age(age_hours: float) -> str:
         return f"{hours} hours ago" if hours != 1 else "1 hour ago"
     days = int(age_hours / 24)
     return f"{days} days ago" if days != 1 else "1 day ago"
+
+
+# ---- MLPerf display helpers ----
+
+_METRIC_UNIT_DISPLAY: dict[str, str] = {
+    "tokens_per_second":  "Tokens/s",
+    "samples_per_second": "Samples/s",
+    "queries_per_second": "Queries/s",
+}
+
+_METRIC_UNIT_SHORT: dict[str, str] = {
+    "tokens_per_second":  "tok/s",
+    "samples_per_second": "smp/s",
+    "queries_per_second": "q/s",
+}
+
+_GPU_SHORT_NAMES: dict[str, str] = {
+    "nvidia-hopper-h100":      "H100",
+    "nvidia-hopper-h200":      "H200",
+    "nvidia-blackwell-b200":   "B200",
+    "nvidia-blackwell-b100":   "B100",
+    "nvidia-blackwell-gb200":  "GB200",
+    "nvidia-ampere-a100":      "A100",
+    "nvidia-ada-l40s":         "L40S",
+    "nvidia-ada-l4":           "L4",
+    "amd-cdna3-mi300x":        "MI300X",
+    "amd-cdna3-mi325x":        "MI325X",
+    "intel-habana-gaudi3":     "Gaudi 3",
+}
+
+
+def metric_unit_display(metric: str) -> str:
+    """'tokens_per_second' → 'Tokens/s'. Falls back to raw on miss."""
+    return _METRIC_UNIT_DISPLAY.get(metric, metric)
+
+
+def metric_unit_short(metric: str) -> str:
+    """'tokens_per_second' → 'tok/s'. Used in workload <summary> meta."""
+    return _METRIC_UNIT_SHORT.get(metric, metric)
+
+
+def gpu_short_name(canonical_id: str | None) -> str:
+    """Compact form for inline use ('B200' vs 'NVIDIA Blackwell B200').
+    Falls back to canonical id when unknown — never empty."""
+    if not canonical_id:
+        return "?"
+    return _GPU_SHORT_NAMES.get(canonical_id, canonical_id)
 
 
 # ---- Pricing context builder ----
@@ -184,6 +240,176 @@ def build_pricing_context(conn: sqlite3.Connection, now: datetime) -> PricingCon
         is_stale=is_stale,
         age_hours=age_hours,
         gpu_groups=gpu_groups,
+    )
+
+
+# ---- MLPerf context builder ----
+
+def _load_rounds_registry() -> dict[str, str]:
+    """Return {round_id: published_at_iso} from mlperf_rounds.yaml.
+    Empty dict if YAML missing — caller falls back to a derivable date."""
+    if not MLPERF_ROUNDS_YAML.exists():
+        return {}
+    data = yaml.safe_load(MLPERF_ROUNDS_YAML.read_text(encoding="utf-8"))
+    return {r["id"]: r["published_at"] for r in data.get("rounds", [])}
+
+
+def _parse_round_id(round_id: str) -> tuple[int, ...]:
+    """'v5.1' → (5, 1); 'v5.10' → (5, 10); 'v5' → (5,).
+
+    Used as the sort key when picking the newest round in the DB.
+    SQL `ORDER BY round DESC` is lexicographic — `'v5.10' < 'v5.9'` by
+    text collation — so sorting must happen in Python after fetching
+    distinct round ids.
+    """
+    parts = round_id.lstrip("v").split(".")
+    return tuple(int(p) for p in parts)
+
+
+def _format_date_long(iso_date: str) -> str:
+    """'2025-09-09' → 'September 9, 2025'. No `%-d` (musl-safe)."""
+    d = datetime.strptime(iso_date, "%Y-%m-%d")
+    return f"{d.strftime('%B')} {d.day}, {d.year}"
+
+
+def _workload_anchor(model: str, scenario: str) -> str:
+    """URL-safe slug e.g. 'llama2-70b-99-server'."""
+    return f"{model}-{scenario.lower()}".replace(".", "-").replace("/", "-")
+
+
+def _round_freshness(
+    now: datetime, latest_round: str, fetched_at_iso: str,
+) -> tuple[bool, str, str]:
+    """Return (is_round_stale, published_at_iso, published_at_display).
+    Stale = months since round published > STALE_ROUND_MONTHS."""
+    rounds_published = _load_rounds_registry()
+    published_iso = rounds_published.get(latest_round, fetched_at_iso[:10])
+    pub_dt = datetime.strptime(published_iso, "%Y-%m-%d").replace(
+        tzinfo=timezone.utc
+    )
+    months_since = (now - pub_dt).days / 30.0
+    return (
+        months_since > STALE_ROUND_MONTHS,
+        published_iso,
+        _format_date_long(published_iso),
+    )
+
+
+def _row_to_mlperf_result(row: tuple) -> MlperfResult:
+    """Map a DB row to a typed MlperfResult.
+
+    Row positions: model, scenario, gpu, accelerator, accelerator_count,
+                   submitter, system_name, metric, metric_value, accuracy,
+                   submission_url
+    """
+    gpu_canonical, accelerator = row[2], row[3]
+    display_gpu = (
+        gpu_display_name(gpu_canonical) if gpu_canonical else accelerator
+    )
+    accuracy_raw = row[9]
+    return MlperfResult(
+        display_gpu=display_gpu,
+        submitter=row[5],
+        system_name=row[6],
+        accelerator_count=int(row[4]),
+        metric_value=float(row[8]),
+        accuracy=accuracy_raw if accuracy_raw else "—",
+        submission_url=row[10],
+    )
+
+
+def _top_result_display(top_row: tuple, metric: str) -> str:
+    """'top: 14,200 tok/s (NVIDIA 8× B200)'. Built from highest
+    metric_value row; metric short string is the unit suffix."""
+    return (
+        f"top: {float(top_row[8]):,.0f} {metric_unit_short(metric)} "
+        f"({top_row[5]} {int(top_row[4])}× {gpu_short_name(top_row[2])})"
+    )
+
+
+def _build_workload(
+    idx: int, model: str, scenario: str, rows: list[tuple], metric: str,
+) -> Workload:
+    """Assemble one Workload from the per-(model, scenario) DB rows.
+    `rows` MUST be sorted DESC by metric_value upstream."""
+    return Workload(
+        model=model,
+        scenario=scenario,
+        anchor_id=_workload_anchor(model, scenario),
+        display_label=f"{model} — {scenario}",
+        metric_unit_display=metric_unit_display(metric),
+        submission_count=len(rows),
+        top_result_display=_top_result_display(rows[0], metric),
+        is_open_by_default=(idx == 0),
+        results=tuple(_row_to_mlperf_result(r) for r in rows),
+    )
+
+
+def build_mlperf_context(
+    conn: sqlite3.Connection, now: datetime,
+) -> MlperfContext | None:
+    """Return typed MlperfContext for the latest round in the DB.
+
+    Returns None when no non-quarantined rows exist — caller skips
+    rendering /anvil/mlperf/index.html and the landing-page card stays
+    in 'Coming soon' state.
+    """
+    distinct_rounds = [
+        row[0] for row in conn.execute(
+            "SELECT DISTINCT round FROM mlperf_results WHERE quarantined = 0"
+        ).fetchall()
+    ]
+    if not distinct_rounds:
+        return None
+    # Pick the newest round by parsed semver tuple — NOT lexicographic.
+    # 'v5.10' must outrank 'v5.9'; SQLite text sort gets this wrong.
+    latest_round = max(distinct_rounds, key=_parse_round_id)
+    fetched_at_iso = conn.execute(
+        "SELECT MAX(fetched_at) FROM mlperf_results "
+        "WHERE round = ? AND quarantined = 0",
+        (latest_round,),
+    ).fetchone()[0]
+
+    fetched_dt = datetime.fromisoformat(fetched_at_iso.replace("Z", "+00:00"))
+    if fetched_dt.tzinfo is None:
+        fetched_dt = fetched_dt.replace(tzinfo=timezone.utc)
+    age_hours = (now - fetched_dt).total_seconds() / 3600
+
+    is_round_stale, published_iso, published_display = _round_freshness(
+        now, latest_round, fetched_at_iso,
+    )
+
+    rows = conn.execute("""
+        SELECT model, scenario, gpu, accelerator, accelerator_count,
+               submitter, system_name, metric, metric_value, accuracy,
+               submission_url
+          FROM mlperf_results
+         WHERE round = ? AND quarantined = 0
+         ORDER BY model, scenario, metric_value DESC
+    """, (latest_round,)).fetchall()
+
+    groups: dict[tuple[str, str], list[tuple]] = {}
+    metric_per_group: dict[tuple[str, str], str] = {}
+    for r in rows:
+        key = (r[0], r[1])
+        groups.setdefault(key, []).append(r)
+        metric_per_group.setdefault(key, r[7])
+
+    workloads = tuple(
+        _build_workload(idx, model, scenario, groups[(model, scenario)],
+                        metric_per_group[(model, scenario)])
+        for idx, (model, scenario) in enumerate(sorted(groups.keys()))
+    )
+
+    return MlperfContext(
+        latest_round=latest_round,
+        round_published_at_iso=published_iso,
+        round_published_at_display=published_display,
+        fetched_at_iso=fetched_at_iso,
+        fetched_at_display=format_timestamp_display(fetched_at_iso),
+        relative_age_display=format_relative_age(age_hours),
+        is_round_stale=is_round_stale,
+        workloads=workloads,
     )
 
 
@@ -317,7 +543,6 @@ def build(now: datetime | None = None) -> dict[str, bool]:
     """
     if now is None:
         now = datetime.now(timezone.utc)
-    env = make_jinja_env()
     written: dict[str, bool] = {}
 
     # Pricing
@@ -328,28 +553,44 @@ def build(now: datetime | None = None) -> dict[str, bool]:
             pricing_ctx = build_pricing_context(conn, now)
         finally:
             conn.close()
-        if pricing_ctx and pricing_ctx.gpu_groups:
-            html = render_pricing_page(env, pricing_ctx)
-            write_atomic(OUT_PRICING, html)
-            written["pricing"] = True
-        else:
-            written["pricing"] = False  # DB exists but no rows
-    else:
-        written["pricing"] = False  # DB doesn't exist yet
 
-    # MLPerf — Wave 2 hook. Render only when DB exists with rows.
-    # For now (Wave 1), we don't render mlperf.html.
-    mlperf_ready = False
-    mlperf_round = None
-    mlperf_relative_age = None
-    written["mlperf"] = False
+    # MLPerf — read mlperf.sqlite when present; render only when rows exist
+    mlperf_ctx: MlperfContext | None = None
+    if MLPERF_DB.exists():
+        conn = sqlite3.connect(str(MLPERF_DB))
+        try:
+            mlperf_ctx = build_mlperf_context(conn, now)
+        finally:
+            conn.close()
+
+    # mlperf_ready drives the conditional `Reference > MLPerf` nav link
+    # in the shared base + the landing-page card state. The Jinja env
+    # is built AFTER both DB reads so this flag is correct at render time.
+    mlperf_ready = mlperf_ctx is not None and bool(mlperf_ctx.workloads)
+    env = make_jinja_env(mlperf_ready=mlperf_ready)
+
+    if pricing_ctx and pricing_ctx.gpu_groups:
+        html = render_pricing_page(env, pricing_ctx)
+        write_atomic(OUT_PRICING, html)
+        written["pricing"] = True
+    else:
+        written["pricing"] = False
+
+    if mlperf_ready:
+        html = render_mlperf_page(env, mlperf_ctx)
+        write_atomic(OUT_MLPERF, html)
+        written["mlperf"] = True
+    else:
+        written["mlperf"] = False
 
     # Landing
     landing_ctx = build_landing_context(
         pricing=pricing_ctx,
         mlperf_ready=mlperf_ready,
-        mlperf_round=mlperf_round,
-        mlperf_relative_age=mlperf_relative_age,
+        mlperf_round=mlperf_ctx.latest_round if mlperf_ctx else None,
+        mlperf_relative_age=(
+            mlperf_ctx.relative_age_display if mlperf_ctx else None
+        ),
     )
     html = render_landing_page(env, landing_ctx)
     write_atomic(OUT_LANDING, html)

@@ -147,7 +147,7 @@ main { padding: 0; }
 .page-header h1 .round-tag {
   font-size: 16px;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--brand-green);
   letter-spacing: 0;
   margin-left: 8px;
   font-family: 'SF Mono', Menlo, Consolas, monospace;
@@ -201,10 +201,10 @@ main { padding: 0; }
 }
 .caveat strong { color: var(--dark); }
 
-/* ---- Info card (teal — vocabulary helper, MLPerf only) ---- */
+/* ---- Info card (brand green — vocabulary helper, MLPerf only) ---- */
 .info-card {
   background: #fff;
-  border-left: 4px solid var(--teal);
+  border-left: 4px solid var(--brand-green);
   padding: 16px 20px;
   margin-bottom: 28px;
   border-radius: 0 8px 8px 0;
@@ -215,7 +215,7 @@ main { padding: 0; }
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.2px;
-  color: var(--teal);
+  color: #15803d;
   margin-bottom: 12px;
 }
 .info-card ul { list-style: none; padding: 0; margin: 0; }
@@ -235,7 +235,7 @@ main { padding: 0; }
   top: 9px;
   width: 4px;
   height: 4px;
-  background: var(--teal);
+  background: var(--brand-green);
   border-radius: 50%;
 }
 .info-card strong { color: var(--teal-deep); font-weight: 700; }
@@ -387,6 +387,16 @@ main { padding: 0; }
   font-family: 'SF Mono', Menlo, Consolas, monospace;
 }
 .pricing-table .source-link:hover { color: var(--teal); }
+/* MLPerf submission link — brand-green for visibility (it's the
+   buyer's path back to the official MLCommons source). */
+.mlperf-table .submission-link {
+  color: #15803d;
+  font-weight: 600;
+}
+.mlperf-table .submission-link:hover {
+  color: var(--brand-green);
+  text-decoration: underline;
+}
 
 /* Sticky first column on narrow */
 @media (max-width: 720px) {
@@ -448,7 +458,7 @@ details.workload[open] summary { border-bottom: 1px solid var(--border); }
   font-family: 'SF Mono', Menlo, Consolas, monospace;
 }
 .wl-meta { font-size: 12px; color: var(--muted); margin-left: auto; }
-.wl-meta .top { color: var(--mid); font-weight: 600; }
+.wl-meta .top { color: #15803d; font-weight: 600; }
 .wl-body { padding: 12px 18px 18px; }
 
 /* ---- Methodology footer ---- */

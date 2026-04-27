@@ -12,3 +12,8 @@ dev/
 **/htmlcov/
 **/.mypy_cache/
 **/.ruff_cache/
+
+# Anvil runtime state — fetcher-populated SQLite DBs are local-only.
+# Production: cron writes to a workflow-runner-local copy each cycle.
+# Dev: tools/seed_demo_data.py + tools/seed_demo_mlperf.py regenerate.
+anvil/data/*.sqlite

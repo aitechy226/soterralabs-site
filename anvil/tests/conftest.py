@@ -98,4 +98,14 @@ CREATE TABLE mlperf_results (
 CREATE INDEX idx_mlperf_round ON mlperf_results(round);
 CREATE INDEX idx_mlperf_gpu ON mlperf_results(gpu);
 CREATE INDEX idx_mlperf_model_scenario ON mlperf_results(model, scenario);
+
+CREATE TABLE fetch_runs (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    cloud           TEXT    NOT NULL,
+    started_at      TEXT    NOT NULL,
+    finished_at     TEXT,
+    status          TEXT    NOT NULL,
+    rows_inserted   INTEGER,
+    error_message   TEXT
+);
 """

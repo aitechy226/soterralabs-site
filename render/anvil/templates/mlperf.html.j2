@@ -80,6 +80,15 @@
   <div class="info-card">
     <h3>How to read these tables</h3>
     <ul>
+      <li><strong>Workloads</strong> &mdash;
+        <strong>llama2-70b-99</strong> (Meta Llama 2 70B chat),
+        <strong>llama3.1-405b</strong> (Meta Llama 3.1 405B &mdash; the largest tracked model),
+        <strong>mixtral-8x7b</strong> (Mistral Mixtral mixture-of-experts),
+        <strong>stable-diffusion-xl</strong> (text-to-image),
+        <strong>bert-99</strong> (BERT-Large encoder for text classification),
+        <strong>gptj-99</strong> (GPT-J 6B text generation).
+        The <strong>-99</strong> / <strong>-99.9</strong> suffix is the accuracy track (see below).
+      </li>
       <li><strong>Server vs Offline</strong> &mdash; MLPerf's two scenario types. <strong>Server</strong> simulates real-time traffic with per-query latency limits (the system has to keep up with arriving requests). <strong>Offline</strong> is batch processing with no latency constraint &mdash; pure peak throughput. The same hardware will score differently on each.</li>
       <li><strong># Accelerators</strong> &mdash; how many GPU/AI chips the submitted system used. All throughput metrics below are for the whole system, not per chip.</li>
       <li><strong>Tokens/s, Samples/s, Queries/s</strong> &mdash; total system throughput. Higher is faster. Different workloads use different units (LLMs report tokens/s; image generation reports samples/s; classifiers report queries/s).</li>
@@ -147,7 +156,7 @@
       Rebuilt weekly from MLCommons-published CSVs. No human edits results on this page. New rounds appear after a one-time schema check by Soterra Labs to confirm the source columns have not changed; this typically takes a few days after MLCommons publishes. For current cloud GPU pricing, see <a href="/anvil/pricing">our pricing tracker</a>.
     </p>
     <p class="footer-disclaimer">
-      MLPerf and MLCommons are trademarks of MLCommons. Soterra Labs is not affiliated with MLCommons. Results are reproduced from public MLCommons publications; refer to the linked submission pages for full system configuration. Soterra Labs has no commercial relationship with NVIDIA, AMD, Intel, or any submitter shown. See <a href="/legal/">Terms</a>.
+      MLPerf and MLCommons are trademarks of MLCommons. Soterra Labs is not affiliated with MLCommons. Results are reproduced from public MLCommons publications; refer to the linked submission pages for full system configuration. Soterra Labs has no commercial relationship with NVIDIA, AMD, Intel, or any submitter shown. See <a href="/legal/" target="_blank" rel="noopener">Terms</a>.
     </p>
   </footer>
 

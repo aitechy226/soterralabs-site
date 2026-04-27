@@ -1,0 +1,30 @@
+# MLPerf workload whitelist — what we ingest from each round.
+#
+# Per architect spec §5.6: scoping the ingest surface deliberately. MLCommons
+# publishes hundreds of workload variants per round (datacenter + edge,
+# closed + open, every model × scenario × accuracy track). For Anvil's
+# headline-comparison use, we ship a narrow whitelist of "buyer-relevant"
+# (model, scenario) pairs and reject everything else.
+#
+# Every pair here MUST have:
+#   - a metric-plausibility bound in scripts/metric_plausibility.py
+#   - a metric-inference fallback in scripts/_metric_inference.py
+# The build-time validator (anvil/tests/test_mlperf_yaml_configs.py)
+# enforces this contract.
+#
+# Adding a new pair:
+#   1. Add bound + plausibility range in metric_plausibility.py
+#   2. Add lookup-table entry in _metric_inference.py
+#   3. Add the (model, scenario) here
+#   4. Re-run validator; commit together
+#
+# Removing: reverse order — drop here first so future ingest skips it,
+# then drop the bound + inference entries in a follow-up commit.
+
+tracked:
+  - { model: "llama2-70b-99",       scenarios: ["Server", "Offline"] }
+  - { model: "mixtral-8x7b",        scenarios: ["Server"] }
+  - { model: "llama3.1-405b",       scenarios: ["Server"] }
+  - { model: "stable-diffusion-xl", scenarios: ["Offline"] }
+  - { model: "bert-99",             scenarios: ["Server"] }
+  - { model: "gptj-99",             scenarios: ["Offline"] }

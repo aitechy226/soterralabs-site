@@ -76,6 +76,33 @@
     .logo { display: flex; align-items: center; }
     .logo img { height: 40px; width: auto; }
 
+    /* nav-links — matches products.html / index.html chrome */
+    .nav-links {
+      display: flex;
+      gap: 4px;
+      list-style: none;
+      align-items: center;
+      margin-left: auto;
+      padding: 0;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--dark);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      padding: 10px 16px;
+      border-radius: 4px;
+      white-space: nowrap;
+      transition: color 0.2s ease, background 0.2s ease;
+    }
+    .nav-links a:hover {
+      color: var(--teal);
+      background: var(--teal-light);
+    }
+    .nav-links a.active { color: var(--teal); }
+
     /* ── MAIN ── */
     main {
       max-width: var(--max-w);
