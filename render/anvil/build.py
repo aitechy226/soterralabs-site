@@ -297,22 +297,53 @@ def _round_freshness(
     )
 
 
-def _accuracy_track_display(model: str) -> str:
-    """Parse the MLPerf accuracy-track designator from the model name
-    suffix. MLCommons encodes the track in the model id:
-      llama2-70b-99    → '99%'    (cleared 99% of reference accuracy)
-      llama2-70b-99.9  → '99.9%'  (stricter 'very-high-accuracy' track)
-      mixtral-8x7b     → '—'      (no track concept for this workload)
+# Workloads where MLCommons drops the redundant `-99` suffix because
+# only one accuracy track exists, but the submission still clears the
+# 99%-of-reference accuracy bar. Surface as '99%' so the column reads
+# consistently across LLM workloads.
+_IMPLIED_DEFAULT_TRACK_99: frozenset[str] = frozenset({
+    "mixtral-8x7b",
+    "llama3.1-405b",
+    "llama3.1-8b",
+})
 
-    The raw `Accuracy` field MLCommons publishes is a verbose
-    submitter-debugging string (ROUGE1/2/L, FID, F1, etc.) and is
-    confusing on a buyer-facing page. We surface the track only;
-    the verbose string stays in raw_row JSON for forensic replay.
+# Workloads whose accuracy isn't a `% of reference` quantity at all —
+# image generation uses CLIP + FID, etc. Render as em-dash; the
+# verbose raw Accuracy field stays in raw_row for the audit trail.
+_NON_PERCENT_TRACK_WORKLOADS: frozenset[str] = frozenset({
+    "stable-diffusion-xl",
+})
+
+
+def _accuracy_track_display(model: str) -> str:
+    """Map the MLPerf model id to a buyer-readable track designator.
+
+    Suffix-encoded tracks (LLM + classifier workloads with multiple
+    tracks):
+      llama2-70b-99   → '99%'
+      llama2-70b-99.9 → '99.9%'
+      gptj-99         → '99%'
+      gptj-99.9       → '99.9%'
+
+    Single-track workloads where MLCommons drops the suffix:
+      mixtral-8x7b    → '99%' (per _IMPLIED_DEFAULT_TRACK_99)
+      llama3.1-405b   → '99%'
+
+    Workloads measured against a non-percentage metric:
+      stable-diffusion-xl → '—' (CLIP/FID, not '% of reference')
+
+    The raw `Accuracy` field MLCommons publishes is verbose
+    submitter-debugging detail (ROUGE1/2/L, GSM8K, FID, etc.) — kept
+    in raw_row JSON for forensic replay, never rendered.
     """
     if model.endswith("-99.9"):
         return "99.9%"
     if model.endswith("-99"):
         return "99%"
+    if model in _IMPLIED_DEFAULT_TRACK_99:
+        return "99%"
+    if model in _NON_PERCENT_TRACK_WORKLOADS:
+        return "—"
     return "—"
 
 

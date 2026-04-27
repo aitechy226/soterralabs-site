@@ -251,19 +251,30 @@ def test_display_gpu_falls_back_to_accelerator_when_canonical_none(
 # ---- accuracy fallback ----
 
 def test_accuracy_track_parsed_from_model_name(in_memory_mlperf_db) -> None:
-    """The accuracy column shows the MLPerf track designator (99% /
-    99.9%) parsed from the model id suffix — NOT the raw verbose
-    accuracy string MLCommons publishes (ROUGE1/2/L, FID, etc.).
-    Verbose string stays in raw_row for forensic replay."""
-    _seed_mlperf(in_memory_mlperf_db, model="llama2-70b-99",   accuracy=None)
-    _seed_mlperf(in_memory_mlperf_db, model="llama2-70b-99.9", accuracy=None)
-    _seed_mlperf(in_memory_mlperf_db, model="mixtral-8x7b",    accuracy=None)
+    """The accuracy column derives from the MLPerf track designator —
+    NOT from the raw verbose accuracy string MLCommons publishes
+    (ROUGE1/2/L, FID, etc.). Verbose string stays in raw_row for
+    forensic replay.
+
+    Three rendering classes:
+      - explicit suffix      → '99%' / '99.9%'
+      - implied default      → '99%'  (mixtral, llama3.1 — single track)
+      - non-percent metric   → '—'    (sd-xl uses CLIP/FID, not %)
+    """
+    _seed_mlperf(in_memory_mlperf_db, model="llama2-70b-99",       accuracy=None)
+    _seed_mlperf(in_memory_mlperf_db, model="llama2-70b-99.9",     accuracy=None)
+    _seed_mlperf(in_memory_mlperf_db, model="mixtral-8x7b",        accuracy=None)
+    _seed_mlperf(in_memory_mlperf_db, model="llama3.1-405b",       accuracy=None)
+    _seed_mlperf(in_memory_mlperf_db, model="stable-diffusion-xl", scenario="Offline",
+                 metric="samples_per_second", accuracy=None)
     in_memory_mlperf_db.commit()
     ctx = build.build_mlperf_context(in_memory_mlperf_db, NOW)
     by_model = {w.model: w.results[0].accuracy for w in ctx.workloads}
-    assert by_model["llama2-70b-99"]   == "99%"
-    assert by_model["llama2-70b-99.9"] == "99.9%"
-    assert by_model["mixtral-8x7b"]    == "—"
+    assert by_model["llama2-70b-99"]       == "99%"
+    assert by_model["llama2-70b-99.9"]     == "99.9%"
+    assert by_model["mixtral-8x7b"]        == "99%"      # implied default
+    assert by_model["llama3.1-405b"]       == "99%"      # implied default
+    assert by_model["stable-diffusion-xl"] == "—"        # CLIP/FID, no %
 
 
 def test_accuracy_track_ignores_raw_verbose_string(in_memory_mlperf_db) -> None:
