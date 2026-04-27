@@ -103,7 +103,7 @@
           <tr>
             <td><span class="cloud-tag">{{ q.cloud_display }}</span></td>
             <td>{{ q.region }}</td>
-            <td>{{ q.instance_type }} ({{ q.gpu_count }}&times;) <a href="{{ q.source_url }}" class="source-link" rel="nofollow noopener">[src]</a></td>
+            <td>{{ q.instance_type }} ({{ q.gpu_count }}&times;)</td>
             <td class="num">${{ "%.2f"|format(q.price_per_hour_usd) }}</td>
             <td class="num">${{ "%.2f"|format(q.price_per_gpu_per_hour_usd) }}</td>
           </tr>
