@@ -1,0 +1,203 @@
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a href="#" class="logo">
+        <img src="logo-lit-circle.svg" alt="Soterra Labs" />
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#services">Services</a></li>
+        <li><a href="/gpu-navigator">Products</a></li>
+        <li><a href="#thinking">Thinking</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <script>
+    const toggle = document.getElementById('navToggle');
+    const links  = document.getElementById('navLinks');
+    toggle.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      toggle.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', open);
+    });
+    links.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        links.classList.remove('open');
+        toggle.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+  </script>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="inner">
+      <div class="hero-label">AI Built for Your Business</div>
+      <h1>From <span class="gpu">GPU</span><br/>To <span>Revenue<sup style="font-size:0.4em; font-weight:600; vertical-align:super; margin-left:2px;">&#8482;</sup></span></h1>
+      <p class="hero-sub">
+        Buying with confidence is hard when the technology is moving faster than the buyer can evaluate it. Shipping AI is hard when the gap between pilot and production is wider than it looks. We work the full stack, from pre-sale intelligence tools that close the discovery gap, to production AI systems and infrastructure built to run.
+      </p>
+      <div class="hero-cred">30 years of production engineering · Bell Labs · JPMorgan Chase · Dell</div>
+      <div class="cta-row">
+        <a href="#contact" class="btn-primary">Start a conversation</a>
+        <a href="#services" class="btn-secondary">How we do it &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="inner">
+      <div class="section-label">Services</div>
+      <h2>Three ways we engage</h2>
+      <p class="section-intro">
+        Our From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&#8482;</sup> framework spans your sales motion, your internal workflows, and your infrastructure. Three engagements. One standard: every one delivers a running system in your environment, designed and implemented to your specs.
+      </p>
+
+      <!-- GTM INTELLIGENCE — featured -->
+      <div class="card-featured">
+        <div class="card-featured-label">GTM Intelligence</div>
+        <div class="card-featured-subtitle">Pre-sale tools that surface what matters before the first conversation.</div>
+        <p class="card-featured-intro">Most people don't have 30 minutes with a sales rep for a discovery call. They have five minutes when the calendar clears. They need a way to figure out what they need, on their own, at their own pace.</p>
+
+        <div class="gpu-nav-block">
+          <h4>GPU Navigator<sup style="font-size:0.6em; vertical-align:super;">&#8482;</sup></h4>
+          <p>
+            Built for bare metal GPU infrastructure vendors. The prospect walks through a guided assessment and gets a personalized GPU recommendation with cost comparison. The vendor's sales rep gets the lead brief. Five minutes, no phone call required.
+          </p>
+          <a href="/gpu-navigator" class="btn-primary" style="display:inline-block; margin-top:12px;">See how it works &rarr;</a>
+        </div>
+
+        <div class="card-tag">Pre-Sale Discovery · Qualification Scoring · Domain-Aware Intelligence</div>
+      </div>
+
+      <!-- SUPPORTING SERVICES -->
+      <div class="supporting-cards">
+
+        <div class="card">
+          <div class="card-featured-label" style="margin-bottom:4px;">AI Systems</div>
+          <h3 style="font-size:20px; margin-bottom:10px;">Agentic systems where deterministic code owns the decisions, and LLMs own the prose.</h3>
+          <p>Multi-agent pipelines built on LangGraph. Retrieval with governance, tool-calling with audit trails, orchestration that survives model-version changes. Scoped to your workflow and built to your spec.</p>
+          <div class="card-tag">LangGraph · Multi-Agent · Governed RAG · Audit-Ready Pipelines</div>
+        </div>
+
+        <div class="card">
+          <div class="card-featured-label" style="margin-bottom:4px;">AI Infrastructure</div>
+          <h3 style="font-size:20px; margin-bottom:10px;">Inference stacks tuned for the workloads your team actually runs.</h3>
+          <p>You bought the GPUs. Now make them earn. We deploy the full AI stack: inference serving, model deployment, orchestration, monitoring.</p>
+          <div class="card-tag">GPU Stack · Inference Serving · Model Deployment · Monitoring</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- PRINCIPLES -->
+  <section id="principles">
+    <div class="inner">
+      <div class="section-label">How we build</div>
+      <h2>What you can count on.</h2>
+      <p class="section-intro">
+        Not slogans. Engineering commitments, learned from watching what breaks at scale.
+      </p>
+      <div class="principles">
+        <div class="principle">
+          <div class="principle-num">01</div>
+          <h4>Tested against what actually breaks it.</h4>
+          <p>Happy-path tests prove nothing. Every system we deliver is verified against the failure it's supposed to handle: retries, timeouts, data edge cases, and the scenarios that only show up in production.</p>
+        </div>
+        <div class="principle">
+          <div class="principle-num">02</div>
+          <h4>Every decision is explainable.</h4>
+          <p>Routing, scoring, and risk rules live in deterministic code: inspectable, testable, auditable. AI generates narratives and synthesizes results. It doesn't make decisions you can't trace.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- THINKING / BLOG -->
+  <section id="thinking">
+    <div class="inner">
+      <div class="section-label">Thinking</div>
+      <h2>What we've learned building it.</h2>
+      <p class="section-intro">
+        No hype, no 'thought leadership'. The failures, the fixes, and what the architecture actually looks like after it survives contact with a real environment.
+      </p>
+      <div class="blog-grid">
+
+        <a class="post-card" href="/thinking/gpu-infrastructure-five-calculations">
+          <div class="post-tag">GPU · Infrastructure · TCO</div>
+          <h4>GPU Infrastructure: The Five Calculations That Actually Matter</h4>
+          <p>$/hr is the last number to calculate. VRAM fit, quantization impact, multi-node threshold, egress cost, and real TCO, in that order.</p>
+        </a>
+
+        <a class="post-card" href="/thinking/enterprise-rag-trust-layer">
+          <div class="post-tag">RAG · FSI · Production</div>
+          <h4>The Trust Layer: What Separates Good RAG from Enterprise RAG</h4>
+          <p>Four bugs found while hardening a RAG system for FSI, and what they reveal about the gap between a working system and a trustworthy one.</p>
+        </a>
+
+        <a class="post-card" href="/thinking/agentic-hype-vs-reality">
+          <div class="post-tag">Agents · Architecture</div>
+          <h4>Why Your AI Agent Demo Looks Great and Your Production System Doesn't</h4>
+          <p>The gap between the demo and production: the reliability argument, the auditability argument, and which one survives model improvements.</p>
+        </a>
+
+        <a class="post-card" href="/thinking/mcp-service-to-service">
+          <div class="post-tag">MCP · LangGraph · KYC</div>
+          <h4>I Used MCP as a Service-to-Service Protocol. Here's What I Learned.</h4>
+          <p>MCP was designed as an LLM-to-tool protocol. The tradeoffs of using it as a service layer between a LangGraph orchestrator and integration servers.</p>
+        </a>
+
+      </div>
+      <p class="blog-cta">
+        <a href="/thinking/">More posts →</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="inner">
+      <div class="section-label">About</div>
+      <h2><span style="color:#4ade80;">Soterra</span> <span style="color:var(--teal);">Labs.</span></h2>
+      <div class="about-text">
+        <p>Soterra Labs exists to put AI to work on real problems: faster decisions, better economics, and leaner operations.</p>
+        <p>Our approach is rooted in three decades of production engineering, forged through cycles of extreme scale and complexity. We've been on both sides of the table: building systems as engineering leadership at Lehman Brothers and JPMorgan Chase, and selling them as Field CTOs at Dell. That dual perspective shapes everything we build: we know which questions buyers actually ask, and which answers hold up under scrutiny.</p>
+        <p>Today our focus is the modern AI stack: foundation models, generative architecture, and production deployment on real hardware. We don't hand off to an outside engineering team; we are the engineering team.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="inner">
+      <div class="section-label">Contact</div>
+      <h2>Let's talk.</h2>
+      <p class="section-intro">
+        Ready to move From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&#8482;</sup>? Reach out directly. Every engagement starts with a conversation. Tell us what you're working on.
+      </p>
+      <div class="contact-row">
+        <a href="mailto:sales@soterralabs.ai" class="contact-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/>
+          </svg>
+          Contact Us
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 <span>Soterra Labs</span> — From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&#8482;</sup><span class="footer-sep">·</span><a href="/legal/" class="footer-link">Legal</a></p>
+  </footer>
+

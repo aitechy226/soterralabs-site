@@ -1,0 +1,95 @@
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <img src="logo-lit-circle.svg" alt="Soterra Labs" />
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html#services">Services</a></li>
+        <li><a href="products.html" class="active">Products</a></li>
+        <li><a href="index.html#thinking">Thinking</a></li>
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <script>
+    const toggle = document.getElementById('navToggle');
+    const links  = document.getElementById('navLinks');
+    toggle.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      toggle.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', open);
+    });
+  </script>
+
+  <!-- HERO -->
+  <div class="page-hero">
+    <div class="inner">
+      <div class="page-hero-label">Products</div>
+      <h1>What we ship.</h1>
+      <p>Pre-sale intelligence tools and production AI systems. Each one built for a specific problem, deployed in your environment.</p>
+    </div>
+  </div>
+
+  <!-- PRODUCT GRID -->
+  <div class="products-section">
+    <div class="products-inner">
+      <div class="products-grid">
+
+        <!-- GPU NAVIGATOR -->
+        <div class="product-card">
+          <div class="product-tag">GTM Intelligence</div>
+          <h2>GPU Navigator<sup class="tm">&#8482;</sup></h2>
+          <div class="product-one-liner">
+            Most GPU vendors show a catalog and a price. GPU Navigator<sup class="tm">&#8482;</sup> starts with the workload and works backward to the right GPU — so the prospect arrives at the first call already qualified.
+          </div>
+          <div class="product-details">
+            <strong>Built for:</strong> GPU infrastructure vendors<br/>
+            <strong>Prospect time:</strong> 5 minutes<br/>
+            <strong>Output:</strong> Personalized GPU recommendation, VRAM fit analysis, multi-GPU detection, cost estimate at your rates<br/>
+            <strong>Sales rep gets:</strong> Full brief by email before the first call
+          </div>
+          <a href="gpu-navigator.html" class="product-cta">See how it works &rarr;</a>
+        </div>
+
+        <!-- AI SYSTEMS -->
+        <div class="product-card" style="border-top-color: #2563eb;">
+          <div class="product-tag" style="color: #2563eb;">AI Systems</div>
+          <h2>Custom AI — Packaged to Run</h2>
+          <div class="product-one-liner">
+            Document processing, intelligent search, multi-agent workflows, automated pipelines — scoped to your problem, deployed in your environment, delivered as a running system.
+          </div>
+          <div class="product-details">
+            <strong>Built for:</strong> Teams replacing manual work with AI<br/>
+            <strong>Includes:</strong> RAG systems, agentic workflows, document intelligence, workflow automation<br/>
+            <strong>Delivery:</strong> Production-ready, deployed in your infrastructure
+          </div>
+          <a href="index.html#contact" class="product-cta" style="background: #2563eb;">Start a conversation &rarr;</a>
+        </div>
+
+        <!-- YOUR PROBLEM HERE -->
+        <div class="product-card coming-soon">
+          <div class="coming-badge">Your Problem Here</div>
+          <h2>Something we should build?</h2>
+          <div class="product-one-liner">
+            Every product on this page started as a conversation about a real problem. If you have one, we'd like to hear it.
+          </div>
+          <div class="product-details"></div>
+          <a href="index.html#contact" class="product-cta" style="background: var(--mid);">Start a conversation &rarr;</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2026 <span>Soterra Labs</span> &mdash; From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&#8482;</sup><span class="footer-sep">&middot;</span><a href="/legal/" class="footer-link">Legal</a></p>
+  </footer>
+

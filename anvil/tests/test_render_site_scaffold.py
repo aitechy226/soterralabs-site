@@ -68,13 +68,6 @@ def test_load_post_stub_raises_not_implemented() -> None:
         load_post(Path("/nonexistent.md"))
 
 
-def test_load_page_stub_raises_not_implemented() -> None:
-    """Same as above for the Pydantic loader. Sentinel for Wave 4B."""
-    from render.site.loaders.pydantic import load_page
-    with pytest.raises(NotImplementedError):
-        load_page("nonexistent_module")
-
-
 def test_load_post_index_stub_raises_not_implemented() -> None:
     from render.site.loaders.pydantic import load_post_index
     with pytest.raises(NotImplementedError):

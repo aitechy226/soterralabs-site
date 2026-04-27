@@ -1,0 +1,185 @@
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="logo">
+        <img src="logo-lit-circle.svg" alt="Soterra Labs" />
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/#services">Services</a></li>
+        <li><a href="/gpu-navigator" class="active">Products</a></li>
+        <li><a href="/#thinking">Thinking</a></li>
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <script>
+    const toggle = document.getElementById('navToggle');
+    const links = document.getElementById('navLinks');
+    toggle.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      toggle.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', open);
+    });
+  </script>
+
+  <!-- ══════ HERO ══════ -->
+  <div class="hero">
+    <div class="section">
+      <div class="hero-eyebrow">GPU Navigator<sup class="tm">&#8482;</sup> · For GPU Rental Providers</div>
+      <h1>A Prospect Tool That <span>Earns the Conversation.</span></h1>
+      <a href="#contact" class="hero-cta">Request a Demo</a>
+    </div>
+  </div>
+
+  <!-- ══════ PART 1: THE VENDOR'S VALUE ══════ -->
+
+  <!-- WHY VENDORS LICENSE THIS -->
+  <div class="section-dark">
+    <div class="section">
+      <div class="section-eyebrow">For GPU Providers</div>
+      <h2>Why Vendors License GPU Navigator<sup class="tm">&#8482;</sup>.</h2>
+      <div class="section-lead">Here's what the sales process looks like without it.</div>
+
+      <div class="problem-grid">
+        <div class="problem-card">
+          <h3>No Prospect Data at Handoff</h3>
+          <p>The sales rep has the prospect's name and contact info. No information about the workloads, dependencies, and budget. Discovery starts from scratch.</p>
+        </div>
+        <div class="problem-card">
+          <h3>1-2 Weeks Just to Start Discovery</h3>
+          <p>A prospect's first real conversation with a rep is one to two weeks out. By then the urgency has cooled, or a competitor has found a way in.</p>
+        </div>
+        <div class="problem-card">
+          <h3>3-6 Weeks Before the Prospect Decides</h3>
+          <p>Even after multiple conversations, the prospect is matching their requirements to GPUs without the right tool, and may still end up renting the wrong configuration.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT THE VENDOR GETS -->
+  <div class="section">
+    <div class="section-eyebrow">What the Vendor Gets</div>
+    <h2>Their Catalog. Their Rates. Their Reach.</h2>
+    <div class="section-lead">Send a link to a free tool, not a cold call. Prospects try it on their own time, at their own pace, and choose whether to share results with the vendor. A useful tool that earns the conversation.</div>
+
+    <div class="problem-grid">
+      <div class="problem-card" style="border-left-color: #059669;">
+        <h3>Full Catalog Control</h3>
+        <p>Manage the GPU inventory, set rates, and position against competitors, all through a self-service admin panel.</p>
+      </div>
+      <div class="problem-card" style="border-left-color: #059669;">
+        <h3>Vendor-Branded Experience</h3>
+        <p>The tool runs on a Soterra-hosted subdomain with the vendor's branding. The prospect sees the vendor's name and catalog.</p>
+      </div>
+      <div class="problem-card" style="border-left-color: #059669;">
+        <h3>Lead Briefs on Opt-In</h3>
+        <p>When the prospect chooses to share results, the sales rep gets a ready-to-use lead brief by email.</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════ ASSESSMENT FLOW ══════ -->
+  <div class="section">
+    <div class="section-eyebrow">Assessment Flow — Business View</div>
+    <h2>Four Inputs. One Report.</h2>
+    <div class="section-lead">What the prospect answers, and what they receive.</div>
+
+    <div class="flow-container">
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-step-title">1. Workload</div>
+          <div class="flow-step-desc">Model size, precision, latency tier</div>
+          <div class="flow-step-tag">VRAM computed instantly</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-title">2. Current state</div>
+          <div class="flow-step-desc">Provider, pricing model, migration complexity</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-title">3. Compatibility</div>
+          <div class="flow-step-desc">Data residency, compliance, contracts</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-step-title">4. Buying context</div>
+          <div class="flow-step-desc">Timeline, budget, decision authority</div>
+        </div>
+      </div>
+
+      <div class="flow-report">
+        <div class="flow-report-title">Generated Report</div>
+        <div class="flow-report-items">GPU recommendation · cost comparison · fit score · findings · next steps</div>
+        <div class="flow-report-tags">Shareable · printable · vendor-branded</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- WHAT THE REPORT COVERS -->
+  <div class="section">
+    <div class="section-eyebrow">What the Prospect Gets</div>
+    <h2>Their Recommendation. Their Cost. Their Fit.</h2>
+    <div class="section-lead">Not a marketing pitch. A more informed prospect.</div>
+
+    <div class="problem-grid">
+      <div class="problem-card" style="border-left-color: #1565c0;">
+        <h3>Workload-Based Pick</h3>
+        <p>A specific GPU picked for the prospect's workload, chosen on workload fit rather than price or recency.</p>
+      </div>
+      <div class="problem-card" style="border-left-color: #1565c0;">
+        <h3>Priced at Your Rates</h3>
+        <p>Projected cost at the vendor's actual rates, based on the prospect's usage profile.</p>
+      </div>
+      <div class="problem-card" style="border-left-color: #1565c0;">
+        <h3>Score With Reasoning</h3>
+        <p>A fit score against the prospect's requirements, with the reasoning behind the number.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ GPU COVERAGE ══════ -->
+  <div class="section">
+    <div class="section-eyebrow">Hardware Coverage</div>
+    <h2>The GPU Catalog — Current Coverage, Extendable</h2>
+    <div class="section-lead">Full awareness of modern GPUs, from RTX 4090 to B300, across inference, training, and fine-tuning workloads. The tiers below reflect what the tool knows. Your catalog config decides what any given prospect sees.</div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+      <div style="padding:14px 16px; background:#fff; border:1px solid #e2e8f0; border-left:3px solid #7c3aed; border-radius:0 8px 8px 0;">
+        <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#1e293b; margin-bottom:10px;">Flagship</div>
+        <div style="font-size:14px; color:#1e293b; font-weight:600; line-height:2;">H100 · H200 · B200 · B300 · GH200</div>
+      </div>
+      <div style="padding:14px 16px; background:#fff; border:1px solid #e2e8f0; border-left:3px solid #7c3aed; border-radius:0 8px 8px 0;">
+        <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#1e293b; margin-bottom:10px;">Professional</div>
+        <div style="font-size:14px; color:#1e293b; font-weight:600; line-height:2;">A100 80GB · A100 40GB · L40S · L40 · A6000 · RTX 6000 Ada · RTX Pro 6000</div>
+      </div>
+      <div style="padding:14px 16px; background:#fff; border:1px solid #e2e8f0; border-left:3px solid #7c3aed; border-radius:0 8px 8px 0;">
+        <div style="font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#1e293b; margin-bottom:10px;">Value</div>
+        <div style="font-size:14px; color:#1e293b; font-weight:600; line-height:2;">RTX 4090 · RTX 5090 · L4</div>
+      </div>
+    </div>
+    <div style="margin-top:8px; font-size:13px; color:#94a3b8; font-style:italic;">Coverage expands as new accelerators ship.</div>
+  </div>
+
+  <!-- ══════ CTA ══════ -->
+  <div class="cta-block" id="contact">
+    <h2>See It With Your Rates</h2>
+    <p>We'll load your data and run a live assessment, so you see what your prospects experience.</p>
+    <a href="mailto:sales@soterralabs.ai?subject=GPU%20Navigator%20Demo%20Request" class="cta-btn">Request a Demo</a>
+  </div>
+
+  <!-- ══════ FOOTER ══════ -->
+  <div class="footer">
+    <p>© 2026 Soterra Labs. All rights reserved.<span class="footer-sep">·</span><a href="/legal/" class="footer-link">Legal</a></p>
+    <div class="footer-tag">GPU Navigator<sup class="tm">&#8482;</sup></div>
+  </div>
+
