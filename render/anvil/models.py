@@ -74,7 +74,8 @@ class MlperfResult(_Frozen):
     stack: str                          # PRE-COMPUTED: parenthetical detail (topology + software) or '—'
     engine: str                         # PRE-COMPUTED: short serving-engine name (TensorRT-LLM, vLLM, ...) or '—'
     accelerator_count: int
-    metric_value: float
+    metric_value: float                 # whole-system throughput as MLCommons reports it
+    metric_per_chip: float              # PRE-COMPUTED: metric_value / accelerator_count — buyer-comparable rate
     accuracy: str                       # PRE-COMPUTED: actual value or '—' em-dash
     submission_url: Optional[str]
     band: int                           # 0 or 1, alternates per GPU group for zebra shading

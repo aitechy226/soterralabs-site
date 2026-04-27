@@ -411,6 +411,14 @@ main { padding: 0; }
   font-family: 'SF Mono', Menlo, Consolas, monospace;
   white-space: nowrap;
 }
+/* Per-GPU column = primary buyer-comparable metric (bold, full color);
+   System total = secondary context (smaller, muted). */
+.mlperf-table td.num.primary { font-weight: 700; }
+.mlperf-table td.num.secondary {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 400;
+}
 .pricing-table .source-link, .mlperf-table .submission-link {
   font-size: 11px;
   color: var(--gray-soft);

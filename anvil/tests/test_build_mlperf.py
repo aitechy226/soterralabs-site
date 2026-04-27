@@ -305,6 +305,8 @@ def test_system_paren_split_into_stack_column(in_memory_mlperf_db) -> None:
 
 
 def test_top_result_display_format(in_memory_mlperf_db) -> None:
+    """Top-result string leads with per-GPU rate (buyer-comparable),
+    follows with system total (capacity-context)."""
     _seed_mlperf(
         in_memory_mlperf_db,
         submitter="NVIDIA", system_name="DGX B200", accel_count=8,
@@ -314,11 +316,39 @@ def test_top_result_display_format(in_memory_mlperf_db) -> None:
     ctx = build.build_mlperf_context(in_memory_mlperf_db, NOW)
     top = ctx.workloads[0].top_result_display
     assert top.startswith("top: ")
-    assert "58,400" in top
-    assert "tok/s" in top
-    assert "NVIDIA" in top
-    assert "8×" in top
-    assert "B200" in top
+    assert "7,300" in top                # 58_400 / 8 = 7,300 per-chip
+    assert "58,400" in top               # absolute system total
+    assert "tok/s/GPU" in top
+    assert "system" in top
+    assert "NVIDIA 8× B200" in top
+
+
+def test_per_chip_sort_beats_absolute_within_chip(in_memory_mlperf_db) -> None:
+    """A 48-chip cluster posting 153k absolute (3,189/chip) should
+    NOT outrank an 8-chip submission posting 32k absolute (4,000/chip)
+    on the same chip. Sort is per-chip, not absolute."""
+    _seed_mlperf(in_memory_mlperf_db, submitter="BigCluster",
+                 gpu="amd-cdna3-mi325x", accel_count=48,
+                 metric_value=153_076.0)
+    _seed_mlperf(in_memory_mlperf_db, submitter="SmallBox",
+                 gpu="amd-cdna3-mi325x", accel_count=8,
+                 metric_value=32_140.0)
+    in_memory_mlperf_db.commit()
+    ctx = build.build_mlperf_context(in_memory_mlperf_db, NOW)
+    submitters = [r.submitter for r in ctx.workloads[0].results]
+    assert submitters == ["SmallBox", "BigCluster"]
+    # And per-chip is the model field driving display
+    rates = [round(r.metric_per_chip) for r in ctx.workloads[0].results]
+    assert rates == [4_018, 3_189]
+
+
+def test_per_chip_handles_zero_accelerator_count(in_memory_mlperf_db) -> None:
+    """Defensive: if accelerator_count is 0 (shouldn't happen, but),
+    metric_per_chip falls back to metric_value rather than div-by-zero."""
+    _seed_mlperf(in_memory_mlperf_db, accel_count=0, metric_value=1234.0)
+    in_memory_mlperf_db.commit()
+    ctx = build.build_mlperf_context(in_memory_mlperf_db, NOW)
+    assert ctx.workloads[0].results[0].metric_per_chip == 1234.0
 
 
 # ---- display_gpu fallback ----

@@ -451,14 +451,20 @@ def _row_to_mlperf_result(row: tuple, band: int) -> MlperfResult:
     )
     system_clean, stack = _split_system_stack(row[6])
     software = row[11] if len(row) > 11 else None
+    accel_count = int(row[4])
+    metric_value = float(row[8])
+    metric_per_chip = (
+        metric_value / accel_count if accel_count > 0 else metric_value
+    )
     return MlperfResult(
         display_gpu=display_gpu,
         submitter=row[5],
         system_name=system_clean,
         stack=stack,
         engine=_engine_short(software),
-        accelerator_count=int(row[4]),
-        metric_value=float(row[8]),
+        accelerator_count=accel_count,
+        metric_value=metric_value,
+        metric_per_chip=metric_per_chip,
         accuracy=_accuracy_track_display(row[0]),
         submission_url=row[10],
         band=band,
@@ -482,11 +488,19 @@ def _assign_bands(rows: list[tuple]) -> list[tuple[tuple, int]]:
 
 
 def _top_result_display(top_row: tuple, metric: str) -> str:
-    """'top: 14,200 tok/s (NVIDIA 8× B200)'. Built from highest
-    metric_value row; metric short string is the unit suffix."""
+    """'top: 4,017 tok/s/GPU · 32,139 system (GigaComputing 8× MI325X)'.
+    Built from the per-chip-leader row (already first by the SQL order).
+    Per-chip first because that's the buyer-comparable rate; system
+    total alongside as secondary context.
+    """
+    accel_count = int(top_row[4])
+    metric_value = float(top_row[8])
+    per_chip = metric_value / accel_count if accel_count > 0 else metric_value
+    unit = metric_unit_short(metric)
     return (
-        f"top: {float(top_row[8]):,.0f} {metric_unit_short(metric)} "
-        f"({top_row[5]} {int(top_row[4])}× {gpu_short_name(top_row[2])})"
+        f"top: {per_chip:,.0f} {unit}/GPU · "
+        f"{metric_value:,.0f} system "
+        f"({top_row[5]} {accel_count}× {gpu_short_name(top_row[2])})"
     )
 
 
@@ -512,25 +526,33 @@ def _build_workload(
 
 def _group_rows_by_gpu(rows: list[tuple]) -> list[tuple]:
     """Re-order one workload's rows so submissions on the same GPU sit
-    together; chip families ranked by their best result.
+    together; chip families ranked by their best PER-CHIP result.
 
-    Within a chip-family block, fastest submission first (already the
-    DESC order from the SQL). Between blocks, the chip with the
-    highest single result goes first — so B200 (Blackwell) lands above
-    H200 (Hopper), which lands above A100 (Ampere). Unmapped (gpu IS
+    Within a chip-family block, fastest per-chip submission first
+    (the SQL ORDER BY already sorts by metric_value/accelerator_count
+    DESC). Between blocks, the chip whose best per-chip rate is
+    highest goes first — so a single 8-chip H100 box that posts
+    high per-chip throughput can outrank a 48-chip cluster posting a
+    bigger absolute total but lower per-chip rate. Unmapped (gpu IS
     NULL) rows sort last.
 
-    Position 2 in each row tuple is the canonical GPU id (or None).
-    Position 8 is metric_value.
+    Row positions: 2 = canonical GPU id, 4 = accelerator_count,
+    8 = metric_value. Per-chip rate = 8 / 4.
     """
     by_gpu: dict[str | None, list[tuple]] = {}
     for r in rows:
         by_gpu.setdefault(r[2], []).append(r)
-    # Rank chip families by max metric_value DESC; None goes last.
+
+    def _per_chip(r: tuple) -> float:
+        accel = int(r[4]) if r[4] else 0
+        return float(r[8]) / accel if accel > 0 else float(r[8])
+
+    # Rank chip families by max per-chip rate DESC; None goes last.
     def chip_rank(gpu_id: str | None) -> tuple[int, float]:
         if gpu_id is None:
-            return (1, 0.0)  # Unmapped goes after every mapped chip
-        return (0, -max(float(r[8]) for r in by_gpu[gpu_id]))
+            return (1, 0.0)
+        return (0, -max(_per_chip(r) for r in by_gpu[gpu_id]))
+
     ordered_gpus = sorted(by_gpu.keys(), key=chip_rank)
     return [r for gpu in ordered_gpus for r in by_gpu[gpu]]
 
@@ -576,7 +598,8 @@ def build_mlperf_context(
                json_extract(raw_row, '$.Software') AS software
           FROM mlperf_results
          WHERE round = ? AND quarantined = 0
-         ORDER BY model, scenario, metric_value DESC
+         ORDER BY model, scenario,
+                  (metric_value / NULLIF(accelerator_count, 0)) DESC
     """, (latest_round,)).fetchall()
 
     groups: dict[tuple[str, str], list[tuple]] = {}
