@@ -1,0 +1,68 @@
+name: anvil-weekly-mlperf
+
+# Hardened against the workflow-injection class flagged by GitHub's
+# security guide: only `secrets.*` interpolation (auto-masked); no
+# untrusted user input reaches any `run:` block.
+
+on:
+  schedule:
+    # Mondays at 07:00 UTC — one cycle behind daily pricing so the
+    # two crons don't contend for the commit lock. MLPerf rounds
+    # publish quarterly to twice-yearly; weekly is mostly a no-op
+    # except when MLCommons updates a round payload.
+    - cron: '0 7 * * 1'
+  workflow_dispatch: {}
+
+# Distinct concurrency group from pricing — independent state files
+# (mlperf.sqlite vs pricing.sqlite) and independent failure modes.
+concurrency:
+  group: anvil-mlperf-write
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-and-render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Anvil deps
+        working-directory: anvil
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+
+      - name: Fetch MLPerf (only schema_audited rounds in mlperf_rounds.yaml)
+        working-directory: anvil
+        env:
+          SMTP_HOST:         ${{ secrets.SMTP_HOST }}
+          SMTP_USER:         ${{ secrets.SMTP_USER }}
+          SMTP_PASS:         ${{ secrets.SMTP_PASS }}
+          ALERT_TO:          ${{ secrets.ALERT_TO }}
+          ALERT_FROM:        ${{ secrets.ALERT_FROM }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: python -m scripts.fetch_mlperf
+
+      - name: Render Anvil pages
+        run: python -m render.anvil.build
+
+      - name: Commit re-rendered HTML if changed
+        run: |
+          git config user.name  "anvil-cron[bot]"
+          git config user.email "anvil-cron@users.noreply.github.com"
+          git add anvil/index.html anvil/pricing/index.html anvil/mlperf/index.html anvil/style.css 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No HTML changes to commit."
+          else
+            git commit -m "anvil cron: refresh mlperf $(date -u +%Y-%m-%d)"
+            git push origin main
+          fi
