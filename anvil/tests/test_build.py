@@ -261,3 +261,75 @@ def test_pricing_html_contains_seo_critical_blocks(in_memory_pricing_db):
     assert 'og:description' in html
     assert 'rel="canonical"' in html
     assert 'https://soterralabs.ai/anvil/pricing' in html
+
+
+# ---- mlperf_ready conditional — both directions of the gate ----
+# Wave 1 ships /anvil/pricing without /anvil/mlperf. Any link to the
+# unbuilt mlperf page is a broken link in committed HTML; the conditional
+# in base.html.j2 nav + pricing.html.j2 methodology footer hides those
+# links until mlperf_ready=True. These tests guard both directions so a
+# future template edit can't silently re-introduce the broken link.
+
+
+def test_pricing_page_omits_mlperf_link_when_mlperf_not_ready(in_memory_pricing_db):
+    fetched = (NOW - timedelta(hours=2)).isoformat()
+    _seed_quote(in_memory_pricing_db, fetched, "aws", "us-east-1", "p5.48xlarge",
+                "nvidia-hopper-h100", 8, 98.32)
+    in_memory_pricing_db.commit()
+
+    ctx = build.build_pricing_context(in_memory_pricing_db, NOW)
+    env = build.make_jinja_env(mlperf_ready=False)
+    html = build.render_pricing_page(env, ctx)
+
+    # Methodology footer cross-link must be absent
+    assert 'href="/anvil/mlperf"' not in html, (
+        "pricing methodology footer still contains <a href='/anvil/mlperf'> "
+        "even though mlperf_ready=False — broken-link conditional regressed"
+    )
+    # Site nav dropdown must also not list mlperf
+    assert 'MLPerf Inference Results' not in html, (
+        "base.html.j2 nav dropdown still lists 'MLPerf Inference Results' — "
+        "broken-link conditional regressed"
+    )
+
+
+def test_pricing_page_includes_mlperf_link_when_mlperf_ready(in_memory_pricing_db):
+    """When Wave 2 lands, build() will set mlperf_ready=True and both
+    cross-links must reappear. This test pins the Wave-2 contract — fires
+    if the conditional gets accidentally inverted."""
+    fetched = (NOW - timedelta(hours=2)).isoformat()
+    _seed_quote(in_memory_pricing_db, fetched, "aws", "us-east-1", "p5.48xlarge",
+                "nvidia-hopper-h100", 8, 98.32)
+    in_memory_pricing_db.commit()
+
+    ctx = build.build_pricing_context(in_memory_pricing_db, NOW)
+    env = build.make_jinja_env(mlperf_ready=True)
+    html = build.render_pricing_page(env, ctx)
+
+    # Pricing methodology cross-link present
+    assert '<a href="/anvil/mlperf">our MLPerf results browser</a>' in html
+    # Nav dropdown entry present
+    assert '<a href="/anvil/mlperf">MLPerf Inference Results</a>' in html
+
+
+def test_landing_page_omits_mlperf_nav_link_when_not_ready():
+    """The landing page also extends base.html.j2, so the same nav-dropdown
+    conditional must apply there. Catches the case where someone fixes
+    the pricing template but forgets that base.html.j2 is shared."""
+    landing = build.build_landing_context(
+        pricing=None, mlperf_ready=False,
+        mlperf_round=None, mlperf_relative_age=None,
+    )
+    env = build.make_jinja_env(mlperf_ready=False)
+    html = build.render_landing_page(env, landing)
+    assert 'href="/anvil/mlperf"' not in html
+
+
+def test_landing_page_includes_mlperf_nav_link_when_ready():
+    landing = build.build_landing_context(
+        pricing=None, mlperf_ready=True,
+        mlperf_round="v5.0", mlperf_relative_age="2 hours ago",
+    )
+    env = build.make_jinja_env(mlperf_ready=True)
+    html = build.render_landing_page(env, landing)
+    assert '<a href="/anvil/mlperf">MLPerf Inference Results</a>' in html

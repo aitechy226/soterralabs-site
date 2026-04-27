@@ -243,10 +243,15 @@ def _compute_style_version() -> str:
     return hashlib.sha256(STYLE_CSS.read_bytes()).hexdigest()[:8]
 
 
-def make_jinja_env() -> Environment:
+def make_jinja_env(mlperf_ready: bool = False) -> Environment:
     """Build the Jinja env with autoescape=True explicitly per Priya's
     lesson 4 (select_autoescape extension matching silently bypasses
-    .j2 — known WP scar)."""
+    .j2 — known WP scar).
+
+    mlperf_ready drives conditional rendering of /anvil/mlperf links in
+    base nav + pricing methodology footer. Default False — flip to True
+    in build() once the MLPerf pipeline lands and mlperf.sqlite has rows.
+    """
     env = Environment(
         loader=FileSystemLoader(str(TEMPLATES_DIR)),
         autoescape=True,
@@ -255,6 +260,7 @@ def make_jinja_env() -> Environment:
         lstrip_blocks=False,
     )
     env.globals["style_version"] = _compute_style_version()
+    env.globals["mlperf_ready"] = mlperf_ready
     return env
 
 
