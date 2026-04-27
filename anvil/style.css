@@ -25,7 +25,7 @@
   --border:      #e5e7eb;
   --bg:          #ffffff;
   --bg-alt:      #f5f7fa;
-  --bg-hover:    rgba(0,112,192,0.04);
+  --bg-hover:    rgba(74, 222, 128, 0.18);  /* brand-green at band-equivalent strength — distinct hue from band tint #f6f9fb */
   --amber-bg:    #fffbeb;
   --amber-bdr:   #f59e0b;
   --amber-tx:    #78350f;
