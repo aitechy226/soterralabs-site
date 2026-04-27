@@ -128,7 +128,7 @@
           </thead>
           <tbody>
             {% for r in w.results %}
-            <tr>
+            <tr{% if r.band %} class="gpu-band"{% endif %}>
               <td class="gpu-cell">{{ r.display_gpu }}</td>
               <td>{{ r.submitter }}</td>
               <td>{{ r.system_name }}</td>

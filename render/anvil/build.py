@@ -347,12 +347,15 @@ def _accuracy_track_display(model: str) -> str:
     return "—"
 
 
-def _row_to_mlperf_result(row: tuple) -> MlperfResult:
+def _row_to_mlperf_result(row: tuple, band: int) -> MlperfResult:
     """Map a DB row to a typed MlperfResult.
 
     Row positions: model, scenario, gpu, accelerator, accelerator_count,
                    submitter, system_name, metric, metric_value, accuracy,
                    submission_url
+
+    `band` (0 or 1) alternates per GPU group for the zebra-shading the
+    template renders — caller assigns it from chip-family index.
     """
     gpu_canonical, accelerator = row[2], row[3]
     display_gpu = (
@@ -366,7 +369,24 @@ def _row_to_mlperf_result(row: tuple) -> MlperfResult:
         metric_value=float(row[8]),
         accuracy=_accuracy_track_display(row[0]),
         submission_url=row[10],
+        band=band,
     )
+
+
+def _assign_bands(rows: list[tuple]) -> list[tuple[tuple, int]]:
+    """Walk rows in their already-grouped order; emit (row, band) pairs
+    where `band` flips between 0 and 1 each time the GPU canonical id
+    changes. Used to produce alternating background bands in the table.
+    """
+    out: list[tuple[tuple, int]] = []
+    band = 0
+    last_gpu: object = object()  # sentinel — never equals first row's gpu
+    for r in rows:
+        if r[2] != last_gpu:
+            band ^= 1
+            last_gpu = r[2]
+        out.append((r, band))
+    return out
 
 
 def _top_result_display(top_row: tuple, metric: str) -> str:
@@ -382,7 +402,9 @@ def _build_workload(
     idx: int, model: str, scenario: str, rows: list[tuple], metric: str,
 ) -> Workload:
     """Assemble one Workload from the per-(model, scenario) DB rows.
-    `rows` MUST be sorted DESC by metric_value upstream."""
+    `rows` MUST already be ordered by GPU group (then metric DESC
+    within group) — `_group_rows_by_gpu` upstream handles that."""
+    banded = _assign_bands(rows)
     return Workload(
         model=model,
         scenario=scenario,
@@ -392,7 +414,7 @@ def _build_workload(
         submission_count=len(rows),
         top_result_display=_top_result_display(rows[0], metric),
         is_open_by_default=(idx == 0),
-        results=tuple(_row_to_mlperf_result(r) for r in rows),
+        results=tuple(_row_to_mlperf_result(r, band) for r, band in banded),
     )
 
 

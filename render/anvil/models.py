@@ -75,6 +75,7 @@ class MlperfResult(_Frozen):
     metric_value: float
     accuracy: str                       # PRE-COMPUTED: actual value or '—' em-dash
     submission_url: Optional[str]
+    band: int                           # 0 or 1, alternates per GPU group for zebra shading
 
 
 class Workload(_Frozen):
