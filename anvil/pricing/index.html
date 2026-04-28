@@ -39,7 +39,7 @@
   "headline": "Live Cloud GPU Pricing",
   "description": "Current list-price hourly rates for GPU instances on AWS, Azure, and GCP, refreshed daily.",
   "url": "https://soterralabs.ai/anvil/pricing",
-  "dateModified": "2026-04-27T21:14:56.697543+00:00",
+  "dateModified": "2026-04-28T02:20:18.242392+00:00",
   "publisher": {"@type": "Organization", "name": "Soterra Labs"}
 }
 </script>
@@ -53,7 +53,7 @@
   "creator": {"@type": "Organization", "name": "Soterra Labs"},
   "license": "https://soterralabs.ai/legal/",
   "isAccessibleForFree": true,
-  "dateModified": "2026-04-27T21:14:56.697543+00:00",
+  "dateModified": "2026-04-28T02:20:18.242392+00:00",
   "keywords": "GPU pricing, cloud GPU, AWS GPU pricing, Azure GPU pricing, GCP GPU pricing, H100, H200, B200, MI300X"
 }
 </script>
@@ -69,7 +69,7 @@
 }
 </script>
 
-  <link rel="stylesheet" href="/anvil/style.css?v=912efb11" />
+  <link rel="stylesheet" href="/anvil/style.css?v=7325c8ee" />
 </head>
 <body data-active-nav="reference">
 
@@ -107,8 +107,8 @@
     </p>
     
     <p class="freshness">
-      Last refreshed: <time datetime="2026-04-27T21:14:56.697543+00:00">April 27, 2026 at 21:14 UTC</time>
-      <span class="muted">(3 hours ago)</span>
+      Last refreshed: <time datetime="2026-04-28T02:20:18.242392+00:00">April 28, 2026 at 02:20 UTC</time>
+      <span class="muted">(25 minutes ago)</span>
     </p>
     
   </div>
@@ -127,6 +127,8 @@
     <span class="label">Jump to:</span>
     
     <a href="#nvidia-ampere-a100">Ampere A100</a>
+    
+    <a href="#nvidia-blackwell-b200">Blackwell B200</a>
     
     <a href="#nvidia-hopper-h100">Hopper H100</a>
     
@@ -148,9 +150,9 @@
         <tr>
           <th>Cloud</th>
           <th>Region</th>
-          <th class="num"># GPUs</th>
-          <th>GPU Type</th>
           <th>Instance Type</th>
+          <th>GPU Type</th>
+          <th class="num"># GPUs</th>
           <th class="num">$/hr</th>
           <th class="num">$/GPU/hr</th>
         </tr>
@@ -158,12 +160,12 @@
       <tbody>
         
         
-        <tr id="nvidia-ampere-a100">
+        <tr class="gpu-group-start" id="nvidia-ampere-a100">
           <td><span class="cloud-tag">AWS</span></td>
           <td>us-west-2</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Ampere A100</td>
           <td>p4d.24xlarge</td>
+          <td class="gpu-cell">NVIDIA Ampere A100</td>
+          <td class="num">8</td>
           <td class="num">$21.96</td>
           <td class="num">$2.74</td>
         </tr>
@@ -171,9 +173,9 @@
         <tr>
           <td><span class="cloud-tag">AWS</span></td>
           <td>us-east-1</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Ampere A100</td>
           <td>p4d.24xlarge</td>
+          <td class="gpu-cell">NVIDIA Ampere A100</td>
+          <td class="num">8</td>
           <td class="num">$21.96</td>
           <td class="num">$2.74</td>
         </tr>
@@ -181,9 +183,9 @@
         <tr>
           <td><span class="cloud-tag">AWS</span></td>
           <td>eu-west-1</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Ampere A100</td>
           <td>p4d.24xlarge</td>
+          <td class="gpu-cell">NVIDIA Ampere A100</td>
+          <td class="num">8</td>
           <td class="num">$23.72</td>
           <td class="num">$2.96</td>
         </tr>
@@ -191,9 +193,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>eastus</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Ampere A100</td>
           <td>Standard_ND96asr_A100_v4</td>
+          <td class="gpu-cell">NVIDIA Ampere A100</td>
+          <td class="num">8</td>
           <td class="num">$27.20</td>
           <td class="num">$3.40</td>
         </tr>
@@ -201,9 +203,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>westus2</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Ampere A100</td>
           <td>Standard_ND96asr_A100_v4</td>
+          <td class="gpu-cell">NVIDIA Ampere A100</td>
+          <td class="num">8</td>
           <td class="num">$27.20</td>
           <td class="num">$3.40</td>
         </tr>
@@ -211,9 +213,9 @@
         <tr>
           <td><span class="cloud-tag">AWS</span></td>
           <td>us-east-1</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Ampere A100</td>
           <td>p4de.24xlarge</td>
+          <td class="gpu-cell">NVIDIA Ampere A100</td>
+          <td class="num">8</td>
           <td class="num">$27.45</td>
           <td class="num">$3.43</td>
         </tr>
@@ -221,9 +223,9 @@
         <tr>
           <td><span class="cloud-tag">AWS</span></td>
           <td>us-west-2</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Ampere A100</td>
           <td>p4de.24xlarge</td>
+          <td class="gpu-cell">NVIDIA Ampere A100</td>
+          <td class="num">8</td>
           <td class="num">$27.45</td>
           <td class="num">$3.43</td>
         </tr>
@@ -231,9 +233,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>southcentralus</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Ampere A100</td>
           <td>Standard_ND96asr_A100_v4</td>
+          <td class="gpu-cell">NVIDIA Ampere A100</td>
+          <td class="num">8</td>
           <td class="num">$32.63</td>
           <td class="num">$4.08</td>
         </tr>
@@ -241,21 +243,173 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>westeurope</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Ampere A100</td>
           <td>Standard_ND96asr_A100_v4</td>
+          <td class="gpu-cell">NVIDIA Ampere A100</td>
+          <td class="num">8</td>
           <td class="num">$35.36</td>
           <td class="num">$4.42</td>
         </tr>
         
         
         
-        <tr id="nvidia-hopper-h100">
+        <tr class="gpu-group-start" id="nvidia-blackwell-b200">
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>europe-west4</td>
+          <td>A4 Nvidia B200 (1 gpu slice) attached to DWS Defined Duration VMs running in Netherlands</td>
+          <td class="gpu-cell">NVIDIA Blackwell B200</td>
+          <td class="num">1</td>
+          <td class="num">$8.05</td>
+          <td class="num">$8.05</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-central1</td>
+          <td>A4 Nvidia B200 (1 gpu slice) attached to DWS Defined Duration VMs running in Americas</td>
+          <td class="gpu-cell">NVIDIA Blackwell B200</td>
+          <td class="num">1</td>
+          <td class="num">$8.05</td>
+          <td class="num">$8.05</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-east4</td>
+          <td>A4 Nvidia B200 (1 gpu slice) attached to DWS Defined Duration VMs running in Northern Virginia</td>
+          <td class="gpu-cell">NVIDIA Blackwell B200</td>
+          <td class="num">1</td>
+          <td class="num">$8.05</td>
+          <td class="num">$8.05</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>europe-west4</td>
+          <td>DWS Calendar Mode A4 Nvidia B200 (1 gpu slice) in Netherlands</td>
+          <td class="gpu-cell">NVIDIA Blackwell B200</td>
+          <td class="num">1</td>
+          <td class="num">$11.28</td>
+          <td class="num">$11.28</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-central1</td>
+          <td>DWS Calendar Mode A4 Nvidia B200 (1 gpu slice) in Americas</td>
+          <td class="gpu-cell">NVIDIA Blackwell B200</td>
+          <td class="num">1</td>
+          <td class="num">$11.28</td>
+          <td class="num">$11.28</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-east4</td>
+          <td>DWS Calendar Mode A4 Nvidia B200 (1 gpu slice) in Northern Virginia</td>
+          <td class="gpu-cell">NVIDIA Blackwell B200</td>
+          <td class="num">1</td>
+          <td class="num">$11.28</td>
+          <td class="num">$11.28</td>
+        </tr>
+        
+        
+        
+        <tr class="gpu-group-start" id="nvidia-hopper-h100">
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>europe-west4</td>
+          <td>Nvidia H100 80GB GPU attached to DWS Defined Duration VMs running in Netherlands</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
+          <td class="num">$4.20</td>
+          <td class="num">$4.20</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-central1</td>
+          <td>Nvidia H100 80GB GPU attached to DWS Defined Duration VMs running in Americas</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
+          <td class="num">$4.20</td>
+          <td class="num">$4.20</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-east4</td>
+          <td>Nvidia H100 80GB GPU attached to DWS Defined Duration VMs running in Virginia</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
+          <td class="num">$4.20</td>
+          <td class="num">$4.20</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>europe-west4</td>
+          <td>Reserved Nvidia H100 80GB GPU in Netherlands in Calendar Mode</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
+          <td class="num">$4.57</td>
+          <td class="num">$4.57</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-central1</td>
+          <td>Reserved Nvidia H100 80GB GPU in Americas in Calendar Mode</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
+          <td class="num">$4.57</td>
+          <td class="num">$4.57</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-east4</td>
+          <td>Reserved Nvidia H100 80GB GPU in Virginia in Calendar Mode</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
+          <td class="num">$4.57</td>
+          <td class="num">$4.57</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>europe-west4</td>
+          <td>Reserved Nvidia H100 80GB Mega GPU in Netherlands in Calendar Mode</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
+          <td class="num">$4.84</td>
+          <td class="num">$4.84</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-central1</td>
+          <td>Reserved Nvidia H100 80GB Mega GPU in Americas in Calendar Mode</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
+          <td class="num">$4.84</td>
+          <td class="num">$4.84</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-east4</td>
+          <td>Reserved Nvidia H100 80GB Mega GPU in Virginia in Calendar Mode</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
+          <td class="num">$4.84</td>
+          <td class="num">$4.84</td>
+        </tr>
+        
+        <tr>
           <td><span class="cloud-tag">AWS</span></td>
           <td>us-east-1</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>p5.48xlarge</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">8</td>
           <td class="num">$55.04</td>
           <td class="num">$6.88</td>
         </tr>
@@ -263,9 +417,9 @@
         <tr>
           <td><span class="cloud-tag">AWS</span></td>
           <td>us-west-2</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>p5.48xlarge</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">8</td>
           <td class="num">$55.04</td>
           <td class="num">$6.88</td>
         </tr>
@@ -273,9 +427,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>eastus</td>
-          <td class="num">1</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_NC40ads_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
           <td class="num">$6.98</td>
           <td class="num">$6.98</td>
         </tr>
@@ -283,9 +437,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>eastus</td>
-          <td class="num">2</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_NC80adis_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">2</td>
           <td class="num">$13.96</td>
           <td class="num">$6.98</td>
         </tr>
@@ -293,9 +447,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>eastus2</td>
-          <td class="num">1</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_NC40ads_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
           <td class="num">$6.98</td>
           <td class="num">$6.98</td>
         </tr>
@@ -303,9 +457,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>eastus2</td>
-          <td class="num">2</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_NC80adis_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">2</td>
           <td class="num">$13.96</td>
           <td class="num">$6.98</td>
         </tr>
@@ -313,9 +467,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>westus2</td>
-          <td class="num">1</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_NC40ads_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
           <td class="num">$6.98</td>
           <td class="num">$6.98</td>
         </tr>
@@ -323,9 +477,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>westus2</td>
-          <td class="num">2</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_NC80adis_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">2</td>
           <td class="num">$13.96</td>
           <td class="num">$6.98</td>
         </tr>
@@ -333,9 +487,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>southcentralus</td>
-          <td class="num">1</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_NC40ads_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
           <td class="num">$8.38</td>
           <td class="num">$8.38</td>
         </tr>
@@ -343,9 +497,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>southcentralus</td>
-          <td class="num">2</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_NC80adis_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">2</td>
           <td class="num">$16.76</td>
           <td class="num">$8.38</td>
         </tr>
@@ -353,9 +507,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>westeurope</td>
-          <td class="num">1</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_NC40ads_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
           <td class="num">$9.08</td>
           <td class="num">$9.08</td>
         </tr>
@@ -363,19 +517,59 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>westeurope</td>
-          <td class="num">2</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_NC80adis_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">2</td>
           <td class="num">$18.16</td>
           <td class="num">$9.08</td>
         </tr>
         
         <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-central1</td>
+          <td>Nvidia H100 80GB GPU running in Americas</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
+          <td class="num">$9.80</td>
+          <td class="num">$9.80</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-east4</td>
+          <td>Nvidia H100 80GB GPU running in Virginia</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
+          <td class="num">$9.80</td>
+          <td class="num">$9.80</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-central1</td>
+          <td>Nvidia H100 80GB Plus GPU running in Americas</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
+          <td class="num">$10.34</td>
+          <td class="num">$10.34</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-east4</td>
+          <td>Nvidia H100 80GB Mega GPU running in Virginia</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
+          <td class="num">$10.34</td>
+          <td class="num">$10.34</td>
+        </tr>
+        
+        <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>eastus</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_ND96is_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">8</td>
           <td class="num">$88.49</td>
           <td class="num">$11.06</td>
         </tr>
@@ -383,9 +577,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>eastus2</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_ND96is_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">8</td>
           <td class="num">$88.49</td>
           <td class="num">$11.06</td>
         </tr>
@@ -393,9 +587,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>westus2</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_ND96is_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">8</td>
           <td class="num">$88.49</td>
           <td class="num">$11.06</td>
         </tr>
@@ -403,9 +597,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>eastus</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_ND96isr_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">8</td>
           <td class="num">$98.32</td>
           <td class="num">$12.29</td>
         </tr>
@@ -413,9 +607,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>eastus2</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_ND96isr_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">8</td>
           <td class="num">$98.32</td>
           <td class="num">$12.29</td>
         </tr>
@@ -423,29 +617,49 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>westus2</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_ND96isr_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">8</td>
           <td class="num">$98.32</td>
           <td class="num">$12.29</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>europe-west4</td>
+          <td>Nvidia H100 80GB GPU running in Netherlands</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
+          <td class="num">$12.74</td>
+          <td class="num">$12.74</td>
         </tr>
         
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>southcentralus</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_ND96is_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">8</td>
           <td class="num">$106.17</td>
           <td class="num">$13.27</td>
         </tr>
         
         <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>europe-west4</td>
+          <td>Nvidia H100 80GB Mega GPU running in Netherlands</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">1</td>
+          <td class="num">$13.45</td>
+          <td class="num">$13.45</td>
+        </tr>
+        
+        <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>westeurope</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_ND96is_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">8</td>
           <td class="num">$115.03</td>
           <td class="num">$14.38</td>
         </tr>
@@ -453,9 +667,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>southcentralus</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_ND96isr_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">8</td>
           <td class="num">$117.97</td>
           <td class="num">$14.75</td>
         </tr>
@@ -463,21 +677,21 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>westeurope</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Hopper H100</td>
           <td>Standard_ND96isr_H100_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H100</td>
+          <td class="num">8</td>
           <td class="num">$127.82</td>
           <td class="num">$15.98</td>
         </tr>
         
         
         
-        <tr id="nvidia-hopper-h200">
+        <tr class="gpu-group-start" id="nvidia-hopper-h200">
           <td><span class="cloud-tag">AWS</span></td>
           <td>us-east-1</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Hopper H200</td>
           <td>p5en.48xlarge</td>
+          <td class="gpu-cell">NVIDIA Hopper H200</td>
+          <td class="num">8</td>
           <td class="num">$63.30</td>
           <td class="num">$7.91</td>
         </tr>
@@ -485,9 +699,9 @@
         <tr>
           <td><span class="cloud-tag">AWS</span></td>
           <td>us-west-2</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Hopper H200</td>
           <td>p5en.48xlarge</td>
+          <td class="gpu-cell">NVIDIA Hopper H200</td>
+          <td class="num">8</td>
           <td class="num">$63.30</td>
           <td class="num">$7.91</td>
         </tr>
@@ -495,9 +709,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>eastus2</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Hopper H200</td>
           <td>Standard_ND96isr_H200_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H200</td>
+          <td class="num">8</td>
           <td class="num">$84.80</td>
           <td class="num">$10.60</td>
         </tr>
@@ -505,43 +719,103 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>westus2</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">NVIDIA Hopper H200</td>
           <td>Standard_ND96isr_H200_v5</td>
+          <td class="gpu-cell">NVIDIA Hopper H200</td>
+          <td class="num">8</td>
           <td class="num">$84.80</td>
           <td class="num">$10.60</td>
         </tr>
         
         
         
-        <tr id="nvidia-ada-l4">
-          <td><span class="cloud-tag">AWS</span></td>
-          <td>us-east-1</td>
-          <td class="num">1</td>
+        <tr class="gpu-group-start" id="nvidia-ada-l4">
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-east4</td>
+          <td>Nvidia L4 GPU running in Virginia</td>
           <td class="gpu-cell">NVIDIA L4</td>
-          <td>g6.xlarge</td>
-          <td class="num">$0.80</td>
-          <td class="num">$0.80</td>
+          <td class="num">1</td>
+          <td class="num">$0.56</td>
+          <td class="num">$0.56</td>
         </tr>
         
         <tr>
-          <td><span class="cloud-tag">AWS</span></td>
-          <td>us-west-2</td>
-          <td class="num">1</td>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-east4</td>
+          <td>Nvidia L4 GPU attached to DWS Defined Duration VMs running in Virginia</td>
           <td class="gpu-cell">NVIDIA L4</td>
+          <td class="num">1</td>
+          <td class="num">$0.56</td>
+          <td class="num">$0.56</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-central1</td>
+          <td>Nvidia L4 GPU attached to DWS Defined Duration VMs running in Americas</td>
+          <td class="gpu-cell">NVIDIA L4</td>
+          <td class="num">1</td>
+          <td class="num">$0.56</td>
+          <td class="num">$0.56</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>us-central1</td>
+          <td>Nvidia L4 GPU running in Americas</td>
+          <td class="gpu-cell">NVIDIA L4</td>
+          <td class="num">1</td>
+          <td class="num">$0.56</td>
+          <td class="num">$0.56</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>europe-west4</td>
+          <td>Nvidia L4 GPU attached to DWS Defined Duration VMs running in Netherlands</td>
+          <td class="gpu-cell">NVIDIA L4</td>
+          <td class="num">1</td>
+          <td class="num">$0.59</td>
+          <td class="num">$0.59</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">GCP</span></td>
+          <td>europe-west4</td>
+          <td>Nvidia L4 GPU running in Netherlands</td>
+          <td class="gpu-cell">NVIDIA L4</td>
+          <td class="num">1</td>
+          <td class="num">$0.59</td>
+          <td class="num">$0.59</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">AWS</span></td>
+          <td>us-east-1</td>
           <td>g6.xlarge</td>
+          <td class="gpu-cell">NVIDIA L4</td>
+          <td class="num">1</td>
+          <td class="num">$0.80</td>
+          <td class="num">$0.80</td>
+        </tr>
+        
+        <tr>
+          <td><span class="cloud-tag">AWS</span></td>
+          <td>us-west-2</td>
+          <td>g6.xlarge</td>
+          <td class="gpu-cell">NVIDIA L4</td>
+          <td class="num">1</td>
           <td class="num">$0.80</td>
           <td class="num">$0.80</td>
         </tr>
         
         
         
-        <tr id="nvidia-ada-l40s">
+        <tr class="gpu-group-start" id="nvidia-ada-l40s">
           <td><span class="cloud-tag">AWS</span></td>
           <td>us-east-1</td>
-          <td class="num">1</td>
-          <td class="gpu-cell">NVIDIA L40S</td>
           <td>g6e.xlarge</td>
+          <td class="gpu-cell">NVIDIA L40S</td>
+          <td class="num">1</td>
           <td class="num">$1.86</td>
           <td class="num">$1.86</td>
         </tr>
@@ -549,9 +823,9 @@
         <tr>
           <td><span class="cloud-tag">AWS</span></td>
           <td>us-west-2</td>
-          <td class="num">1</td>
-          <td class="gpu-cell">NVIDIA L40S</td>
           <td>g6e.xlarge</td>
+          <td class="gpu-cell">NVIDIA L40S</td>
+          <td class="num">1</td>
           <td class="num">$1.86</td>
           <td class="num">$1.86</td>
         </tr>
@@ -559,9 +833,9 @@
         <tr>
           <td><span class="cloud-tag">AWS</span></td>
           <td>us-east-1</td>
-          <td class="num">1</td>
-          <td class="gpu-cell">NVIDIA L40S</td>
           <td>g6e.2xlarge</td>
+          <td class="gpu-cell">NVIDIA L40S</td>
+          <td class="num">1</td>
           <td class="num">$2.24</td>
           <td class="num">$2.24</td>
         </tr>
@@ -569,21 +843,21 @@
         <tr>
           <td><span class="cloud-tag">AWS</span></td>
           <td>us-west-2</td>
-          <td class="num">1</td>
-          <td class="gpu-cell">NVIDIA L40S</td>
           <td>g6e.2xlarge</td>
+          <td class="gpu-cell">NVIDIA L40S</td>
+          <td class="num">1</td>
           <td class="num">$2.24</td>
           <td class="num">$2.24</td>
         </tr>
         
         
         
-        <tr id="amd-cdna3-mi300x">
+        <tr class="gpu-group-start" id="amd-cdna3-mi300x">
           <td><span class="cloud-tag">Azure</span></td>
           <td>eastus2</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">AMD Instinct MI300X</td>
           <td>Standard_ND96is_MI300X_v5</td>
+          <td class="gpu-cell">AMD Instinct MI300X</td>
+          <td class="num">8</td>
           <td class="num">$48.00</td>
           <td class="num">$6.00</td>
         </tr>
@@ -591,9 +865,9 @@
         <tr>
           <td><span class="cloud-tag">Azure</span></td>
           <td>eastus2</td>
-          <td class="num">8</td>
-          <td class="gpu-cell">AMD Instinct MI300X</td>
           <td>Standard_ND96isr_MI300X_v5</td>
+          <td class="gpu-cell">AMD Instinct MI300X</td>
+          <td class="num">8</td>
           <td class="num">$48.00</td>
           <td class="num">$6.00</td>
         </tr>
@@ -607,7 +881,7 @@
   <footer class="methodology">
     <h2>How this page is built</h2>
     <p>
-      Rebuilt daily from the public pricing APIs of AWS, Azure, and GCP. No human edits prices on this page. The only manual step &mdash; adding a new instance type when a cloud announces one &mdash; happens roughly two to four times a year and is recorded in a public mapping file. For benchmark performance data, see <a href="/anvil/mlperf">our MLPerf results browser</a>.
+      Rebuilt daily from the public pricing APIs of AWS, Azure, and GCP. No human edits prices on this page. The only manual step &mdash; adding a new instance type when a cloud announces one &mdash; happens as clouds release new SKUs and is recorded in a public mapping file. For benchmark performance data, see <a href="/anvil/mlperf">our MLPerf results browser</a>.
     </p>
     <p class="footer-disclaimer">
       List prices fetched from public AWS, Azure, and GCP pricing catalogs. Verify against your vendor portal before contracting. Soterra Labs has no commercial relationship with AWS, Azure, GCP, NVIDIA, AMD, or Intel; data is fetched from public APIs only. Soterra Labs does not warrant the accuracy of these values; see <a href="/legal/">Terms</a>.
@@ -615,7 +889,7 @@
   </footer>
 
   <div class="soterra-attribution">
-    Built and maintained by <strong>Soterra Labs</strong> &mdash; From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&trade;</sup>. We help vendors and enterprises make defensible GPU infrastructure decisions. See our <a href="/products">products</a> or <a href="/thinking/">recent thinking</a>.
+    <strong>Soterra Labs</strong> &mdash; From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&trade;</sup> &middot; <a href="/products">Products</a> &middot; <a href="/thinking/">Thinking</a>
   </div>
 
 </div>

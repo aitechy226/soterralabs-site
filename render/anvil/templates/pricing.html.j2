@@ -90,9 +90,9 @@
         <tr>
           <th>Cloud</th>
           <th>Region</th>
-          <th class="num"># GPUs</th>
-          <th>GPU Type</th>
           <th>Instance Type</th>
+          <th>GPU Type</th>
+          <th class="num"># GPUs</th>
           <th class="num">$/hr</th>
           <th class="num">$/GPU/hr</th>
         </tr>
@@ -100,12 +100,12 @@
       <tbody>
         {% for group in pricing.gpu_groups %}
         {% for q in group.quotes %}
-        <tr{% if loop.first %} id="{{ group.anchor_id }}"{% endif %}>
+        <tr{% if loop.first %} class="gpu-group-start" id="{{ group.anchor_id }}"{% endif %}>
           <td><span class="cloud-tag">{{ q.cloud_display }}</span></td>
           <td>{{ q.region }}</td>
-          <td class="num">{{ q.gpu_count }}</td>
-          <td class="gpu-cell">{{ group.display_name }}</td>
           <td>{{ q.instance_type }}</td>
+          <td class="gpu-cell">{{ group.display_name }}</td>
+          <td class="num">{{ q.gpu_count }}</td>
           <td class="num">${{ "%.2f"|format(q.price_per_hour_usd) }}</td>
           <td class="num">${{ "%.2f"|format(q.price_per_gpu_per_hour_usd) }}</td>
         </tr>
@@ -123,7 +123,7 @@
   <footer class="methodology">
     <h2>How this page is built</h2>
     <p>
-      Rebuilt daily from the public pricing APIs of AWS, Azure, and GCP. No human edits prices on this page. The only manual step &mdash; adding a new instance type when a cloud announces one &mdash; happens roughly two to four times a year and is recorded in a public mapping file.{% if mlperf_ready %} For benchmark performance data, see <a href="/anvil/mlperf">our MLPerf results browser</a>.{% endif %}
+      Rebuilt daily from the public pricing APIs of AWS, Azure, and GCP. No human edits prices on this page. The only manual step &mdash; adding a new instance type when a cloud announces one &mdash; happens as clouds release new SKUs and is recorded in a public mapping file.{% if mlperf_ready %} For benchmark performance data, see <a href="/anvil/mlperf">our MLPerf results browser</a>.{% endif %}
     </p>
     <p class="footer-disclaimer">
       List prices fetched from public AWS, Azure, and GCP pricing catalogs. Verify against your vendor portal before contracting. Soterra Labs has no commercial relationship with AWS, Azure, GCP, NVIDIA, AMD, or Intel; data is fetched from public APIs only. Soterra Labs does not warrant the accuracy of these values; see <a href="/legal/">Terms</a>.
@@ -131,7 +131,7 @@
   </footer>
 
   <div class="soterra-attribution">
-    Built and maintained by <strong>Soterra Labs</strong> &mdash; From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&trade;</sup>. We help vendors and enterprises make defensible GPU infrastructure decisions. See our <a href="/products">products</a> or <a href="/thinking/">recent thinking</a>.
+    <strong>Soterra Labs</strong> &mdash; From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&trade;</sup> &middot; <a href="/products">Products</a> &middot; <a href="/thinking/">Thinking</a>
   </div>
 
 </div>

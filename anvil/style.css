@@ -156,7 +156,6 @@ main { padding: 0; }
   font-size: 18px;
   color: rgba(255,255,255,0.82);
   margin-bottom: 18px;
-  max-width: 720px;
   line-height: 1.7;
 }
 .page-header .round-published {
@@ -379,29 +378,40 @@ main { padding: 0; }
   font-weight: 600;
 }
 .pricing-table tr:hover, .mlperf-table tr:hover { background: var(--bg-hover); }
-/* MLPerf table bands by GPU family — alternating chip groups get a
-   tinted row background so cross-chip transitions read at a glance.
-   Override on hover preserves the existing hover affordance. */
+/* MLPerf table bands by GPU family — workload tables are short enough
+   that alternating chip groups read cleanly as zebra. Pricing uses a
+   different mechanism (gpu-group-start, below) because its groups are
+   too imbalanced for banding to read. */
 .mlperf-table tr.gpu-band td { background: #e8eef4; }
 .mlperf-table tr.gpu-band:hover td { background: var(--bg-hover); }
+/* Pricing table — first quote of each GPU group gets a top-border accent
+   so the eye sees "new chip family starts here" without painting a full
+   band. Avoids the imbalanced-group problem (H100 has 22 rows; A100 has
+   3) where banding produced one mega-tinted block. */
+.pricing-table tr.gpu-group-start td { border-top: 2px solid var(--teal-deep); }
 .pricing-table .cloud-tag, .mlperf-table .gpu-cell {
   font-weight: 600;
   color: var(--teal-deep);
 }
-.mlperf-table .stack-cell {
-  font-size: 12px;
-  color: var(--muted);
-  font-family: 'SF Mono', Menlo, Consolas, monospace;
-  max-width: 280px;
-}
-/* Submitter + System: compact to match Stack's width footprint;
-   System names + submitter brands range up to ~30 chars and were
-   eating row real estate with default sizing. */
+/* MLPerf table column discipline. Columns:
+   (1) GPU Type · (2) Submitter · (3) System · (4) # GPUs · (5) Engine · ... */
+/* Submitter + System — names range up to ~30 chars and were eating row
+   real estate with default sizing. */
 .mlperf-table td:nth-child(2),
 .mlperf-table td:nth-child(3) {
   font-size: 12px;
   max-width: 200px;
   word-break: break-word;
+}
+/* # GPUs — small integers; shrink-wrap so the column doesn't inherit
+   default cell width and squeeze the System column above. */
+.mlperf-table td:nth-child(4),
+.mlperf-table th:nth-child(4) { width: 1%; white-space: nowrap; }
+/* Pricing Instance Type — it's an identifier (e.g. Standard_ND96isr_H100_v5,
+   p5.48xlarge); treat like one. Col 3 after the causal-order reorder. */
+.pricing-table td:nth-child(3) {
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px;
 }
 /* Engine: short pill of identifying tag — TensorRT, vLLM, LLMBoost. */
 .mlperf-table .engine-cell {

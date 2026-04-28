@@ -3,6 +3,11 @@ dev/
 *.pdf
 .DS_Store
 
+# Secrets — local credentials, NEVER committed.
+.env
+.env.local
+.env.*.local
+
 # Python — Anvil project
 **/.venv/
 **/__pycache__/

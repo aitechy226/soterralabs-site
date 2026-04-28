@@ -315,10 +315,10 @@ def test_top_result_display_format(in_memory_mlperf_db) -> None:
     in_memory_mlperf_db.commit()
     ctx = build.build_mlperf_context(in_memory_mlperf_db, NOW)
     top = ctx.workloads[0].top_result_display
-    assert top.startswith("top: ")
+    assert top.startswith("top per-GPU: ")
     assert "7,300" in top                # 58_400 / 8 = 7,300 per-chip
     assert "58,400" in top               # absolute system total
-    assert "tok/s/GPU" in top
+    assert "tok/s" in top                # unit appears (per-GPU + system)
     assert "system" in top
     assert "NVIDIA 8× B200" in top
 

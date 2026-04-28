@@ -89,7 +89,7 @@ class Workload(_Frozen):
     display_label: str                  # 'llama2-70b-99 — Server'
     metric_unit_display: str            # 'Tokens/s' | 'Samples/s' | 'Queries/s'
     submission_count: int
-    top_result_display: str             # 'top: 14,200 tok/s (NVIDIA 8×B200)'
+    top_result_display: str             # 'top per-GPU: 14,200 tok/s · 113,600 tok/s system (NVIDIA 8× B200)'
     is_open_by_default: bool            # only the first workload defaults open
     results: tuple[MlperfResult, ...]   # sorted DESC by metric_value, then submitter ASC
 

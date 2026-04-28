@@ -28,7 +28,7 @@
   "license": "https://soterralabs.ai/legal/",
   "isAccessibleForFree": true,
   "dateModified": "{{ mlperf.fetched_at_iso }}",
-  "keywords": "MLPerf, MLPerf Inference, MLCommons benchmarks, llama2, mixtral, stable diffusion, BERT, gpt-j, H100, H200, B200, MI300X"
+  "keywords": "MLPerf, MLPerf Inference, MLCommons benchmarks, llama2, llama3.1, mixtral, stable diffusion, H100, H200, B200, GB200, MI300X, MI325X"
 }
 </script>
 <script type="application/ld+json">
@@ -73,10 +73,6 @@
   </div>
   {% endif %}
 
-  <p class="caveat">
-    <strong>About these numbers.</strong> MLPerf submissions are tuned by vendors for the benchmark and run on highly optimized configurations &mdash; specific batch sizes, quantization choices, and serving stacks selected to maximize the metric. Production workloads with different traffic patterns, accuracy requirements, or stack constraints will measure differently. Use these results to compare systems against each other on a common task, not to size capacity for your own deployment.
-  </p>
-
   <div class="info-card">
     <h3>How to read these tables</h3>
     <ul>
@@ -84,9 +80,7 @@
         <strong>llama2-70b-99</strong> (Meta Llama 2 70B chat),
         <strong>llama3.1-405b</strong> (Meta Llama 3.1 405B &mdash; the largest tracked model),
         <strong>mixtral-8x7b</strong> (Mistral Mixtral mixture-of-experts),
-        <strong>stable-diffusion-xl</strong> (text-to-image),
-        <strong>bert-99</strong> (BERT-Large encoder for text classification),
-        <strong>gptj-99</strong> (GPT-J 6B text generation).
+        <strong>stable-diffusion-xl</strong> (text-to-image).
         The <strong>-99</strong> / <strong>-99.9</strong> suffix is the accuracy track (see below).
       </li>
       <li><strong>Server vs Offline</strong> &mdash; MLPerf's two scenario types. <strong>Server</strong> simulates real-time traffic with per-query latency limits (the system has to keep up with arriving requests). <strong>Offline</strong> is batch processing with no latency constraint &mdash; pure peak throughput. The same hardware will score differently on each.</li>
@@ -118,29 +112,27 @@
         <table class="mlperf-table">
           <thead>
             <tr>
-              <th class="num"># GPUs</th>
               <th>GPU Type</th>
               <th>Submitter</th>
               <th>System</th>
+              <th class="num"># GPUs</th>
               <th>Engine</th>
               <th class="num">{{ w.metric_unit_display }}/GPU</th>
               <th class="num">{{ w.metric_unit_display }} (system)</th>
               <th class="num">Accuracy</th>
-              <th>Submission</th>
             </tr>
           </thead>
           <tbody>
             {% for r in w.results %}
             <tr{% if r.band %} class="gpu-band"{% endif %}>
-              <td class="num">{{ r.accelerator_count }}</td>
               <td class="gpu-cell">{{ r.display_gpu }}</td>
               <td>{{ r.submitter }}</td>
               <td>{{ r.system_name }}</td>
+              <td class="num">{{ r.accelerator_count }}</td>
               <td class="engine-cell">{{ r.engine }}</td>
               <td class="num primary">{{ "{:,.1f}".format(r.metric_per_chip) }}</td>
               <td class="num secondary">{{ "{:,.1f}".format(r.metric_value) }}</td>
               <td class="num">{{ r.accuracy }}</td>
-              <td>{% if r.submission_url %}<a href="{{ r.submission_url }}" class="submission-link" rel="nofollow noopener">[link]</a>{% else %}&mdash;{% endif %}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -158,7 +150,7 @@
   <footer class="methodology">
     <h2>How this page is built</h2>
     <p>
-      Rebuilt weekly from MLCommons-published CSVs. No human edits results on this page. New rounds appear after a one-time schema check by Soterra Labs to confirm the source columns have not changed; this typically takes a few days after MLCommons publishes. For current cloud GPU pricing, see <a href="/anvil/pricing">our pricing tracker</a>.
+      Rebuilt weekly from MLCommons-published JSON results. No human edits results on this page. New rounds appear after a one-time schema check by Soterra Labs to confirm the source fields have not changed; this typically takes a few days after MLCommons publishes. Full submission set for the current round: <a href="https://github.com/mlcommons/inference_results_{{ mlperf.latest_round }}" rel="nofollow noopener">github.com/mlcommons/inference_results_{{ mlperf.latest_round }}</a>. For current cloud GPU pricing, see <a href="/anvil/pricing">our pricing tracker</a>.
     </p>
     <p class="footer-disclaimer">
       MLPerf and MLCommons are trademarks of MLCommons. Soterra Labs is not affiliated with MLCommons. Results are reproduced from public MLCommons publications; refer to the linked submission pages for full system configuration. Soterra Labs has no commercial relationship with NVIDIA, AMD, Intel, or any submitter shown. See <a href="/legal/" target="_blank" rel="noopener">Terms</a>.
@@ -166,7 +158,7 @@
   </footer>
 
   <div class="soterra-attribution">
-    Built and maintained by <strong>Soterra Labs</strong> &mdash; From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&trade;</sup>. We help vendors and enterprises make defensible GPU infrastructure decisions. See our <a href="/products">products</a> or <a href="/thinking/">recent thinking</a>.
+    <strong>Soterra Labs</strong> &mdash; From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&trade;</sup> &middot; <a href="/products">Products</a> &middot; <a href="/thinking/">Thinking</a>
   </div>
 
 </div>

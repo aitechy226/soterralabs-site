@@ -435,15 +435,30 @@ def _split_system_stack(raw_system: str) -> tuple[str, str]:
       'Supermicro AS-8125GS-TNMR2'
         → ('Supermicro AS-8125GS-TNMR2', '—')
 
+      ''  (empty / not reported by submitter)
+        → ('—', '—')
+
     The parenthetical content travels in its own table column so the
     System cell stays narrow and the (buyer-relevant) software-stack
     piece is scannable. Trailing `)` is stripped; em-dash for
-    submissions with no parens.
+    submissions with no parens or no system name at all.
     """
     if "(" not in raw_system:
-        return raw_system.strip(), "—"
+        return raw_system.strip() or "—", "—"
     head, _, tail = raw_system.partition("(")
-    return head.strip(), tail.rstrip(") ").strip() or "—"
+    return head.strip() or "—", tail.rstrip(") ").strip() or "—"
+
+
+def _clean_submitter(raw: str) -> str:
+    """Convert MLCommons submitter token to display form.
+
+    Submitters arrive with `_` as space-separator
+    (`Quanta_Cloud_Technology`, `Dell_MangoBoost`). Replace with
+    spaces. Joint submissions (Dell+MangoBoost) read fine as
+    'Dell MangoBoost'; if Sri ever wants explicit ' + ' for known
+    partnerships, add a per-pair mapping here.
+    """
+    return raw.replace("_", " ").strip() or "—"
 
 
 def _row_to_mlperf_result(row: tuple, band: int) -> MlperfResult:
@@ -469,7 +484,7 @@ def _row_to_mlperf_result(row: tuple, band: int) -> MlperfResult:
     )
     return MlperfResult(
         display_gpu=display_gpu,
-        submitter=row[5],
+        submitter=_clean_submitter(row[5]),
         system_name=system_clean,
         stack=stack,
         engine=_engine_short(software),
@@ -499,18 +514,19 @@ def _assign_bands(rows: list[tuple]) -> list[tuple[tuple, int]]:
 
 
 def _top_result_display(top_row: tuple, metric: str) -> str:
-    """'top: 4,017 tok/s/GPU · 32,139 system (GigaComputing 8× MI325X)'.
+    """'top per-GPU: 4,017 tok/s · 32,139 tok/s system (GigaComputing 8× MI325X)'.
     Built from the per-chip-leader row (already first by the SQL order).
     Per-chip first because that's the buyer-comparable rate; system
-    total alongside as secondary context.
+    total alongside as secondary context. Mara fix: 'per-GPU' prefix
+    avoids the read-as-absolute-claim ambiguity.
     """
     accel_count = int(top_row[4])
     metric_value = float(top_row[8])
     per_chip = metric_value / accel_count if accel_count > 0 else metric_value
     unit = metric_unit_short(metric)
     return (
-        f"top: {per_chip:,.0f} {unit}/GPU · "
-        f"{metric_value:,.0f} system "
+        f"top per-GPU: {per_chip:,.0f} {unit} · "
+        f"{metric_value:,.0f} {unit} system "
         f"({top_row[5]} {accel_count}× {gpu_short_name(top_row[2])})"
     )
 
