@@ -84,35 +84,36 @@
 
   <p class="scroll-hint">Scroll table sideways to see all columns &rarr;</p>
 
-  {% for group in pricing.gpu_groups %}
-  <section class="pricing-section" id="{{ group.anchor_id }}">
-    <h2>{{ group.display_name }} <span class="canonical-id">{{ group.canonical_id }}</span></h2>
-    <div class="table-scroll">
-      <table class="pricing-table">
-        <thead>
-          <tr>
-            <th>Cloud</th>
-            <th>Region</th>
-            <th>Instance</th>
-            <th class="num">$/hr</th>
-            <th class="num">$/GPU/hr</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for q in group.quotes %}
-          <tr>
-            <td><span class="cloud-tag">{{ q.cloud_display }}</span></td>
-            <td>{{ q.region }}</td>
-            <td>{{ q.instance_type }} ({{ q.gpu_count }}&times;)</td>
-            <td class="num">${{ "%.2f"|format(q.price_per_hour_usd) }}</td>
-            <td class="num">${{ "%.2f"|format(q.price_per_gpu_per_hour_usd) }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </section>
-  {% endfor %}
+  <div class="table-scroll">
+    <table class="pricing-table">
+      <thead>
+        <tr>
+          <th>Cloud</th>
+          <th>Region</th>
+          <th class="num"># GPUs</th>
+          <th>GPU Type</th>
+          <th>Instance Type</th>
+          <th class="num">$/hr</th>
+          <th class="num">$/GPU/hr</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for group in pricing.gpu_groups %}
+        {% for q in group.quotes %}
+        <tr{% if loop.first %} id="{{ group.anchor_id }}"{% endif %}>
+          <td><span class="cloud-tag">{{ q.cloud_display }}</span></td>
+          <td>{{ q.region }}</td>
+          <td class="num">{{ q.gpu_count }}</td>
+          <td class="gpu-cell">{{ group.display_name }}</td>
+          <td>{{ q.instance_type }}</td>
+          <td class="num">${{ "%.2f"|format(q.price_per_hour_usd) }}</td>
+          <td class="num">${{ "%.2f"|format(q.price_per_gpu_per_hour_usd) }}</td>
+        </tr>
+        {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
   {% else %}
   <p class="caveat">
     <strong>No pricing data available.</strong> The first fetch has not completed yet, or all fetchers are currently failing. Check back soon.
