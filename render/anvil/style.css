@@ -174,8 +174,12 @@ nav.site-nav {
   }
   .nav-links .has-children .dropdown li { text-align: center; }
   .nav-links .has-children .dropdown a {
-    padding: 10px 24px;
-    font-size: 11px;
+    padding: 6px 24px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    text-transform: none;
+    opacity: 0.75;
     color: var(--muted);
     text-align: center;
   }
