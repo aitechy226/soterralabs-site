@@ -84,13 +84,21 @@
       });
     })();
     // Live relative-time. Server bakes "Just now" / "53 minutes ago" at
-    // build time; that string goes stale between cron runs. Any element
-    // with data-iso="<ISO 8601>" gets its textContent rewritten on page
-    // load with the up-to-date relative against the visitor's clock.
+    // build time; that string goes stale between cron runs AND when a
+    // visitor leaves the tab open for hours after JS first ran. Fix:
+    // (1) re-run on a 60s interval, (2) re-run when the tab becomes
+    // visible again (catches "left open overnight" case).
+    // Python writes 6-digit microseconds (.123456); some browsers
+    // truncate, some don't — normalize to milliseconds before parsing
+    // for cross-browser safety.
     (function() {
-      function relativeFrom(isoString, now) {
-        var then = new Date(isoString);
-        if (isNaN(then.getTime())) return null;
+      function parseIso(s) {
+        if (!s) return null;
+        var clean = s.replace(/\.(\d{3})\d+(?=[+\-Z])/, '.$1');
+        var d = new Date(clean);
+        return isNaN(d.getTime()) ? null : d;
+      }
+      function relativeFrom(then, now) {
         var diffSec = Math.max(0, (now.getTime() - then.getTime()) / 1000);
         if (diffSec < 60) return 'Just now';
         var m = Math.floor(diffSec / 60);
@@ -109,10 +117,17 @@
         if (mo === 1) return '1 month ago';
         return mo + ' months ago';
       }
-      var now = new Date();
-      document.querySelectorAll('[data-iso]').forEach(function(el) {
-        var rel = relativeFrom(el.getAttribute('data-iso'), now);
-        if (rel) el.textContent = rel;
+      function refresh() {
+        var now = new Date();
+        document.querySelectorAll('[data-iso]').forEach(function(el) {
+          var then = parseIso(el.getAttribute('data-iso'));
+          if (then) el.textContent = relativeFrom(then, now);
+        });
+      }
+      refresh();
+      setInterval(refresh, 60000);
+      document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) refresh();
       });
     })();
   </script>
