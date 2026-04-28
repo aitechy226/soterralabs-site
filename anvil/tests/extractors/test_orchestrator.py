@@ -121,10 +121,14 @@ def test_main_runs_clean_against_temp_db(
     the comprehension, logging emits the expected messages, connection
     closes cleanly.
 
-    Without this test, a typo in `main()` ships green and crashes the
-    first cron run."""
+    The registry is monkeypatched to empty so the loop emits `skipped`
+    audit rows for all 9 engines without firing live HTTP. The
+    end-to-end orchestrator test (with vLLM upstream mocked) lives in
+    test_orchestrator_extraction.py — different concerns, different
+    test surface."""
     db_path = tmp_path / "engine_facts.sqlite"
     monkeypatch.setattr(extract_all_engines, "default_db_path", lambda: db_path)
+    monkeypatch.setattr(extract_all_engines, "_ENGINE_EXTRACTORS", {})
 
     with caplog.at_level(logging.INFO, logger="scripts.extract_all_engines"):
         main()
@@ -138,3 +142,6 @@ def test_main_runs_clean_against_temp_db(
     # comprehension typo that emits the wrong attribute would surface here.
     assert "vllm" in log_text
     assert "deepspeed-mii" in log_text
+    # Loop ran end-to-end and emitted the summary line.
+    assert "run complete" in log_text
+    assert "skipped=9" in log_text

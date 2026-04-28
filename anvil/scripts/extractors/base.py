@@ -71,6 +71,12 @@ class Evidence:
     even after upstream edits the file, defeating the §7.1 evidence
     liveness validator. The `commit_sha` field exists to make the
     pinning auditable.
+
+    `note` carries a human-readable reason when a fact's `fact_value`
+    is empty (the engine doesn't expose this surface; the parser
+    couldn't extract; the path moved upstream). Renderer reads this
+    for the mobile-fallback `data-reason` attr (per Jake's Wave 1A
+    Option C scope rules — empty-cell tooltip discipline).
     """
 
     source_url: str
@@ -78,6 +84,7 @@ class Evidence:
     fetched_at: str  # ISO 8601 UTC, required from caller
     source_path: str | None = None   # e.g., "Dockerfile:7" or "vllm/api_server.py:412"
     commit_sha: str | None = None    # pinned commit when source_type == "github_file"
+    note: str | None = None          # human-readable reason for empty-value facts (Wave 1B)
 
 
 @dataclass(frozen=True)
@@ -213,6 +220,7 @@ CREATE TABLE IF NOT EXISTS evidence_links (
     source_path TEXT,
     commit_sha  TEXT,
     fetched_at  TEXT    NOT NULL,
+    note        TEXT,
     FOREIGN KEY (fact_id) REFERENCES facts(id)
 );
 

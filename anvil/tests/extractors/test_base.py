@@ -184,6 +184,29 @@ def test_evidence_is_frozen() -> None:
         ev.source_url = "https://attacker.example"  # type: ignore[misc]
 
 
+def test_evidence_note_field_is_optional() -> None:
+    """`note` field added in Wave 1B for the empty-cell mobile-fallback
+    `data-reason` attr. Must be optional so Wave 1A's existing Evidence
+    construction sites still work without modification (backward-compat).
+    Default is None; explicit string is accepted."""
+    # No note: backward-compat with Wave 1A construction sites
+    ev_no_note = Evidence(
+        source_url="https://example.com",
+        source_type="github_file",
+        fetched_at="2026-04-28T12:00:00+00:00",
+    )
+    assert ev_no_note.note is None
+
+    # Explicit note: empty-cell facts carry a data-reason
+    ev_with_note = Evidence(
+        source_url="https://github.com/ollama/ollama/blob/abc/Dockerfile",
+        source_type="github_file",
+        fetched_at="2026-04-28T12:00:00+00:00",
+        note="Go project — Python not pinned in Dockerfile",
+    )
+    assert ev_with_note.note == "Go project — Python not pinned in Dockerfile"
+
+
 # ============================================================
 # 6. Evidence requires fetched_at (no default factory)
 # ============================================================

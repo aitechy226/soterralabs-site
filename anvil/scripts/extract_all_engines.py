@@ -24,11 +24,29 @@ from pathlib import Path
 from scripts._fetcher_base import now_iso
 from scripts.extractors.base import (
     Engine,
+    Extractor,
+    Fact,
     ensure_engine_facts_schema,
     load_engines,
 )
+from scripts.extractors.vllm import VllmExtractor
 
 log = logging.getLogger(__name__)
+
+#: Registry mapping `engines.yaml` ids → per-engine Extractor classes.
+#: Wave 1B.1 ships vLLM only; Waves 1B.2 / 1C / 1D append entries here
+#: as each engine module lands. Engines absent from this dict are
+#: skipped (logged but not failed) — the orchestrator runs cleanly even
+#: when the canonical YAML is ahead of the implementations.
+_ENGINE_EXTRACTORS: dict[str, type[Extractor]] = {
+    "vllm": VllmExtractor,
+}
+
+#: Status values written to extraction_runs.status. Open-coded here so
+#: the audit-row writer + the test invariants share the same set.
+STATUS_SUCCESS = "success"
+STATUS_FAILED = "failed"
+STATUS_SKIPPED = "skipped"
 
 
 def default_db_path() -> Path:
@@ -100,21 +118,182 @@ def init_run(
     return conn, engines
 
 
-def main() -> None:
-    """Cron entrypoint. Wave 1A: bootstrap only.
+def insert_facts(
+    conn: sqlite3.Connection,
+    engine_id: str,
+    facts: list[Fact],
+    extracted_at: str,
+) -> int:
+    """Insert facts + evidence_links for one engine in a single
+    implicit transaction. Caller commits on success or rolls back
+    on failure — this function does not commit/rollback itself.
 
-    Wave 1B+ extends this to loop engines, instantiate each
-    extractor, wrap in try/except, log to extraction_runs, INSERT
-    facts + evidence_links.
+    Returns the count of facts inserted. Each Fact has 1+ Evidence
+    rows linked via fact_id (the autoincrement PK from `facts`).
+
+    Per Wave 1B PRODUCE §6.6 Decision 6 (Jen Q6 — highest-risk):
+    if any single Fact's Evidence INSERT fails, the entire engine's
+    facts must roll back so we don't leave half a row set behind.
+    Implicit transaction makes that automatic; the caller's
+    `conn.rollback()` covers it.
+    """
+    insert_fact_sql = (
+        "INSERT INTO facts "
+        "(engine_id, category, fact_type, fact_value, extracted_at) "
+        "VALUES (?, ?, ?, ?, ?)"
+    )
+    insert_ev_sql = (
+        "INSERT INTO evidence_links "
+        "(fact_id, source_url, source_type, source_path, "
+        "commit_sha, fetched_at, note) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?)"
+    )
+    for fact in facts:
+        cur = conn.execute(
+            insert_fact_sql,
+            (engine_id, fact.category, fact.fact_type, fact.fact_value, extracted_at),
+        )
+        fact_id = cur.lastrowid
+        for ev in fact.evidence:
+            conn.execute(
+                insert_ev_sql,
+                (fact_id, ev.source_url, ev.source_type, ev.source_path,
+                 ev.commit_sha, ev.fetched_at, ev.note),
+            )
+    return len(facts)
+
+
+def insert_extraction_run(
+    conn: sqlite3.Connection,
+    engine_id: str,
+    started_at: str,
+    finished_at: str,
+    status: str,
+    facts_extracted: int,
+    error_message: str | None,
+) -> None:
+    """Append one row to `extraction_runs` — the per-engine audit log.
+
+    Always called, regardless of status: success rows for the cron
+    log, failed rows so a downstream alerting cron (Wave 1G)
+    surfaces extraction failures without scanning logs.
+    """
+    conn.execute(
+        "INSERT INTO extraction_runs "
+        "(engine_id, started_at, finished_at, status, facts_extracted, error_message) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (engine_id, started_at, finished_at, status, facts_extracted, error_message),
+    )
+
+
+def extract_one_engine(
+    conn: sqlite3.Connection,
+    engine: Engine,
+    extractor: Extractor,
+) -> tuple[str, int]:
+    """Run one engine's extractor and persist facts + audit row.
+
+    Per-engine try/except is the cross-engine isolation invariant
+    (Wave 1B PRODUCE §6.6 Decision 6): a failure in vLLM extraction
+    must NOT prevent the next engine from running.
+
+    Failure path is three-layered so the original exception is never
+    masked: (a) `conn.rollback()` is wrapped — a rollback failure
+    (closed connection, missing DB file) is logged separately and
+    does NOT replace the primary exception; (b) the audit-row write
+    has its own try/except, since FK violations or DB lock errors
+    on the audit row would otherwise re-raise; (c) the original
+    `exc` is logged last, after both side-effect attempts.
+
+    Returns (status, facts_count). Status is one of STATUS_SUCCESS /
+    STATUS_FAILED so the caller can accumulate counts without
+    conflating "succeeded with 0 facts" against "failed."
+    """
+    started_at = now_iso()
+    try:
+        facts = extractor.extract()
+        insert_facts(conn, engine.id, facts, extracted_at=now_iso())
+        insert_extraction_run(
+            conn, engine.id, started_at, now_iso(),
+            STATUS_SUCCESS, len(facts), None,
+        )
+        conn.commit()
+        log.info("engine %s: %d facts extracted", engine.id, len(facts))
+        return STATUS_SUCCESS, len(facts)
+    except Exception as exc:  # noqa: BLE001 — orchestrator owns the boundary
+        try:
+            conn.rollback()  # drop any half-inserted facts before audit row
+        except Exception as rb_exc:  # noqa: BLE001
+            log.error(
+                "engine %s: rollback itself failed: %s",
+                engine.id, rb_exc, exc_info=True,
+            )
+        try:
+            insert_extraction_run(
+                conn, engine.id, started_at, now_iso(),
+                STATUS_FAILED, 0, str(exc),
+            )
+            conn.commit()
+        except Exception:  # noqa: BLE001
+            log.error(
+                "engine %s: also failed to write audit row", engine.id,
+                exc_info=True,
+            )
+        log.error("engine %s: extraction failed: %s", engine.id, exc, exc_info=True)
+        return STATUS_FAILED, 0
+
+
+def run_extraction_loop(
+    conn: sqlite3.Connection,
+    engines: list[Engine],
+) -> tuple[int, int, int]:
+    """Iterate engines, dispatch to each registered extractor.
+
+    Engines without a registered extractor (canonical YAML ahead of
+    implementations during Wave 1B/C/D rollout) are logged + skipped
+    — a `skipped` audit row is still written so the cron has full
+    coverage. Returns (success_count, failed_count, skipped_count).
+    """
+    success = failed = skipped = 0
+    for engine in engines:
+        extractor_cls = _ENGINE_EXTRACTORS.get(engine.id)
+        if extractor_cls is None:
+            started = now_iso()
+            insert_extraction_run(
+                conn, engine.id, started, started,
+                STATUS_SKIPPED, 0, "no extractor registered for this engine yet",
+            )
+            conn.commit()
+            log.info("engine %s: skipped (no extractor registered)", engine.id)
+            skipped += 1
+            continue
+        status, _ = extract_one_engine(conn, engine, extractor_cls())
+        if status == STATUS_SUCCESS:
+            success += 1
+        else:
+            failed += 1
+    return success, failed, skipped
+
+
+def main() -> None:
+    """Cron entrypoint. Bootstrap + per-engine extraction loop.
+
+    Wave 1B.1: vLLM only registered. Subsequent waves append entries
+    to `_ENGINE_EXTRACTORS`. Engines without a registered extractor
+    are skipped (logged + audited), not failed — keeps the cron
+    runnable while the per-engine modules are still rolling out.
     """
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     conn, engines = init_run()
     try:
-        # Wave 1A: prove the foundation runs cleanly. Subsequent waves
-        # add the actual extraction loop here.
         engine_ids = [e.id for e in engines]
         log.info("engine-facts foundation: schema OK; %d engines loaded", len(engines))
         log.info("engine ids: %s", ", ".join(engine_ids))
+        success, failed, skipped = run_extraction_loop(conn, engines)
+        log.info(
+            "engine-facts run complete: success=%d failed=%d skipped=%d",
+            success, failed, skipped,
+        )
     finally:
         conn.close()
 
