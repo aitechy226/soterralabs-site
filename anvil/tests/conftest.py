@@ -49,6 +49,22 @@ def in_memory_mlperf_db() -> Iterator[sqlite3.Connection]:
     conn.close()
 
 
+@pytest.fixture
+def in_memory_engine_facts_conn() -> Iterator[sqlite3.Connection]:
+    """In-memory engine_facts.sqlite with the production schema bootstrapped.
+
+    Uses the production `ensure_engine_facts_schema()` (not a parallel
+    schema string) so the bootstrap path itself is exercised by the
+    fixture — the tests inherit FK enforcement automatically."""
+    from scripts.extractors.base import ensure_engine_facts_schema
+
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    ensure_engine_facts_schema(conn)
+    yield conn
+    conn.close()
+
+
 _PRICING_SCHEMA = """
 CREATE TABLE price_quotes (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
