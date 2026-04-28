@@ -36,6 +36,45 @@ def default_db_path() -> Path:
     return Path(__file__).resolve().parent.parent / "data" / "pricing.sqlite"
 
 
+# Schema bootstrap — anvil/data/*.sqlite is gitignored, so the first
+# fetcher run on any fresh checkout (cron runner, new dev box) hits an
+# empty file with no tables. Idempotent CREATE IF NOT EXISTS makes the
+# fetcher self-bootstrapping; on subsequent runs the statements no-op.
+_PRICING_SCHEMA_SQL = """
+CREATE TABLE IF NOT EXISTS price_quotes (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    fetched_at      TEXT    NOT NULL,
+    cloud           TEXT    NOT NULL,
+    region          TEXT    NOT NULL,
+    instance_type   TEXT    NOT NULL,
+    gpu             TEXT    NOT NULL,
+    gpu_count       INTEGER NOT NULL,
+    price_per_hour_usd  REAL NOT NULL,
+    source_url      TEXT    NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_quotes_cloud_gpu
+    ON price_quotes(cloud, gpu, fetched_at);
+CREATE INDEX IF NOT EXISTS idx_quotes_fetched_at
+    ON price_quotes(fetched_at);
+
+CREATE TABLE IF NOT EXISTS fetch_runs (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    cloud           TEXT    NOT NULL,
+    started_at      TEXT    NOT NULL,
+    finished_at     TEXT,
+    status          TEXT    NOT NULL,
+    rows_inserted   INTEGER,
+    error_message   TEXT
+);
+"""
+
+
+def _ensure_pricing_schema(conn: sqlite3.Connection) -> None:
+    """Idempotent CREATE IF NOT EXISTS for the pricing tables + indexes."""
+    conn.executescript(_PRICING_SCHEMA_SQL)
+    conn.commit()
+
+
 @contextmanager
 def fetch_run(
     cloud: str,
@@ -55,6 +94,7 @@ def fetch_run(
     db_path = db_path or default_db_path()
     db_path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(db_path))
+    _ensure_pricing_schema(conn)
     started = now_fn()
 
     cur = conn.cursor()

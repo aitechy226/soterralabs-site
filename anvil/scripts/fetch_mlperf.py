@@ -261,6 +261,54 @@ def process_row(
 
 # ---- run lifecycle ----
 
+# Schema bootstrap — anvil/data/*.sqlite is gitignored; first run on a
+# fresh checkout (cron runner, new dev box) hits an empty file. Idempotent
+# CREATE IF NOT EXISTS makes the fetcher self-bootstrapping.
+_MLPERF_SCHEMA_SQL = """
+CREATE TABLE IF NOT EXISTS mlperf_results (
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    round             TEXT    NOT NULL,
+    submitter         TEXT    NOT NULL,
+    system_name       TEXT    NOT NULL,
+    accelerator       TEXT    NOT NULL,
+    accelerator_count INTEGER NOT NULL,
+    gpu               TEXT,
+    model             TEXT    NOT NULL,
+    scenario          TEXT    NOT NULL,
+    metric            TEXT    NOT NULL,
+    metric_value      REAL    NOT NULL,
+    accuracy          TEXT,
+    submission_url    TEXT,
+    raw_row           TEXT    NOT NULL,
+    quarantined       INTEGER NOT NULL DEFAULT 0,
+    quarantine_reason TEXT,
+    fetched_at        TEXT    NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_mlperf_round
+    ON mlperf_results(round);
+CREATE INDEX IF NOT EXISTS idx_mlperf_gpu
+    ON mlperf_results(gpu);
+CREATE INDEX IF NOT EXISTS idx_mlperf_model_scenario
+    ON mlperf_results(model, scenario);
+
+CREATE TABLE IF NOT EXISTS fetch_runs (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    cloud           TEXT    NOT NULL,
+    started_at      TEXT    NOT NULL,
+    finished_at     TEXT,
+    status          TEXT    NOT NULL,
+    rows_inserted   INTEGER,
+    error_message   TEXT
+);
+"""
+
+
+def _ensure_mlperf_schema(conn: sqlite3.Connection) -> None:
+    """Idempotent CREATE IF NOT EXISTS for mlperf tables + indexes."""
+    conn.executescript(_MLPERF_SCHEMA_SQL)
+    conn.commit()
+
+
 @contextmanager
 def mlperf_fetch_run(
     round_id: str,
@@ -276,6 +324,7 @@ def mlperf_fetch_run(
     db_path = db_path or DEFAULT_DB_PATH
     db_path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(db_path))
+    _ensure_mlperf_schema(conn)
     started = now_fn()
     cur = conn.cursor()
     cur.execute(
