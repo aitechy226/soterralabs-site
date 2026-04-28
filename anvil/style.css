@@ -25,7 +25,7 @@
   --border:      #e5e7eb;
   --bg:          #ffffff;
   --bg-alt:      #f5f7fa;
-  --bg-hover:    rgba(74, 222, 128, 0.18);  /* brand-green at band-equivalent strength — distinct hue from band tint #f6f9fb */
+  --bg-hover:    rgba(74, 222, 128, 0.12);  /* brand-green hover — lighter than the row band so hover reads as 'on top' */
   --amber-bg:    #fffbeb;
   --amber-bdr:   #f59e0b;
   --amber-tx:    #78350f;
@@ -382,7 +382,7 @@ main { padding: 0; }
 /* MLPerf table bands by GPU family — alternating chip groups get a
    tinted row background so cross-chip transitions read at a glance.
    Override on hover preserves the existing hover affordance. */
-.mlperf-table tr.gpu-band td { background: #f6f9fb; }
+.mlperf-table tr.gpu-band td { background: #e8eef4; }
 .mlperf-table tr.gpu-band:hover td { background: var(--bg-hover); }
 .pricing-table .cloud-tag, .mlperf-table .gpu-cell {
   font-weight: 600;
