@@ -226,6 +226,17 @@ def build_pricing_context(conn: sqlite3.Connection, now: datetime) -> PricingCon
             source_url=r[6],
         ))
 
+    # Sort by display-name (vendor prefix stripped) so the anchor nav
+    # reads alphabetically — Ampere A100, Hopper H100, …, MI300X —
+    # rather than canonical-id alphabetical (which front-loads AMD).
+    def _sort_key(item: tuple[str, list]) -> str:
+        return (
+            gpu_display_name(item[0])
+            .replace("NVIDIA ", "")
+            .replace("AMD Instinct ", "")
+            .replace("Intel ", "")
+        )
+
     gpu_groups = tuple(
         GpuGroup(
             canonical_id=cid,
@@ -233,7 +244,7 @@ def build_pricing_context(conn: sqlite3.Connection, now: datetime) -> PricingCon
             anchor_id=cid,
             quotes=tuple(quotes),
         )
-        for cid, quotes in sorted(groups_by_id.items())
+        for cid, quotes in sorted(groups_by_id.items(), key=_sort_key)
     )
 
     return PricingContext(
