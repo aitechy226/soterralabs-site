@@ -147,14 +147,21 @@ nav.site-nav {
     z-index: 100;
   }
   .nav-links.open { display: flex; }
+  .nav-links li {
+    width: 100%;
+    text-align: center;
+  }
   .nav-links li a {
     display: block;
     padding: 14px 24px;
     font-size: 12px;
     border-radius: 0;
     letter-spacing: 1.5px;
+    text-align: center;
   }
-  /* Mobile dropdown — flatten to inline list under Reference */
+  /* Mobile dropdown — flatten to inline list under Reference;
+     center-aligned to match parent items, smaller + muted to read
+     as sub-items without indentation. */
   .nav-links .has-children .dropdown {
     position: static;
     display: block;
@@ -163,12 +170,18 @@ nav.site-nav {
     background: transparent;
     margin: 0;
     padding: 0;
+    width: 100%;
   }
+  .nav-links .has-children .dropdown li { text-align: center; }
   .nav-links .has-children .dropdown a {
-    padding-left: 40px;
+    padding: 10px 24px;
     font-size: 11px;
     color: var(--muted);
+    text-align: center;
   }
+  /* Hide the desktop dropdown arrow (▾) on mobile — sub-items render
+     directly below, so the affordance is redundant. */
+  .has-children > a::after { display: none; }
 }
 
 /* ---- MAIN ---- */
