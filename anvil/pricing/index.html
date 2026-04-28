@@ -39,7 +39,7 @@
   "headline": "Live Cloud GPU Pricing",
   "description": "Current list-price hourly rates for GPU instances on AWS, Azure, and GCP, refreshed daily.",
   "url": "https://soterralabs.ai/anvil/pricing",
-  "dateModified": "2026-04-28T03:05:55.383510+00:00",
+  "dateModified": "2026-04-28T02:20:18.242392+00:00",
   "publisher": {"@type": "Organization", "name": "Soterra Labs"}
 }
 </script>
@@ -53,7 +53,7 @@
   "creator": {"@type": "Organization", "name": "Soterra Labs"},
   "license": "https://soterralabs.ai/legal/",
   "isAccessibleForFree": true,
-  "dateModified": "2026-04-28T03:05:55.383510+00:00",
+  "dateModified": "2026-04-28T02:20:18.242392+00:00",
   "keywords": "GPU pricing, cloud GPU, AWS GPU pricing, Azure GPU pricing, GCP GPU pricing, H100, H200, B200, MI300X"
 }
 </script>
@@ -85,6 +85,7 @@
           <a href="/anvil/" class="active">Reference</a>
           <ul class="dropdown">
             <li><a href="/anvil/pricing">Cloud GPU Pricing</a></li>
+            <li><a href="/anvil/mlperf">MLPerf Inference Results</a></li>
           </ul>
         </li>
         <li><a href="/#thinking">Thinking</a></li>
@@ -106,8 +107,8 @@
     </p>
     
     <p class="freshness">
-      Last refreshed: <time datetime="2026-04-28T03:05:55.383510+00:00">April 28, 2026 at 03:05 UTC</time>
-      <span class="muted">(Just now)</span>
+      Last refreshed: <time datetime="2026-04-28T02:20:18.242392+00:00">April 28, 2026 at 02:20 UTC</time>
+      <span class="muted">(56 minutes ago)</span>
     </p>
     
   </div>
@@ -880,7 +881,7 @@
   <footer class="methodology">
     <h2>How this page is built</h2>
     <p>
-      Rebuilt daily from the public pricing APIs of AWS, Azure, and GCP. No human edits prices on this page. The only manual step &mdash; adding a new instance type when a cloud announces one &mdash; happens as clouds release new SKUs and is recorded in a public mapping file.
+      Rebuilt daily from the public pricing APIs of AWS, Azure, and GCP. No human edits prices on this page. The only manual step &mdash; adding a new instance type when a cloud announces one &mdash; happens as clouds release new SKUs and is recorded in a public mapping file. For benchmark performance data, see <a href="/anvil/mlperf">our MLPerf results browser</a>.
     </p>
     <p class="footer-disclaimer">
       List prices fetched from public AWS, Azure, and GCP pricing catalogs. Verify against your vendor portal before contracting. Soterra Labs has no commercial relationship with AWS, Azure, GCP, NVIDIA, AMD, or Intel; data is fetched from public APIs only. Soterra Labs does not warrant the accuracy of these values; see <a href="/legal/">Terms</a>.

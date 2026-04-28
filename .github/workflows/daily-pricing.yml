@@ -88,7 +88,7 @@ jobs:
         run: |
           git config user.name  "anvil-cron[bot]"
           git config user.email "anvil-cron@users.noreply.github.com"
-          git add anvil/index.html anvil/pricing/index.html anvil/mlperf/index.html anvil/style.css 2>/dev/null || true
+          git add anvil/index.html anvil/pricing/index.html anvil/mlperf/index.html anvil/style.css anvil/data/pricing.sqlite 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No HTML changes to commit."
           else
