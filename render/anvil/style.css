@@ -106,7 +106,68 @@ nav.site-nav {
   border-radius: 0;
 }
 .dropdown a:hover { background: var(--teal-light); color: var(--teal-deep); }
-@media (max-width: 1100px) { .nav-links { display: none; } }
+/* Hamburger toggle — hidden on desktop, shown below 1100px */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  width: 36px;
+  height: 36px;
+}
+.nav-toggle span {
+  display: block;
+  height: 2px;
+  width: 22px;
+  background: var(--mid);
+  border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+@media (max-width: 1100px) {
+  .nav-toggle { display: flex; }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,0.98);
+    border-bottom: 1px solid var(--border);
+    flex-direction: column;
+    gap: 0;
+    padding: 8px 0 12px;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links li a {
+    display: block;
+    padding: 14px 24px;
+    font-size: 12px;
+    border-radius: 0;
+    letter-spacing: 1.5px;
+  }
+  /* Mobile dropdown — flatten to inline list under Reference */
+  .nav-links .has-children .dropdown {
+    position: static;
+    display: block;
+    box-shadow: none;
+    border: none;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+  }
+  .nav-links .has-children .dropdown a {
+    padding-left: 40px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+}
 
 /* ---- MAIN ---- */
 main { padding: 0; }

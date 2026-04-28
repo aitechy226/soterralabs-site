@@ -42,7 +42,10 @@
       <a href="/" class="logo" aria-label="Soterra Labs home">
         <img src="/logo-lit-circle.svg" alt="Soterra Labs" />
       </a>
-      <ul class="nav-links">
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
         <li><a href="/#services">Services</a></li>
         <li><a href="/products">Products</a></li>
         {%- if section == "anvil" %}
@@ -62,6 +65,25 @@
       </ul>
     </div>
   </nav>
+  <script>
+    (function() {
+      var toggle = document.getElementById('navToggle');
+      var links = document.getElementById('navLinks');
+      if (!toggle || !links) return;
+      toggle.addEventListener('click', function() {
+        var open = links.classList.toggle('open');
+        toggle.classList.toggle('open', open);
+        toggle.setAttribute('aria-expanded', open);
+      });
+      links.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', function() {
+          links.classList.remove('open');
+          toggle.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        });
+      });
+    })();
+  </script>
 
   <main>
     {% block content %}{% endblock %}

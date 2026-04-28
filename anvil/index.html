@@ -43,7 +43,7 @@
 }
 </script>
 
-  <link rel="stylesheet" href="/anvil/style.css?v=7325c8ee" />
+  <link rel="stylesheet" href="/anvil/style.css?v=60646185" />
 </head>
 <body data-active-nav="reference">
 
@@ -52,7 +52,10 @@
       <a href="/" class="logo" aria-label="Soterra Labs home">
         <img src="/logo-lit-circle.svg" alt="Soterra Labs" />
       </a>
-      <ul class="nav-links">
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
         <li><a href="/#services">Services</a></li>
         <li><a href="/products">Products</a></li>
         <li class="has-children">
@@ -68,6 +71,25 @@
       </ul>
     </div>
   </nav>
+  <script>
+    (function() {
+      var toggle = document.getElementById('navToggle');
+      var links = document.getElementById('navLinks');
+      if (!toggle || !links) return;
+      toggle.addEventListener('click', function() {
+        var open = links.classList.toggle('open');
+        toggle.classList.toggle('open', open);
+        toggle.setAttribute('aria-expanded', open);
+      });
+      links.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', function() {
+          links.classList.remove('open');
+          toggle.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        });
+      });
+    })();
+  </script>
 
   <main>
     
