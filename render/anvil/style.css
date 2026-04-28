@@ -351,10 +351,10 @@ main { padding: 0; }
 .pricing-table th, .mlperf-table th {
   text-align: left;
   padding: 10px 14px;
-  /* Same dark-navy gradient as the page hero — anchors the table
-     visually to the page header instead of looking like a separate
-     light-gray strip. */
-  background: linear-gradient(135deg, #0a1f44 0%, #0070c0 100%);
+  /* Solid lightest-blue from the page-hero gradient family. Uniform
+     across columns so headers read as one strip; gradient produced
+     multi-shade columns that fought the row content. */
+  background: #0070c0;
   color: #fff;
   font-weight: 600;
   font-size: 12px;
