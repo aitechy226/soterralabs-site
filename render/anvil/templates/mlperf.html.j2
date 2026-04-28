@@ -59,7 +59,7 @@
     {% if not mlperf.is_round_stale %}
     <p class="freshness">
       Ingested: <time datetime="{{ mlperf.fetched_at_iso }}">{{ mlperf.fetched_at_display }}</time>
-      <span class="muted">({{ mlperf.relative_age_display }})</span>
+      <span class="muted">(<span data-iso="{{ mlperf.fetched_at_iso }}">{{ mlperf.relative_age_display }}</span>)</span>
     </p>
     {% endif %}
   </div>

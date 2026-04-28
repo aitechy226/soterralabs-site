@@ -89,6 +89,38 @@
         });
       });
     })();
+    // Live relative-time. Server bakes "Just now" / "53 minutes ago" at
+    // build time; that string goes stale between cron runs. Any element
+    // with data-iso="<ISO 8601>" gets its textContent rewritten on page
+    // load with the up-to-date relative against the visitor's clock.
+    (function() {
+      function relativeFrom(isoString, now) {
+        var then = new Date(isoString);
+        if (isNaN(then.getTime())) return null;
+        var diffSec = Math.max(0, (now.getTime() - then.getTime()) / 1000);
+        if (diffSec < 60) return 'Just now';
+        var m = Math.floor(diffSec / 60);
+        if (m === 1) return '1 minute ago';
+        if (m < 60) return m + ' minutes ago';
+        var h = Math.floor(m / 60);
+        if (h === 1) return '1 hour ago';
+        if (h < 24) return h + ' hours ago';
+        var d = Math.floor(h / 24);
+        if (d === 1) return '1 day ago';
+        if (d < 7) return d + ' days ago';
+        var w = Math.floor(d / 7);
+        if (w === 1) return '1 week ago';
+        if (w < 5) return w + ' weeks ago';
+        var mo = Math.floor(d / 30);
+        if (mo === 1) return '1 month ago';
+        return mo + ' months ago';
+      }
+      var now = new Date();
+      document.querySelectorAll('[data-iso]').forEach(function(el) {
+        var rel = relativeFrom(el.getAttribute('data-iso'), now);
+        if (rel) el.textContent = rel;
+      });
+    })();
   </script>
 
   <main>
@@ -113,7 +145,7 @@
       <h2>Cloud GPU Pricing</h2>
       <p class="description">Current list-price hourly rates for GPU instances on AWS, Azure, and GCP. Refreshed daily from each cloud&#39;s public pricing API.</p>
       <div class="freshness-pill">
-        <span><strong>Refreshed Just now</strong> <span class="muted">· April 28, 2026 at 08:18 UTC</span></span>
+        <span><strong>Refreshed 3 hours ago</strong> <span class="muted">· April 28, 2026 at 08:18 UTC</span></span>
       </div>
       
       <a href="/anvil/pricing" class="report-cta">View pricing →</a>
@@ -125,7 +157,7 @@
       <h2>MLPerf Inference Results</h2>
       <p class="description">Latest schema-audited MLPerf Inference Datacenter results, filtered to common workloads. Every row links to its official MLCommons submission.</p>
       <div class="freshness-pill">
-        <span><strong>Round v5.1</strong> <span class="muted">· Ingested 9 hours ago</span></span>
+        <span><strong>Round v5.1</strong> <span class="muted">· Ingested 12 hours ago</span></span>
       </div>
       
       <a href="/anvil/mlperf" class="report-cta">View results →</a>

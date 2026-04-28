@@ -309,7 +309,7 @@ def test_pricing_page_includes_mlperf_link_when_mlperf_ready(in_memory_pricing_d
     # Pricing methodology cross-link present
     assert '<a href="/anvil/mlperf">our MLPerf results browser</a>' in html
     # Nav dropdown entry present
-    assert '<a href="/anvil/mlperf">MLPerf Inference Results</a>' in html
+    assert '<a href="/anvil/mlperf">&middot; MLPerf Inference Results</a>' in html
 
 
 def test_landing_page_omits_mlperf_nav_link_when_not_ready():
@@ -332,4 +332,4 @@ def test_landing_page_includes_mlperf_nav_link_when_ready():
     )
     env = build.make_jinja_env(mlperf_ready=True)
     html = build.render_landing_page(env, landing)
-    assert '<a href="/anvil/mlperf">MLPerf Inference Results</a>' in html
+    assert '<a href="/anvil/mlperf">&middot; MLPerf Inference Results</a>' in html
