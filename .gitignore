@@ -3,6 +3,11 @@ dev/
 *.pdf
 .DS_Store
 
+# Playwright MCP cache — captured snapshots / screenshots / state from
+# `mcp__plugin_playwright_playwright__*` calls. Transient session state,
+# not part of the repo. Was untracked but accumulating across sessions.
+.playwright-mcp/
+
 # Secrets — local credentials, NEVER committed.
 .env
 .env.local
