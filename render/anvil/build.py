@@ -81,6 +81,7 @@ MLPERF_ROUNDS_YAML = ANVIL_ROOT / "scripts" / "mlperf_rounds.yaml"
 OUT_LANDING = REPO_ROOT / "anvil" / "index.html"
 OUT_PRICING = REPO_ROOT / "anvil" / "pricing" / "index.html"
 OUT_MLPERF = REPO_ROOT / "anvil" / "mlperf" / "index.html"
+OUT_ENGINES = REPO_ROOT / "anvil" / "engines" / "index.html"
 OUT_STYLE_CSS = REPO_ROOT / "anvil" / "style.css"
 
 
@@ -1308,6 +1309,13 @@ def render_mlperf_page(env: Environment, mlperf) -> str:  # mlperf: MlperfContex
     )
 
 
+def render_engines_page(env: Environment, engines: EngineFactsContext) -> str:
+    return env.get_template("engines.html.j2").render(
+        engines=engines,
+        active_nav="reference",
+    )
+
+
 def write_atomic(path: Path, content: str) -> None:
     """Write content to path atomically. Determinism: writes only if changed."""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -1364,6 +1372,26 @@ def build(now: datetime | None = None) -> dict[str, bool]:
         written["mlperf"] = True
     else:
         written["mlperf"] = False
+
+    # Engine Facts — read engine_facts.sqlite when present; render only
+    # when the loader returns a non-None context (engines table populated
+    # AND every (engine, fact_type) cell present per canonical-fact-types
+    # invariant). 1E.4 will extend the landing card to add an
+    # "Engine Facts" tile reading engines_ctx.
+    engines_ctx: EngineFactsContext | None = None
+    if ENGINE_FACTS_DB.exists():
+        conn = sqlite3.connect(str(ENGINE_FACTS_DB))
+        try:
+            engines_ctx = build_engine_facts_context(conn, now)
+        finally:
+            conn.close()
+
+    if engines_ctx is not None:
+        html = render_engines_page(env, engines_ctx)
+        write_atomic(OUT_ENGINES, html)
+        written["engines"] = True
+    else:
+        written["engines"] = False
 
     # Landing
     landing_ctx = build_landing_context(

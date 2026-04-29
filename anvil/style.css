@@ -779,3 +779,216 @@ footer.site-footer .footer-link:hover { text-decoration: underline; }
   footer.methodology, .methodology-block { padding: 20px; }
   .soterra-attribution { padding: 20px; }
 }
+
+/* ---- Engine Facts (Wave 1E.3) ---- */
+/* engines as ROWS × fact_types as COLUMNS, grouped into 4 per-category
+   sub-tables. Sticky leftmost engine column for horizontal-scroll
+   ergonomics on narrow viewports. 4 cell-state classes preserve the
+   Wave 1C/1D NOTE_VOCABULARY semantic distinction at the visual layer. */
+
+.engine-facts-section {
+  margin: 32px 0;
+}
+.engine-facts-section-header {
+  margin-bottom: 12px;
+}
+.engine-facts-section-header h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  color: var(--dark);
+}
+.engine-facts-section-header .category-definition {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.engines-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 720px;
+}
+.engines-table thead th {
+  text-align: left;
+  padding: 10px 12px;
+  background: #0070c0;
+  color: #fff;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.engines-table thead th .fact-type-label {
+  display: block;
+  font-size: 12px;
+}
+.engines-table thead th .fact-type-definition {
+  display: block;
+  font-weight: 400;
+  font-size: 10px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #cfe2f3;
+  margin-top: 3px;
+  line-height: 1.35;
+  max-width: 220px;
+  white-space: normal;
+}
+.engines-table tbody th.engine-col,
+.engines-table thead th.engine-col {
+  /* Sticky leftmost engine column — keeps row identity visible during
+     horizontal scroll. Background must match the surrounding cell to
+     hide the underlying row content while it scrolls beneath. */
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 140px;
+}
+.engines-table thead th.engine-col {
+  background: #0070c0;
+  z-index: 2;
+}
+.engines-table tbody th.engine-col {
+  background: #fff;
+  text-align: left;
+  font-weight: 600;
+  color: var(--teal-deep);
+}
+.engines-table tbody th.engine-col a {
+  color: var(--teal-deep);
+  text-decoration: none;
+}
+.engines-table tbody th.engine-col a:hover {
+  text-decoration: underline;
+}
+.engines-table tbody tr:nth-child(even) th.engine-col {
+  background: #f5f7fa;
+}
+.engines-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--mid);
+  vertical-align: top;
+  max-width: 220px;
+  word-break: break-word;
+}
+.engines-table tbody tr:nth-child(even) td {
+  background: #f5f7fa;
+}
+.engines-table tbody tr:last-child td,
+.engines-table tbody tr:last-child th { border-bottom: none; }
+
+/* Cell evidence link — every cell value (or em-dash) hyperlinks to the
+   SHA-pinned source. Underline-on-hover keeps the table visually quiet
+   on first scan, reveals interactivity when buyer reaches for proof. */
+.engines-table .cell-evidence-link {
+  color: inherit;
+  text-decoration: none;
+}
+.engines-table .cell-evidence-link:hover {
+  text-decoration: underline;
+}
+.engines-table .cell-evidence-link.em-dash {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Empty-cell note caption — italic, smaller, directly beneath the
+   em-dash. Always-visible per Mara's rule (no tooltip-only). */
+.engines-table .cell-note {
+  display: block;
+  font-size: 11px;
+  font-style: italic;
+  color: var(--muted);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+/* ---- 4 cell-state classes (Wave 1C/1D NOTE_VOCABULARY) ---- */
+.engines-table td.cell-value { /* default — no extra treatment */ }
+
+.engines-table td.cell-not-applicable .cell-evidence-link.em-dash {
+  color: var(--muted);
+}
+.engines-table td.cell-not-applicable .cell-note {
+  color: var(--muted);
+}
+
+.engines-table td.cell-not-declared .cell-evidence-link.em-dash {
+  color: #6b7280;
+}
+.engines-table td.cell-not-declared .cell-note {
+  color: #6b7280;
+}
+
+.engines-table td.cell-not-detected .cell-evidence-link.em-dash {
+  color: #b45309;  /* caution amber */
+}
+.engines-table td.cell-not-detected .cell-note {
+  color: #92400e;
+}
+
+.engines-table td.cell-unsupported-runtime .cell-evidence-link.em-dash {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.engines-table td.cell-unsupported-runtime .cell-evidence-link.em-dash::before {
+  content: "n/a runtime";
+}
+.engines-table td.cell-unsupported-runtime .cell-note {
+  color: #78350f;
+}
+
+/* ---- Engine-stale (extraction failed) — overlaid on cells ---- */
+.engines-table td.cell-stale {
+  /* Cells in a column whose engine's last extraction_runs.status != 'success'.
+     Last-known-good values are still shown — diagonal-stripe overlay
+     signals "you're looking at prior-run data". */
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 6px,
+    rgba(180, 83, 9, 0.06) 6px,
+    rgba(180, 83, 9, 0.06) 8px
+  );
+}
+
+/* Per-engine extraction-failed badge in the row-header */
+.engines-table .extraction-failed-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  text-transform: none;
+  vertical-align: middle;
+}
+
+/* ---- Anchor nav for the 4 categories ---- */
+.engines-nav {
+  /* Inherits .anchor-nav base styling; engine-facts-specific overrides
+     could go here if categories need a different visual treatment.
+     None for V1 — pricing + mlperf precedent matches. */
+}
+
+@media (max-width: 540px) {
+  .engine-facts-section { margin: 24px 0; }
+  .engines-table { font-size: 12px; min-width: 600px; }
+  .engines-table thead th { padding: 8px 10px; }
+  .engines-table td { padding: 6px 10px; max-width: 180px; }
+  .engines-table tbody th.engine-col { min-width: 110px; }
+}
+

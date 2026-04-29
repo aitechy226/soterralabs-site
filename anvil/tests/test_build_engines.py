@@ -1011,6 +1011,154 @@ def test_engine_column_pre_computes_extraction_failed_badge_and_aria(
     assert cols_by_id["vllm"].extraction_failed_aria == ""
 
 
+# ============================================================
+# Wave 1E.3 — L3 Display tier: render the Jinja template
+# ============================================================
+
+
+def _render_engines_html(fixture_db: Path, now: datetime) -> str:
+    """Helper: build context from fixture DB + render engines.html.j2."""
+    from render.anvil.build import make_jinja_env, render_engines_page
+
+    conn = sqlite3.connect(fixture_db)
+    try:
+        ctx = build_engine_facts_context(conn, now)
+    finally:
+        conn.close()
+    assert ctx is not None
+    env = make_jinja_env(mlperf_ready=False)
+    return render_engines_page(env, ctx)
+
+
+def test_template_renders_without_error(
+    fixture_db: Path, now_fresh: datetime,
+) -> None:
+    """L3 smoke: template renders end-to-end against a fixture context.
+    Catches broken Jinja syntax, missing field access, undefined filters."""
+    html = _render_engines_html(fixture_db, now_fresh)
+    assert "<table class=\"engines-table\">" in html
+    assert "Engine Facts" in html
+
+
+def test_template_renders_four_per_category_subtables(
+    fixture_db: Path, now_fresh: datetime,
+) -> None:
+    """Per architect §1.2: 4 sub-tables (project_meta / container /
+    api_surface / observability), engines as rows."""
+    html = _render_engines_html(fixture_db, now_fresh)
+    assert html.count('class="engines-table"') == 4
+    for category in ("project_meta", "container", "api_surface", "observability"):
+        assert f'id="{category}"' in html
+
+
+def test_template_renders_anchor_nav_for_categories(
+    fixture_db: Path, now_fresh: datetime,
+) -> None:
+    """Anchor-nav lets buyers jump to a category quickly (Jake §3 +
+    pricing/mlperf precedent)."""
+    html = _render_engines_html(fixture_db, now_fresh)
+    assert 'class="anchor-nav engines-nav"' in html
+    for category_label in ("Project Meta", "Container", "API Surface", "Observability"):
+        assert category_label in html
+
+
+def test_template_includes_freshness_pill_with_data_iso(
+    fixture_db: Path, now_fresh: datetime,
+) -> None:
+    """Static-site-rendering scar protection: relative-time phrase is
+    inside <span data-iso="..."> so the JS shim recomputes on page
+    load. Fail this test if a future refactor inlines the relative
+    phrase outside the data-iso wrapper."""
+    html = _render_engines_html(fixture_db, now_fresh)
+    assert 'data-iso="2026-04-29T06:00:00+00:00"' in html
+
+
+def test_template_includes_stale_banner_when_db_stale(
+    fixture_db: Path, now_stale: datetime,
+) -> None:
+    """When the loader reports is_stale=True, the banner-stale block
+    fires with Mara's prose."""
+    html = _render_engines_html(fixture_db, now_stale)
+    assert 'class="banner-stale"' in html
+    assert "Engine facts are stale" in html
+    assert "14-day cadence" in html
+
+
+def test_template_omits_stale_banner_when_fresh(
+    fixture_db: Path, now_fresh: datetime,
+) -> None:
+    html = _render_engines_html(fixture_db, now_fresh)
+    assert "Engine facts are stale" not in html
+
+
+def test_template_renders_extraction_failed_badge(
+    fixture_db: Path, now_fresh: datetime,
+) -> None:
+    """Mara's badge text + aria render in the engine row-header for
+    engines with extraction_runs.status != 'success'.
+    The fixture has mlc-llm marked failed."""
+    html = _render_engines_html(fixture_db, now_fresh)
+    assert 'class="extraction-failed-badge"' in html
+    assert "last run failed Apr 29" in html
+    assert "values shown are from the prior successful run" in html
+
+
+def test_template_renders_all_four_cell_state_classes(
+    fixture_db: Path, now_fresh: datetime,
+) -> None:
+    """Wave 1C/1D NOTE_VOCABULARY semantic distinction preserved at the
+    visual layer. The fixture includes overrides for all 4 NOTE prefixes
+    + plain values, so all 5 cell-state classes render in the HTML."""
+    html = _render_engines_html(fixture_db, now_fresh)
+    assert "cell-not-applicable" in html
+    assert "cell-not-declared" in html
+    assert "cell-not-detected" in html
+    assert "cell-unsupported-runtime" in html
+    assert "cell-value" in html
+
+
+def test_template_renders_evidence_url_on_every_value_cell(
+    fixture_db: Path, now_fresh: datetime,
+) -> None:
+    """Every cell value (or em-dash) hyperlinks to the SHA-pinned source
+    URL. Sample check on a known fact."""
+    html = _render_engines_html(fixture_db, now_fresh)
+    assert 'class="cell-evidence-link"' in html
+    # Fixture evidence URLs follow `.../blob/abc123/file.py` shape
+    assert "/blob/abc123/" in html
+
+
+def test_template_renders_schema_org_dataset_jsonld(
+    fixture_db: Path, now_fresh: datetime,
+) -> None:
+    """Schema.org Dataset + TechArticle + BreadcrumbList JSON-LD per the
+    pricing/mlperf precedent. SEO surface for /anvil/engines."""
+    html = _render_engines_html(fixture_db, now_fresh)
+    assert '"@type": "Dataset"' in html
+    assert '"@type": "TechArticle"' in html
+    assert '"@type": "BreadcrumbList"' in html
+    assert "LLM Inference Engine Facts" in html
+
+
+def test_template_includes_methodology_footer(
+    fixture_db: Path, now_fresh: datetime,
+) -> None:
+    """Mara's methodology + footer-disclaimer prose."""
+    html = _render_engines_html(fixture_db, now_fresh)
+    assert "How this page is built" in html
+    assert "Rebuilt weekly" in html
+    assert "trademarks of their respective owners" in html
+
+
+def test_template_includes_sha_pinned_evidence_links(
+    fixture_db: Path, now_fresh: datetime,
+) -> None:
+    """Evidence links open in new tab with rel=nofollow noopener (no
+    SEO juice flowing to upstream projects on every Anvil page hit)."""
+    html = _render_engines_html(fixture_db, now_fresh)
+    assert 'rel="nofollow noopener"' in html
+
+
 def test_engine_column_no_extraction_run_yields_empty_badges(
     tmp_path: Path, now_fresh: datetime,
 ) -> None:
