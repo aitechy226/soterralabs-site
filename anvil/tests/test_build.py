@@ -189,9 +189,13 @@ def test_build_landing_pricing_ready_mlperf_not_ready():
     )
     landing = build.build_landing_context(p_ctx, mlperf_ready=False,
                                           mlperf_round=None, mlperf_relative_age=None)
-    assert len(landing.cards) == 2
-    pricing_card, mlperf_card = landing.cards
+    # Wave 1E.4: third card (Engine Facts) appended; defaults to
+    # 'Coming soon' state when engines_ctx is None (omitted here).
+    assert len(landing.cards) == 3
+    pricing_card, mlperf_card, engines_card = landing.cards
     assert pricing_card.is_ready is True
+    assert engines_card.is_ready is False
+    assert engines_card.freshness_main == "Coming soon"
     # Wave 2026-04-29 fix: relative phrase split out of freshness_main into
     # freshness_main_relative so the template can wrap it in <span data-iso=...>
     # for client-side recompute. freshness_main now carries just the static

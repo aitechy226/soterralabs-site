@@ -1182,9 +1182,11 @@ def build_landing_context(
     mlperf_round: str | None,
     mlperf_relative_age: str | None,
     mlperf_fetched_at_iso: str | None = None,
+    engines_ctx: EngineFactsContext | None = None,
 ) -> LandingContext:
-    """Build the /anvil/ landing-page context. Pricing card always present;
-    MLPerf card shows 'Coming soon' until Wave 2 lands real data.
+    """Build the /anvil/ landing-page context. Pricing + MLPerf + Engine
+    Facts cards each render with one of three states (ready / coming-soon
+    / stale).
 
     `freshness_iso` + the *_relative split fields populate the
     client-side recompute markup (see `_base.html.j2` JS shim and
@@ -1192,6 +1194,10 @@ def build_landing_context(
     fetched_at is unavailable (Coming soon, stale, etc.), those fields
     stay empty and the template falls back to plain server-rendered
     text — no data-iso wrapper, no recompute attempted.
+
+    Wave 1E.4: engines_ctx param added; Engine Facts card mirrors the
+    Pricing-card "Refreshed <relative>" shape. Default None so existing
+    callers (tests + first-cron-fail recovery paths) don't break.
     """
     cards: list[AssetCard] = []
 
@@ -1243,6 +1249,34 @@ def build_landing_context(
         freshness_iso=(mlperf_fetched_at_iso or "") if mlperf_ready else "",
         freshness_muted_relative=(
             mlperf_relative_age if mlperf_ready and mlperf_relative_age else ""
+        ),
+    ))
+
+    # Engine Facts card (Wave 1E.4). Same shape as the Pricing card —
+    # "Refreshed <relative>" main + the absolute timestamp in muted.
+    # Cron is weekly so the relative phrase is "N days ago" not "N
+    # hours ago" once the first cron run lands.
+    engines_ready = engines_ctx is not None and bool(engines_ctx.engines)
+    engines_fresh = engines_ready and not engines_ctx.is_stale  # type: ignore[union-attr]
+    cards.append(AssetCard(
+        eyebrow="Engine Facts",
+        title="LLM Inference Engine Facts",
+        description="Side-by-side reference of nine open-source LLM inference engines on project health, container, API routes, and observability. Every cell links to its SHA-pinned source.",
+        url="/anvil/engines",
+        cta_label="View engines →" if engines_ready else "Coming soon",
+        is_ready=engines_ready,
+        freshness_main=(
+            "Refreshed " if engines_fresh
+            else "Data is stale" if engines_ready and engines_ctx.is_stale  # type: ignore[union-attr]
+            else "Coming soon"
+        ),
+        freshness_muted=(
+            f"· {engines_ctx.extracted_at_display}" if engines_ready and engines_ctx.extracted_at_display  # type: ignore[union-attr]
+            else ""
+        ),
+        freshness_iso=(engines_ctx.extracted_at_iso if engines_fresh else ""),  # type: ignore[union-attr]
+        freshness_main_relative=(
+            engines_ctx.extracted_at_relative if engines_fresh else ""  # type: ignore[union-attr]
         ),
     ))
 
@@ -1404,6 +1438,7 @@ def build(now: datetime | None = None) -> dict[str, bool]:
         mlperf_fetched_at_iso=(
             mlperf_ctx.fetched_at_iso if mlperf_ctx else None
         ),
+        engines_ctx=engines_ctx,
     )
     html = render_landing_page(env, landing_ctx)
     write_atomic(OUT_LANDING, html)

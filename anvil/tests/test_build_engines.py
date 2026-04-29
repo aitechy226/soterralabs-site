@@ -1159,6 +1159,96 @@ def test_template_includes_sha_pinned_evidence_links(
     assert 'rel="nofollow noopener"' in html
 
 
+# ============================================================
+# Wave 1E.4 — L4 end-to-end: Engine Facts landing card
+# ============================================================
+
+def test_landing_includes_engine_facts_card_when_engines_ready(
+    fixture_db: Path, now_fresh: datetime,
+) -> None:
+    """L4 integration: build_landing_context appends an Engine Facts
+    card when engines_ctx is supplied + non-stale. Mirrors the Pricing
+    card shape ('Refreshed <relative>')."""
+    from render.anvil.build import build_landing_context
+
+    conn = sqlite3.connect(fixture_db)
+    try:
+        engines_ctx = build_engine_facts_context(conn, now_fresh)
+    finally:
+        conn.close()
+    assert engines_ctx is not None
+
+    landing = build_landing_context(
+        pricing=None,
+        mlperf_ready=False,
+        mlperf_round=None,
+        mlperf_relative_age=None,
+        engines_ctx=engines_ctx,
+    )
+    assert len(landing.cards) == 3
+    engines_card = landing.cards[2]
+    assert engines_card.eyebrow == "Engine Facts"
+    assert engines_card.url == "/anvil/engines"
+    assert engines_card.is_ready is True
+    assert engines_card.freshness_main == "Refreshed "
+    # Static-site-rendering scar protection: data-iso pair populated
+    # so the template's <span data-iso="..."> shim can recompute.
+    assert engines_card.freshness_iso != ""
+    assert engines_card.freshness_main_relative != ""
+
+
+def test_landing_engine_facts_card_coming_soon_when_no_ctx() -> None:
+    """When engines_ctx=None (first-cron-not-yet-run), the Engine Facts
+    card renders 'Coming soon' — same contract as pricing/mlperf when
+    their respective DBs are empty."""
+    from render.anvil.build import build_landing_context
+
+    landing = build_landing_context(
+        pricing=None,
+        mlperf_ready=False,
+        mlperf_round=None,
+        mlperf_relative_age=None,
+        engines_ctx=None,
+    )
+    engines_card = landing.cards[2]
+    assert engines_card.is_ready is False
+    assert engines_card.freshness_main == "Coming soon"
+    # No data-iso shim needed — nothing to recompute.
+    assert engines_card.freshness_iso == ""
+
+
+def test_landing_engine_facts_card_stale_branch(
+    fixture_db: Path, now_stale: datetime,
+) -> None:
+    """When engines_ctx.is_stale=True (DB older than 14 days), the
+    card renders 'Data is stale' — buyer-credibility cue that the
+    landing card should not be trusted as fresh."""
+    from render.anvil.build import build_landing_context
+
+    conn = sqlite3.connect(fixture_db)
+    try:
+        engines_ctx = build_engine_facts_context(conn, now_stale)
+    finally:
+        conn.close()
+    assert engines_ctx is not None
+    assert engines_ctx.is_stale is True
+
+    landing = build_landing_context(
+        pricing=None,
+        mlperf_ready=False,
+        mlperf_round=None,
+        mlperf_relative_age=None,
+        engines_ctx=engines_ctx,
+    )
+    engines_card = landing.cards[2]
+    assert engines_card.is_ready is True  # data exists, just stale
+    assert engines_card.freshness_main == "Data is stale"
+    # Stale data: don't run the data-iso shim (the timestamp is
+    # already known-old; recomputing relative-time on top of that
+    # would just mislead).
+    assert engines_card.freshness_iso == ""
+
+
 def test_engine_column_no_extraction_run_yields_empty_badges(
     tmp_path: Path, now_fresh: datetime,
 ) -> None:
