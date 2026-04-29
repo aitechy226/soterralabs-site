@@ -160,8 +160,14 @@ class LandingContext(_Frozen):
 
 class EngineColumn(_Frozen):
     """One engine column header. Carries extraction-status state so the
-    template can flag "extraction failed YYYY-MM-DD" badges per Jen's
-    Wave 1E architect verdict §1.8."""
+    template can flag "last run failed Apr 28" badges per Jen's
+    Wave 1E architect verdict §1.8 + Mara's Wave 1E.2 copy framing.
+
+    `extraction_failed_badge` / `extraction_failed_aria` are pre-computed
+    at load time per SSOT (Principle 3). Both are empty strings when
+    extraction_status == 'success'; the template guards on
+    `is_engine_stale` to render or skip.
+    """
     engine_id: str                      # 'vllm' | 'tgi' | … (matches engines.yaml)
     display_name: str                   # 'vLLM' | 'TGI' | …
     repo_url: str
@@ -169,6 +175,8 @@ class EngineColumn(_Frozen):
     extraction_finished_iso: str        # ISO 8601 or '' when unknown
     extraction_finished_display: str    # 'April 28, 2026' or '' — pre-computed for template
     is_engine_stale: bool               # True iff extraction_status != 'success'
+    extraction_failed_badge: str        # Mara's badge text: 'last run failed Apr 28' or '' when success
+    extraction_failed_aria: str         # Mara's tooltip/aria: full sentence or '' when success
 
 
 class EngineCell(_Frozen):

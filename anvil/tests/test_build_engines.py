@@ -40,6 +40,9 @@ from render.anvil.build import (
     FACT_TYPE_DISPLAY,
     _derive_cell_state,
     _format_age_days,
+    _format_extraction_failed_aria,
+    _format_extraction_failed_badge,
+    _select_canonical_evidence,
     build_engine_facts_context,
 )
 
@@ -737,3 +740,325 @@ def test_loader_raises_when_engine_missing_canonical_fact(
             build_engine_facts_context(conn, now_fresh)
     finally:
         conn.close()
+
+
+# ============================================================
+# Wave 1E.2 — Service layer: canonical-evidence selection
+# ============================================================
+
+class TestSelectCanonicalEvidence:
+    """Pure-helper tests for `_select_canonical_evidence`. Row tuple
+    shape matches the SQL: index 8 = ev.source_type, index 9 = ev.id."""
+
+    @staticmethod
+    def _row(source_type: str, ev_id: int) -> tuple:
+        # Matches the SELECT in build_engine_facts_context. Indices 0-7
+        # are the fact + raw evidence columns; 8 = source_type, 9 = ev.id.
+        return (
+            "vllm", "container", "latest_tag", "0.4.5",
+            "2026-04-29T06:00:00+00:00",
+            f"https://example.com/{source_type}",
+            "path", "", source_type, ev_id,
+        )
+
+    def test_single_row_returned_as_is(self) -> None:
+        row = self._row("github_file", 1)
+        assert _select_canonical_evidence([row]) is row
+
+    def test_github_file_preferred_over_docker_hub(self) -> None:
+        """Wave 1E.2 spec: github_file is the most-buyer-credible source
+        (SHA-pinned, 1-click verifiable). When both source_types exist
+        for a fact, github_file wins regardless of ev.id order."""
+        docker_hub = self._row("docker_hub", 10)  # earlier id
+        github_file = self._row("github_file", 20)  # later id
+        chosen = _select_canonical_evidence([docker_hub, github_file])
+        assert chosen[8] == "github_file"
+        assert chosen[9] == 20
+
+    def test_github_file_preferred_over_ghcr(self) -> None:
+        ghcr = self._row("ghcr", 5)
+        github_file = self._row("github_file", 15)
+        chosen = _select_canonical_evidence([ghcr, github_file])
+        assert chosen[8] == "github_file"
+
+    def test_priority_order_matches_evidence_priority_constant(self) -> None:
+        """Verify the full priority chain: github_file > github_release
+        > github_api > docker_hub > ghcr > ngc."""
+        rows = [
+            self._row("ngc", 1),
+            self._row("ghcr", 2),
+            self._row("docker_hub", 3),
+            self._row("github_api", 4),
+            self._row("github_release", 5),
+            self._row("github_file", 6),
+        ]
+        chosen = _select_canonical_evidence(rows)
+        assert chosen[8] == "github_file"
+
+    def test_falls_back_to_first_row_when_no_preferred_type(self) -> None:
+        """Unknown source_types preserve 1E.1's first-by-id behavior."""
+        row1 = self._row("unknown_type_a", 1)
+        row2 = self._row("unknown_type_b", 2)
+        chosen = _select_canonical_evidence([row1, row2])
+        assert chosen is row1
+
+    def test_priority_picks_lowest_id_within_same_source_type(self) -> None:
+        """Tiebreak: when multiple rows share the highest-priority
+        source_type, pick lowest ev.id (extractor's first emission).
+        SQL ORDER BY ev.id ASC ensures input order; the helper
+        respects that."""
+        github_file_late = self._row("github_file", 99)
+        github_file_early = self._row("github_file", 5)
+        # Input order matches SQL ORDER BY ev.id ASC
+        chosen = _select_canonical_evidence([github_file_early, github_file_late])
+        assert chosen[9] == 5
+
+    def test_empty_rows_raises_value_error(self) -> None:
+        """Wave 1E.2 code-reviewer Finding 2: explicit guard converts a
+        latent IndexError into a clear diagnostic. The current call
+        site can't produce an empty list (LEFT JOIN unmatched evidence
+        materializes as length-1 with all-None columns), but a future
+        refactor that pre-filters None-id rows could regress to an
+        empty list. The guard catches that drift."""
+        with pytest.raises(ValueError, match="empty rows list"):
+            _select_canonical_evidence([])
+
+
+def test_loader_picks_canonical_evidence_when_two_evidence_rows_exist(
+    tmp_path: Path, now_fresh: datetime,
+) -> None:
+    """L2 integration: when a Fact has 2 evidence_links rows (one
+    docker_hub with lower id, one github_file with higher id), the
+    loader's canonical-selection picks github_file. Buyer-credibility
+    invariant: the cell value's hyperlink resolves to the SHA-pinned
+    source, not the registry tag URL."""
+    db_path = tmp_path / "two_evidence.sqlite"
+    conn = sqlite3.connect(db_path)
+    ensure_engine_facts_schema(conn)
+    extracted_at = "2026-04-29T06:00:00+00:00"
+
+    conn.execute(
+        "INSERT INTO engines (id, display_name, repo_url, container_source, "
+        "license, description, last_extracted_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        ("vllm", "vLLM", "https://github.com/vllm-project/vllm",
+         "https://hub.docker.com/r/vllm/vllm-openai", "Apache-2.0",
+         "vLLM serving", extracted_at),
+    )
+    fact_id = 1
+    for category, fact_types in CANONICAL_FACT_TYPES_BY_CATEGORY.items():
+        for fact_type in fact_types:
+            conn.execute(
+                "INSERT INTO facts (id, engine_id, category, fact_type, "
+                "fact_value, extracted_at) VALUES (?, ?, ?, ?, ?, ?)",
+                (fact_id, "vllm", category, fact_type,
+                 f"v-{fact_type}", extracted_at),
+            )
+            # Most facts get one Evidence row.
+            conn.execute(
+                "INSERT INTO evidence_links (fact_id, source_url, "
+                "source_type, source_path, commit_sha, fetched_at, note) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (fact_id,
+                 f"https://github.com/vllm-project/vllm/blob/abc/{fact_type}.py",
+                 "github_file", f"{fact_type}.py", "abc", extracted_at, ""),
+            )
+            # latest_tag specifically gets a SECOND evidence row from
+            # docker_hub, inserted FIRST (lower id) so that the canonical-
+            # selection logic must override id ordering to pick github_file.
+            if fact_type == "latest_tag":
+                # Insert a docker_hub row with id-priority ahead of the
+                # github_file row already inserted. Use direct id assignment
+                # since AUTOINCREMENT picks the next id; instead we INSERT
+                # a row that semantically came first.
+                conn.execute(
+                    "INSERT INTO evidence_links (fact_id, source_url, "
+                    "source_type, source_path, commit_sha, fetched_at, note) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (fact_id, "https://hub.docker.com/r/vllm/vllm-openai/tags",
+                     "docker_hub", None, None, extracted_at, ""),
+                )
+            fact_id += 1
+
+    conn.execute(
+        "INSERT INTO extraction_runs (engine_id, started_at, finished_at, "
+        "status, facts_extracted) VALUES (?, ?, ?, ?, ?)",
+        ("vllm", extracted_at, extracted_at, "success", 24),
+    )
+    conn.commit()
+
+    try:
+        ctx = build_engine_facts_context(conn, now_fresh)
+    finally:
+        conn.close()
+    assert ctx is not None
+
+    # Find the latest_tag cell — it should resolve to github_file even
+    # though docker_hub is also present in evidence_links.
+    container_group = next(g for g in ctx.fact_groups if g.category == "container")
+    latest_tag_row = next(r for r in container_group.rows if r.fact_type == "latest_tag")
+    cell = latest_tag_row.cells[0]
+    assert "/blob/abc/" in cell.evidence_url, (
+        f"canonical-evidence selection failed: expected github_file URL, "
+        f"got {cell.evidence_url!r}"
+    )
+
+
+# ============================================================
+# Wave 1E.2 — Service layer: extraction-failed badge (Mara's copy)
+# ============================================================
+
+class TestFormatExtractionFailedBadge:
+    """Pure-helper tests for the badge text formatter — Mara's
+    'last run failed Apr 28' format (≤ 25 chars)."""
+
+    def test_success_status_returns_empty(self) -> None:
+        assert _format_extraction_failed_badge(
+            "success", "2026-04-28T06:00:00+00:00",
+        ) == ""
+
+    def test_failed_status_renders_short_date(self) -> None:
+        result = _format_extraction_failed_badge(
+            "failed", "2026-04-28T06:00:00+00:00",
+        )
+        assert result == "last run failed Apr 28"
+        assert len(result) <= 25
+
+    def test_skipped_status_renders_short_date(self) -> None:
+        result = _format_extraction_failed_badge(
+            "skipped", "2026-04-28T06:00:00+00:00",
+        )
+        assert result == "last run skipped Apr 28"
+        assert len(result) <= 25
+
+    def test_unknown_status_renders_with_status_word(self) -> None:
+        # Defensive — orchestrator only emits success/failed/skipped, but
+        # fall-through preserves date format if a new status ever lands.
+        result = _format_extraction_failed_badge(
+            "unknown", "2026-04-28T06:00:00+00:00",
+        )
+        assert "Apr 28" in result
+
+    def test_empty_finished_iso_returns_empty(self) -> None:
+        assert _format_extraction_failed_badge("failed", "") == ""
+
+    def test_handles_z_suffix_iso(self) -> None:
+        assert _format_extraction_failed_badge(
+            "failed", "2026-04-28T06:00:00Z",
+        ) == "last run failed Apr 28"
+
+
+class TestFormatExtractionFailedAria:
+    """Pure-helper tests for the longer aria/tooltip — Mara's
+    'Last extraction failed Apr 28, 2026 — values shown are from the
+    prior successful run.' format (≤ 100 chars)."""
+
+    def test_success_status_returns_empty(self) -> None:
+        assert _format_extraction_failed_aria(
+            "success", "2026-04-28T06:00:00+00:00",
+        ) == ""
+
+    def test_failed_status_full_sentence(self) -> None:
+        result = _format_extraction_failed_aria(
+            "failed", "2026-04-28T06:00:00+00:00",
+        )
+        assert result == (
+            "Last extraction failed Apr 28, 2026 — values shown are from "
+            "the prior successful run."
+        )
+        assert len(result) <= 100
+
+    def test_skipped_status_full_sentence(self) -> None:
+        result = _format_extraction_failed_aria(
+            "skipped", "2026-04-28T06:00:00+00:00",
+        )
+        assert "skipped" in result
+        assert "prior successful run" in result
+        assert len(result) <= 100
+
+    def test_aria_explains_cells_are_last_known(self) -> None:
+        """Buyer-credibility invariant from Mara's framing: the aria
+        text must say the cells are from a prior successful run, not
+        blank or stale. This is the contract that prevents the buyer
+        from misreading 'extraction failed' as 'data unavailable'."""
+        for status in ("failed", "skipped"):
+            text = _format_extraction_failed_aria(
+                status, "2026-04-28T06:00:00+00:00",
+            )
+            assert "prior successful run" in text
+
+
+def test_engine_column_pre_computes_extraction_failed_badge_and_aria(
+    fixture_db: Path, now_fresh: datetime,
+) -> None:
+    """L2 integration: existing fixture has mlc-llm with status='failed'
+    and vllm with status='success'. After Wave 1E.2, the EngineColumn
+    for mlc-llm carries the badge + aria; vllm's badge fields are empty."""
+    conn = sqlite3.connect(fixture_db)
+    try:
+        ctx = build_engine_facts_context(conn, now_fresh)
+    finally:
+        conn.close()
+    assert ctx is not None
+    cols_by_id = {c.engine_id: c for c in ctx.engines}
+
+    # mlc-llm extraction_runs.status = 'failed' in the fixture
+    assert cols_by_id["mlc-llm"].extraction_failed_badge == "last run failed Apr 29"
+    assert "Apr 29, 2026" in cols_by_id["mlc-llm"].extraction_failed_aria
+    assert "prior successful run" in cols_by_id["mlc-llm"].extraction_failed_aria
+
+    # vllm extraction_runs.status = 'success' → both badge fields empty
+    assert cols_by_id["vllm"].extraction_failed_badge == ""
+    assert cols_by_id["vllm"].extraction_failed_aria == ""
+
+
+def test_engine_column_no_extraction_run_yields_empty_badges(
+    tmp_path: Path, now_fresh: datetime,
+) -> None:
+    """An engine with NO extraction_runs row gets status='unknown' (per
+    1E.1 Finding 3 fix). Mara's badge formatter returns '' for missing
+    finished_iso → no badge rendered, but is_engine_stale=True still
+    flags the column visually via the 'cell-stale' class on each cell."""
+    db_path = tmp_path / "no_runs.sqlite"
+    conn = sqlite3.connect(db_path)
+    ensure_engine_facts_schema(conn)
+    extracted_at = "2026-04-29T06:00:00+00:00"
+
+    conn.execute(
+        "INSERT INTO engines (id, display_name, repo_url, container_source, "
+        "license, description, last_extracted_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        ("vllm", "vLLM", "https://github.com/vllm-project/vllm",
+         "https://hub.docker.com/r/vllm/vllm-openai", "Apache-2.0",
+         "vLLM serving", extracted_at),
+    )
+    fact_id = 1
+    for category, fact_types in CANONICAL_FACT_TYPES_BY_CATEGORY.items():
+        for fact_type in fact_types:
+            conn.execute(
+                "INSERT INTO facts (id, engine_id, category, fact_type, "
+                "fact_value, extracted_at) VALUES (?, ?, ?, ?, ?, ?)",
+                (fact_id, "vllm", category, fact_type,
+                 f"v-{fact_type}", extracted_at),
+            )
+            conn.execute(
+                "INSERT INTO evidence_links (fact_id, source_url, "
+                "source_type, source_path, commit_sha, fetched_at, note) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (fact_id,
+                 "https://github.com/vllm-project/vllm/blob/abc/file.py",
+                 "github_file", "file.py", "abc", extracted_at, ""),
+            )
+            fact_id += 1
+    conn.commit()
+
+    try:
+        ctx = build_engine_facts_context(conn, now_fresh)
+    finally:
+        conn.close()
+    assert ctx is not None
+    col = ctx.engines[0]
+    assert col.extraction_status == "unknown"
+    assert col.is_engine_stale is True
+    # No finished_iso → empty badge fields (template guards on
+    # is_engine_stale + presence of badge text to decide what to render)
+    assert col.extraction_failed_badge == ""
+    assert col.extraction_failed_aria == ""

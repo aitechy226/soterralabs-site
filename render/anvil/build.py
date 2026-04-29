@@ -734,6 +734,118 @@ _CELL_STATE_BY_NOTE_PREFIX: dict[str, tuple[str, str]] = {
 }
 
 
+# ---- Engine Facts service-layer helpers (Wave 1E.2) ----
+
+#: Canonical-evidence preference order. When 1+ Evidence rows exist for
+#: a single (engine, fact_type), the renderer picks the highest-priority
+#: source_type — github_file is preferred because it's the SHA-pinned
+#: literal source the buyer can verify in 1 click. Other types are
+#: legitimate (the no-container shape uses github_api; container facts
+#: use docker_hub / ghcr / ngc) but lower-priority when github_file is
+#: also present for the same fact. V1 extractors emit exactly 1 Evidence
+#: per Fact; the selection logic is forward-compat for V2+ where
+#: extractors may layer alternate sources.
+_EVIDENCE_PRIORITY: tuple[str, ...] = (
+    "github_file",
+    "github_release",
+    "github_api",
+    "docker_hub",
+    "ghcr",
+    "ngc",
+)
+
+
+def _select_canonical_evidence(rows: list[tuple]) -> tuple:
+    """Return the canonical row from 1+ Evidence rows for one fact.
+
+    Priority by source_type (above), tiebreak by lowest ev.id (the
+    extractor's first emission — same as Wave 1E.1's foundational
+    behavior). Unknown source_types fall to lowest-id within their
+    own bucket; if no row matches the priority list, the first row
+    by id is returned (preserves 1E.1 behavior for unknown shapes).
+
+    Raises ValueError on empty input. The current call site builds
+    `rows` from a LEFT JOIN on evidence_links — an unmatched fact
+    row materializes as a length-1 list with all-None evidence
+    columns, NOT a length-0 list. But a future refactor that
+    pre-filters None-id rows would silently change the contract;
+    the explicit guard converts a latent IndexError into a
+    diagnostic.
+
+    Source layer: ENGINEERING (github_file preference is a buyer-
+    credibility judgment — the SHA-pinned source is the most
+    verifiable evidence in 1 click).
+    """
+    if not rows:
+        raise ValueError(
+            "_select_canonical_evidence called with empty rows list"
+        )
+    if len(rows) == 1:
+        return rows[0]
+    # Pre-sorted by ev.id ASC from the SQL ORDER BY. Walk preference
+    # list; first matching source_type wins.
+    for preferred in _EVIDENCE_PRIORITY:
+        for row in rows:
+            if row[8] == preferred:  # row[8] = ev.source_type
+                return row
+    # No preferred source_type matched — fall back to first by id.
+    return rows[0]
+
+
+def _format_extraction_failed_badge(status: str, finished_iso: str) -> str:
+    """Mara's badge text per Wave 1E.2 copy memo. Returns '' when
+    status == 'success' (no badge rendered).
+
+    Format: 'last run failed Apr 28' (≤ 25 chars). The 'failed' /
+    'skipped' distinction is preserved per Mara — collapsing both to
+    'stale' would mislead because the cells aren't stale, they're
+    last-known-good after a failed refresh.
+
+    Date formatting: explicit f-string with `dt.day` rather than
+    `strftime('%-d')`. The %-d directive is glibc-only — fails on
+    musl libc (Alpine containers) and Windows. Mirrors the
+    `_format_date_long` musl-safe pattern already in this module.
+    """
+    if status == "success" or not finished_iso:
+        return ""
+    try:
+        dt = datetime.fromisoformat(finished_iso.replace("Z", "+00:00"))
+    except ValueError:
+        return ""
+    short_date = f"{dt.strftime('%b')} {dt.day}"  # 'Apr 28' (musl-safe)
+    if status == "failed":
+        return f"last run failed {short_date}"
+    if status == "skipped":
+        return f"last run skipped {short_date}"
+    return f"last run {status} {short_date}"
+
+
+def _format_extraction_failed_aria(status: str, finished_iso: str) -> str:
+    """Mara's tooltip/aria sentence per Wave 1E.2 copy memo. Returns
+    '' when status == 'success'.
+
+    Format: 'Last extraction failed Apr 28, 2026 — values shown are
+    from the prior successful run.' (≤ 100 chars). The trailing
+    sentence is the buyer-credibility hook — the cells underneath
+    aren't blank, they're last-known-good.
+
+    Date formatting: musl-safe f-string (see _format_extraction_failed_badge
+    for the rationale).
+    """
+    if status == "success" or not finished_iso:
+        return ""
+    try:
+        dt = datetime.fromisoformat(finished_iso.replace("Z", "+00:00"))
+    except ValueError:
+        return ""
+    long_date = f"{dt.strftime('%b')} {dt.day}, {dt.year}"  # 'Apr 28, 2026' (musl-safe)
+    verb = status if status in ("failed", "skipped") else status
+    return (
+        f"Last extraction {verb} {long_date} — values shown are from "
+        f"the prior successful run."
+    )
+
+
 def _derive_cell_state(fact_value: str, note: str) -> tuple[str, str]:
     """Return (cell_state, cell_state_class) for one cell.
 
@@ -848,7 +960,7 @@ def build_engine_facts_context(
     fact_rows = conn.execute("""
         SELECT
             f.engine_id, f.category, f.fact_type, f.fact_value, f.extracted_at,
-            ev.source_url, ev.source_path, ev.note
+            ev.source_url, ev.source_path, ev.note, ev.source_type, ev.id
         FROM facts f
         LEFT JOIN evidence_links ev ON ev.fact_id = f.id
         ORDER BY f.engine_id, f.category, f.fact_type, ev.id
@@ -856,14 +968,26 @@ def build_engine_facts_context(
     if not fact_rows:
         return None
 
-    # Group: (engine_id, fact_type) → first matching row tuple
-    # ("first" because rows are ORDER BY ev.id ASC and 1E.1 takes the
-    # foundational evidence — 1E.2 may layer canonical-evidence preference).
-    fact_by_key: dict[tuple[str, str], tuple] = {}
+    # Wave 1E.2: collect ALL evidence rows per (engine, fact_type) so
+    # _select_canonical_evidence can pick the most-buyer-credible
+    # source. 1E.1 took the FIRST row by ev.id; that's the fallback
+    # when no preferred source_type exists. Multi-evidence facts are
+    # currently rare in V1 (extractors emit 1 Evidence per Fact) but
+    # the canonical-selection logic is forward-compat for V2+ where
+    # extractors may layer alternate sources (e.g. Docker Hub manifest
+    # + GitHub release tag for the same fact).
+    fact_rows_by_key: dict[tuple[str, str], list[tuple]] = {}
     for row in fact_rows:
         key = (row[0], row[2])
-        if key not in fact_by_key:
-            fact_by_key[key] = row
+        fact_rows_by_key.setdefault(key, []).append(row)
+
+    # _select_canonical_evidence(rows) returns the single canonical row
+    # per (engine, fact_type). Downstream code reads from this dict
+    # exactly like 1E.1 read from fact_by_key.
+    fact_by_key: dict[tuple[str, str], tuple] = {
+        key: _select_canonical_evidence(rows)
+        for key, rows in fact_rows_by_key.items()
+    }
 
     # Build engine columns in display_name ASC order (Jake's sort default).
     engines_tuple = tuple(
@@ -910,7 +1034,8 @@ def _build_engine_column(
     repo_url: str,
     extraction_by_engine: dict[str, tuple[str, str | None]],
 ) -> EngineColumn:
-    """One EngineColumn — engine identity + extraction status."""
+    """One EngineColumn — engine identity + extraction status + Mara's
+    pre-computed extraction-failed badge / aria copy (Wave 1E.2)."""
     status, finished_at = extraction_by_engine.get(engine_id, ("unknown", None))
     is_engine_stale = status != "success"
     finished_iso = finished_at or ""
@@ -925,6 +1050,12 @@ def _build_engine_column(
         extraction_finished_iso=finished_iso,
         extraction_finished_display=finished_display,
         is_engine_stale=is_engine_stale,
+        extraction_failed_badge=_format_extraction_failed_badge(
+            status, finished_iso,
+        ),
+        extraction_failed_aria=_format_extraction_failed_aria(
+            status, finished_iso,
+        ),
     )
 
 
@@ -977,12 +1108,24 @@ def _build_engine_cell(
     fact_by_key: dict[tuple[str, str], tuple],
     is_engine_stale: bool,
 ) -> EngineCell:
-    """One EngineCell — pre-computed display state for a single (engine, fact_type)."""
+    """One EngineCell — pre-computed display state for a single (engine, fact_type).
+
+    Row tuple layout (from build_engine_facts_context SQL SELECT):
+      row[0]=f.engine_id  row[1]=f.category   row[2]=f.fact_type
+      row[3]=f.fact_value row[4]=f.extracted_at
+      row[5]=ev.source_url row[6]=ev.source_path row[7]=ev.note
+      row[8]=ev.source_type row[9]=ev.id
+
+    Indices anchored here defensively — a future SQL extension that
+    re-orders columns must update this comment AND every index read
+    below. The 1E.2 extension (added source_type+id at 8/9) preserved
+    indices 0-7; future changes must check.
+    """
     row = fact_by_key[(engine_id, fact_type)]
-    fact_value = row[3] or ""
-    source_url = row[5] or ""
-    source_path = row[6] or ""
-    note = row[7] or ""
+    fact_value = row[3] or ""    # row[3] = f.fact_value
+    source_url = row[5] or ""    # row[5] = ev.source_url
+    source_path = row[6] or ""   # row[6] = ev.source_path
+    note = row[7] or ""          # row[7] = ev.note
 
     cell_state, cell_state_class = _derive_cell_state(fact_value, note)
     display_value = fact_value if fact_value else "—"
