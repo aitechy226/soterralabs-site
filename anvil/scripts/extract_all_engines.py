@@ -292,13 +292,35 @@ def run_extraction_loop(
     return success, failed, skipped
 
 
-def main() -> None:
-    """Cron entrypoint. Bootstrap + per-engine extraction loop.
+def _failed_engine_ids(conn: sqlite3.Connection) -> list[str]:
+    """Return engine_ids whose latest extraction_runs.status is 'failed'.
+    Used by the cron-failure alert path so the email body names which
+    engines need attention."""
+    rows = conn.execute("""
+        SELECT er.engine_id, er.status
+        FROM extraction_runs er
+        INNER JOIN (
+            SELECT engine_id, MAX(id) AS id
+            FROM extraction_runs
+            GROUP BY engine_id
+        ) latest
+            ON er.engine_id = latest.engine_id
+           AND er.id = latest.id
+        WHERE er.status = ?
+        ORDER BY er.engine_id
+    """, (STATUS_FAILED,)).fetchall()
+    return [r[0] for r in rows]
 
-    Wave 1B.1: vLLM only registered. Subsequent waves append entries
-    to `_ENGINE_EXTRACTORS`. Engines without a registered extractor
-    are skipped (logged + audited), not failed — keeps the cron
-    runnable while the per-engine modules are still rolling out.
+
+def main() -> int:
+    """Cron entrypoint. Bootstrap + per-engine extraction loop + alert
+    dispatch. Returns POSIX exit code.
+
+    Wave 1G alerting contract per project memory `project_anvil_alerting.md`:
+    every notify.alert(...) call carries (level, source, what_failed,
+    action_hint). Engine Facts cron alerts when ANY engine fails — buyer
+    sees the column-header badge on /anvil/engines, but ops needs the
+    push notification to investigate.
     """
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     conn, engines = init_run()
@@ -311,9 +333,44 @@ def main() -> None:
             "engine-facts run complete: success=%d failed=%d skipped=%d",
             success, failed, skipped,
         )
+
+        if failed > 0:
+            failed_ids = _failed_engine_ids(conn)
+            try:
+                from scripts import notify
+                notify.alert(
+                    level="warn",
+                    source="extract_all_engines",
+                    what_failed=(
+                        f"{failed} of {len(engines)} engine extractors failed: "
+                        f"{', '.join(failed_ids)}"
+                    ),
+                    action_hint=(
+                        "Auto-recovers next cycle if upstream rate-limit / "
+                        "transient. If same engine fails 2+ cycles, check "
+                        "anvil/scripts/extractors/<engine>.py against the "
+                        "latest GitHub repo paths (file moves are the most "
+                        "common cause). Buyer-facing /anvil/engines column "
+                        "shows the 'last run failed' badge per Mara's "
+                        "Wave 1E.2 copy."
+                    ),
+                    context={
+                        "success": success,
+                        "failed": failed,
+                        "skipped": skipped,
+                        "failed_engines": failed_ids,
+                    },
+                )
+            except Exception as alert_exc:  # noqa: BLE001
+                log.error(
+                    "engine-facts: alert dispatch failed: %s",
+                    alert_exc, exc_info=True,
+                )
+
+        return 0 if failed == 0 else 1
     finally:
         conn.close()
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
