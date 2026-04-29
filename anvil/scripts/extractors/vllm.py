@@ -28,8 +28,15 @@ from scripts.extractors._http import (
     github_file_blob_url,
     resolve_repo_head_sha,
 )
+from scripts.extractors._canonical_fact_types import (
+    NOTE_NOT_DECLARED,
+    NOTE_NOT_DETECTED,
+)
 from scripts.extractors._parsers import (
+    detect_prometheus_client,
     find_dockerfile_from_lines,
+    find_first_real_base_image_from_line,
+    format_gpu_runtime_value as _format_gpu_runtime_value,
     normalize_python_version_floor,
     parse_cuda_version_from_image,
     parse_pyproject_python_requires,
@@ -221,7 +228,7 @@ class VllmExtractor(Extractor):
                     fetched_at=ctx.contributors_fetched_at,
                     note=(
                         None if contrib_count is not None
-                        else "Link header absent — repo has 0 or 1 contributors"
+                        else f"{NOTE_NOT_DETECTED}: Link header absent — repo has 0 or 1 contributors"
                     ),
                 ),),
             ),
@@ -258,13 +265,18 @@ class VllmExtractor(Extractor):
                     fetched_at=ctx.readme_fetched_at,
                     source_path="README.md",
                     commit_sha=ctx.sha,
-                    note=None if readme_first else "first non-blank prose line not detected",
+                    note=None if readme_first else f"{NOTE_NOT_DETECTED}: README has no non-empty prose line before headers",
                 ),),
             ),
         ]
 
     def _container_facts(self, ctx: _VllmRunContext) -> list[Fact]:
-        """5 fact_types: Docker Hub tags + Dockerfile FROM line + pyproject Python pin."""
+        """5 fact_types: Docker Hub tags + Dockerfile FROM line + pyproject Python pin.
+
+        Wave 1B.2 catalog renames applied: gpu_runtime_in_from_line (was
+        cuda_in_from_line) with `cuda <ver>` value vocabulary;
+        runtime_pinned (was python_pinned) with `python <ver>` shape.
+        """
         results = ctx.dockerhub.get("results", [])
         latest_tag, image_size_mb, hub_fetched_at = self._dockerhub_latest(
             results, ctx.dockerhub_fetched_at,
@@ -277,7 +289,10 @@ class VllmExtractor(Extractor):
         base_image, cuda_version, cuda_line = self._resolve_dockerfile_base(
             ctx.dockerfile_text, from_lines,
         )
-        python_floor = self._python_pin_floor(ctx.pyproject_text)
+        gpu_runtime_value, gpu_runtime_note = _format_gpu_runtime_value(
+            base_image, cuda_version,
+        )
+        runtime_pinned_value = self._runtime_pinned_value(ctx.pyproject_text)
 
         return [
             Fact(
@@ -285,7 +300,7 @@ class VllmExtractor(Extractor):
                 (Evidence(
                     source_url=hub_url, source_type="docker_hub",
                     fetched_at=hub_fetched_at,
-                    note=None if latest_tag else "no tags in Docker Hub response",
+                    note=None if latest_tag else f"{NOTE_NOT_DECLARED}: Docker Hub returned no tags",
                 ),),
             ),
             Fact(
@@ -293,7 +308,7 @@ class VllmExtractor(Extractor):
                 (Evidence(
                     source_url=hub_url, source_type="docker_hub",
                     fetched_at=hub_fetched_at,
-                    note=None if image_size_mb else "no full_size in latest tag",
+                    note=None if image_size_mb else f"{NOTE_NOT_DECLARED}: latest tag carries no full_size",
                 ),),
             ),
             Fact(
@@ -304,12 +319,12 @@ class VllmExtractor(Extractor):
                     fetched_at=ctx.dockerfile_fetched_at,
                     note=(
                         None if base_image
-                        else "FROM line uses ARG without resolvable default"
+                        else f"{NOTE_NOT_DETECTED}: FROM line uses ARG without resolvable default"
                     ),
                 ),),
             ),
             Fact(
-                "container", "cuda_in_from_line", cuda_version,
+                "container", "gpu_runtime_in_from_line", gpu_runtime_value,
                 (Evidence(
                     source_url=github_file_blob_url(
                         VLLM_OWNER, VLLM_REPO, ctx.dockerfile_path, ctx.sha,
@@ -322,11 +337,11 @@ class VllmExtractor(Extractor):
                     ),
                     commit_sha=ctx.sha,
                     fetched_at=ctx.dockerfile_fetched_at,
-                    note=None if cuda_version else "no CUDA version in FROM line — CPU image or runtime-resolved",
+                    note=gpu_runtime_note,
                 ),),
             ),
             Fact(
-                "container", "python_pinned", python_floor,
+                "container", "runtime_pinned", runtime_pinned_value,
                 (Evidence(
                     source_url=github_file_blob_url(
                         VLLM_OWNER, VLLM_REPO, VLLM_PYPROJECT_PATH, ctx.sha,
@@ -334,19 +349,32 @@ class VllmExtractor(Extractor):
                     source_type="github_file",
                     source_path=VLLM_PYPROJECT_PATH, commit_sha=ctx.sha,
                     fetched_at=ctx.pyproject_fetched_at,
-                    note=None if python_floor else "requires-python not found in pyproject.toml",
+                    note=(
+                        None if runtime_pinned_value
+                        else f"{NOTE_NOT_DECLARED}: requires-python not in pyproject.toml"
+                    ),
                 ),),
             ),
         ]
 
     def _api_surface_facts(self, ctx: _VllmRunContext) -> list[Fact]:
         """6 fact_types — literal grep over api_server.py. Empty Facts
-        with note when route lives in a deeper sub-router (V1 honesty rule)."""
+        with note when route lives in a deeper sub-router (V1 honesty rule).
+
+        source layer: EMPIRICAL — for each empty fact, the value's
+        absence is a NEGATIVE CLAIM from incomplete grep, NOT physics.
+        We read api_server.py only; vLLM's actual route handlers live
+        in deeper modules (e.g., vllm/entrypoints/openai/generate/).
+        Per Carol's Wave 1B.2 §1.5 source-layer correction.
+        """
         api_server_url = github_file_blob_url(
             VLLM_OWNER, VLLM_REPO, VLLM_API_SERVER_PATH, ctx.sha,
         )
         text = ctx.api_server_text
-        not_in_top = "not detected in api_server.py — may be registered in a sub-router"
+        # source layer: EMPIRICAL — negative claim from incomplete grep
+        not_in_top = (
+            f"{NOTE_NOT_DETECTED}: route may live in a sub-router we don't fetch"
+        )
 
         def grep_fact(fact_type: str, needle: str) -> Fact:
             line = self._first_line_with(text, needle)
@@ -377,7 +405,12 @@ class VllmExtractor(Extractor):
         ]
 
     def _observability_facts(self, ctx: _VllmRunContext) -> list[Fact]:
-        """5 fact_types — literal grep across api_server.py + pyproject.toml."""
+        """5 fact_types — literal grep across api_server.py + pyproject.toml.
+
+        source layer: EMPIRICAL for the api_server.py greps (negative
+        claims from incomplete probe). PHYSICS for prometheus_client
+        (literal pyproject.toml dependency declaration).
+        """
         api_server_url = github_file_blob_url(
             VLLM_OWNER, VLLM_REPO, VLLM_API_SERVER_PATH, ctx.sha,
         )
@@ -386,7 +419,10 @@ class VllmExtractor(Extractor):
         )
         text = ctx.api_server_text
         py_text = ctx.pyproject_text
-        not_in_top = "not detected in api_server.py — may be registered in a sub-router"
+        # source layer: EMPIRICAL — negative claim from incomplete grep
+        not_in_top = (
+            f"{NOTE_NOT_DETECTED}: route may live in a sub-router we don't fetch"
+        )
 
         def server_grep(fact_type: str, needle: str) -> Fact:
             line = self._first_line_with(text, needle)
@@ -414,7 +450,8 @@ class VllmExtractor(Extractor):
             self._first_line_with(text, otel_names[0]) if otel_names else 0
         )
         otel_value = ", ".join(otel_names)
-        prometheus_present = "prometheus_client" in py_text or "prometheus-client" in py_text
+        # Wave 1B.2: route through the polyglot detection table.
+        prometheus_present = detect_prometheus_client("python", py_text)
 
         return [
             server_grep("metrics_endpoint", "/metrics"),
@@ -433,7 +470,7 @@ class VllmExtractor(Extractor):
                     ),
                     commit_sha=ctx.sha,
                     fetched_at=ctx.api_server_fetched_at,
-                    note=None if otel_value else "no OTEL_* env var refs in api_server.py",
+                    note=None if otel_value else f"{NOTE_NOT_DECLARED}: no OTEL_* env var refs in api_server.py",
                 ),),
             ),
             Fact(
@@ -447,7 +484,7 @@ class VllmExtractor(Extractor):
                     fetched_at=ctx.pyproject_fetched_at,
                     note=(
                         None if prometheus_present
-                        else "prometheus_client not declared in pyproject.toml"
+                        else f"{NOTE_NOT_DECLARED}: prometheus_client not in pyproject.toml dependencies"
                     ),
                 ),),
             ),
@@ -518,55 +555,37 @@ class VllmExtractor(Extractor):
         from_lines: list[tuple[int, str]],
     ) -> tuple[str, str, int]:
         """Return (base_image_string, cuda_version, line_number) for the
-        first FROM line, resolving `${ARG}` substitution against the
-        Dockerfile's own ARG defaults (vLLM uses
-        `FROM ${BUILD_BASE_IMAGE}` with the actual image in a top-of-file
-        ARG default).
+        first REAL base image in the Dockerfile — skipping `scratch`
+        stages and stage-name references that earlier stages declare.
+        ARG substitution applied; cuda_version is "" when no CUDA
+        version is detectable.
 
-        cuda_version is "" when no CUDA version is detectable (CPU images,
-        unresolved ARG values, etc.).
+        Wave 1B.2 swap: was `from_lines[0]` blindly. Multi-stage
+        Dockerfiles where the meaningful base is below line 1 (Ollama:
+        `scratch` on line 14, ROCm on line 17) need the smarter helper.
+        Caller's `format_gpu_runtime_value` translates the (base, cuda)
+        pair into the gpu_runtime_in_from_line vocabulary value.
         """
-        if not from_lines:
+        line_num, resolved = find_first_real_base_image_from_line(text, from_lines)
+        if not resolved:
             return "", "", 0
-        first_line_num, first_image = from_lines[0]
-        resolved = VllmExtractor._resolve_arg_substitution(text, first_image)
         cuda = parse_cuda_version_from_image(resolved) or ""
-        return resolved, cuda, first_line_num
+        return resolved, cuda, line_num
 
     @staticmethod
-    def _resolve_arg_substitution(text: str, image: str) -> str:
-        """Substitute ${ARG_NAME} references in `image` against ARG
-        default values defined in the Dockerfile.
+    def _runtime_pinned_value(pyproject_text: str) -> str:
+        """Return the `runtime_pinned` value in the Wave 1B.2 vocabulary
+        shape `<lang> <version>` (e.g., `python 3.10`), or "" when no
+        pin is declared.
 
-        Recursively resolves nested substitutions (vLLM's BUILD_BASE_IMAGE
-        default is `nvidia/cuda:${CUDA_VERSION}-devel-ubuntu22.04`).
-        Bounded depth = 5 to prevent runaway on circular references.
+        The empty case is emitted with a `not declared` note in the
+        caller — orchestrator-side, not here, so the helper stays pure.
         """
-        arg_defaults: dict[str, str] = {}
-        for line in text.splitlines():
-            match = re.match(r"^\s*ARG\s+([A-Za-z_][A-Za-z0-9_]*)=(.+?)\s*$", line)
-            if match:
-                arg_defaults[match.group(1)] = match.group(2).strip()
-        resolved = image
-        for _ in range(5):
-            new = re.sub(
-                r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}",
-                lambda m: arg_defaults.get(m.group(1), m.group(0)),
-                resolved,
-            )
-            if new == resolved:
-                break
-            resolved = new
-        return resolved
-
-    @staticmethod
-    def _python_pin_floor(pyproject_text: str) -> str:
-        """Return floor Python version (e.g., '3.10') from
-        requires-python, or "" when no pin is declared."""
         spec = parse_pyproject_python_requires(pyproject_text)
         if not spec:
             return ""
-        return normalize_python_version_floor(spec) or ""
+        floor = normalize_python_version_floor(spec)
+        return f"python {floor}" if floor else ""
 
     @staticmethod
     def _first_line_with(text: str, needle: str) -> int:

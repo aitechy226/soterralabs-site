@@ -10,6 +10,11 @@ from __future__ import annotations
 
 from scripts.extractors._canonical_fact_types import (
     CANONICAL_FACT_TYPES_BY_CATEGORY,
+    NOTE_NOT_APPLICABLE,
+    NOTE_NOT_DECLARED,
+    NOTE_NOT_DETECTED,
+    NOTE_UNSUPPORTED_RUNTIME,
+    NOTE_VOCABULARY,
     all_fact_types,
     fact_types_for_category,
 )
@@ -77,3 +82,44 @@ def test_fact_types_for_category_unknown_raises() -> None:
     import pytest
     with pytest.raises(KeyError):
         fact_types_for_category("hardware")  # V2 only — not in V1 catalog
+
+
+# ============================================================
+# Wave 1B.2 catalog rename invariants
+# ============================================================
+
+def test_wave_1b2_renames_present() -> None:
+    """Wave 1B.2 PRODUCE §1.1: `python_pinned` → `runtime_pinned`,
+    `cuda_in_from_line` → `gpu_runtime_in_from_line`. The rename was
+    locked at N=2 (one extractor in tree) to avoid 6 future ports
+    inheriting misnamed slots. If a regression reintroduces the old
+    names, this test fires."""
+    flat = all_fact_types()
+    # New names present
+    assert "runtime_pinned" in flat
+    assert "gpu_runtime_in_from_line" in flat
+    # Old names gone
+    assert "python_pinned" not in flat, "python_pinned was renamed to runtime_pinned"
+    assert "cuda_in_from_line" not in flat, "cuda_in_from_line was renamed to gpu_runtime_in_from_line"
+
+
+def test_note_vocabulary_has_four_terms() -> None:
+    """Wave 1B.2 PRODUCE §1.3: 4-term controlled vocabulary for
+    Evidence.note prefixes. Adding/removing a term changes the
+    contract for 7 future engines — this test fires on any drift."""
+    assert len(NOTE_VOCABULARY) == 4
+    assert NOTE_VOCABULARY == (
+        NOTE_NOT_APPLICABLE,
+        NOTE_NOT_DECLARED,
+        NOTE_NOT_DETECTED,
+        NOTE_UNSUPPORTED_RUNTIME,
+    )
+
+
+def test_note_vocabulary_terms_are_distinct_lowercase() -> None:
+    """Vocabulary terms are case-sensitive prefixes. Mixed case would
+    break the conformance check that asserts every note STARTS WITH
+    one of these."""
+    for term in NOTE_VOCABULARY:
+        assert term == term.lower(), f"vocabulary term not lowercase: {term!r}"
+    assert len(set(NOTE_VOCABULARY)) == 4, "duplicate vocabulary terms"

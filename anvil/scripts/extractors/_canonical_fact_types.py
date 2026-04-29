@@ -47,8 +47,8 @@ CANONICAL_FACT_TYPES_BY_CATEGORY: dict[str, tuple[str, ...]] = {
         "latest_tag",
         "image_size_mb",
         "base_image",
-        "cuda_in_from_line",
-        "python_pinned",
+        "gpu_runtime_in_from_line",
+        "runtime_pinned",
     ),
     # API Surface — "Will my client just work?"
     "api_surface": (
@@ -85,3 +85,46 @@ def fact_types_for_category(category: str) -> tuple[str, ...]:
     """Get the canonical fact_type list for a category, preserving
     rendered column order. Raises KeyError on unknown category."""
     return CANONICAL_FACT_TYPES_BY_CATEGORY[category]
+
+
+# ============================================================
+# Empty-cell Evidence.note vocabulary (Jake's UX call, Wave 1B.2)
+# ============================================================
+
+#: Controlled vocabulary for `Evidence.note` strings on empty Facts.
+#: Every note string MUST start with one of these prefixes followed by
+#: a colon and case-specific detail. The renderer's mobile-fallback
+#: tooltip surfaces these strings; uncontrolled phrasing lets 7 future
+#: engines drift into 24+ unique phrasings.
+#:
+#: Per Wave 1B.2 PRODUCE §1.3 — locked at N=2 to bind 7 more engines.
+#: Tested by `test_canonical_fact_types.py::test_every_note_uses_vocabulary`.
+NOTE_NOT_APPLICABLE: str = "not applicable"
+"""Categorically out of scope for this engine.
+Example: `not applicable: Go project — runtime_pinned reports go 1.24.1, not Python`."""
+
+NOTE_NOT_DECLARED: str = "not declared"
+"""Searched the surface, value legitimately absent.
+Example: `not declared: prometheus_client not in go.mod dependencies`."""
+
+NOTE_NOT_DETECTED: str = "not detected"
+"""Searched, didn't find, can't rule out — negative claim from incomplete probe.
+Example: `not detected: route may live in a sub-router we don't fetch`.
+
+Per Carol's Wave 1B.2 source-layer correction: Facts emitted with this
+prefix are EMPIRICAL (negative claim), NOT PHYSICS — the absence of a
+literal grep hit doesn't prove the route doesn't exist."""
+
+NOTE_UNSUPPORTED_RUNTIME: str = "unsupported runtime"
+"""Tooling didn't probe this dimension.
+Example: `unsupported runtime: CPU-only image — no GPU runtime to extract`."""
+
+#: Iterable of all 4 vocabulary prefixes — used by the conformance test
+#: that asserts every `Evidence.note` from every extractor begins with
+#: one of these strings.
+NOTE_VOCABULARY: tuple[str, ...] = (
+    NOTE_NOT_APPLICABLE,
+    NOTE_NOT_DECLARED,
+    NOTE_NOT_DETECTED,
+    NOTE_UNSUPPORTED_RUNTIME,
+)

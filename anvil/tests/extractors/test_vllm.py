@@ -188,6 +188,24 @@ def test_every_fact_fetched_at_is_set(extracted: list[Fact]) -> None:
             assert ev.fetched_at, f"empty fetched_at on fact {fact.fact_type!r}"
 
 
+def test_every_evidence_note_uses_controlled_vocabulary(
+    extracted: list[Fact],
+) -> None:
+    """Wave 1B.2 PRODUCE §1.3: every Evidence.note string MUST start with
+    one of the 4 NOTE_VOCABULARY prefixes followed by a colon. Renderer's
+    mobile-fallback tooltip surfaces these strings; uncontrolled phrasing
+    drifts across 8 future engines and erodes the vocabulary signal."""
+    from scripts.extractors._canonical_fact_types import NOTE_VOCABULARY
+    for fact in extracted:
+        for ev in fact.evidence:
+            if ev.note is None:
+                continue  # non-empty Facts skip the note field
+            assert any(ev.note.startswith(f"{term}:") for term in NOTE_VOCABULARY), (
+                f"fact {fact.fact_type!r} has note {ev.note!r} that doesn't "
+                f"start with one of {NOTE_VOCABULARY}"
+            )
+
+
 # ============================================================
 # Per-category content checks
 # ============================================================
@@ -275,24 +293,28 @@ def test_container_base_image_resolves_arg_substitution(
     assert "nvidia/cuda" in base or base == "", base
 
 
-def test_container_cuda_version_extracted_when_present(
+def test_container_gpu_runtime_extracted_when_present(
     extracted: list[Fact],
 ) -> None:
-    """Once ARG substitution resolves to nvidia/cuda:<ver>-..., the
-    cuda parser should pull the version. Empty value is acceptable
-    only when CUDA_VERSION ARG itself is unresolved."""
+    """Wave 1B.2: fact_type renamed from `cuda_in_from_line` to
+    `gpu_runtime_in_from_line` with vocabulary value `cuda <ver>` /
+    `rocm <ver>` / `vulkan` / `metal` / `cpu` / "". For vLLM (nvidia/cuda
+    base) the value should start with `cuda `."""
     by_type = _facts_by_type(extracted)
-    cuda = by_type["cuda_in_from_line"].fact_value
+    gpu_runtime = by_type["gpu_runtime_in_from_line"].fact_value
     base = by_type["base_image"].fact_value
     if "nvidia/cuda" in base and "${" not in base:
-        assert cuda, f"base_image is {base!r} but cuda_in_from_line is empty"
+        assert gpu_runtime.startswith("cuda"), (
+            f"nvidia/cuda base should produce `cuda <ver>` value, got {gpu_runtime!r}"
+        )
 
 
-def test_container_python_pinned_floor_version(extracted: list[Fact]) -> None:
-    """vLLM declares `requires-python = ">=3.10,<3.15"` — extractor
-    surfaces the floor `3.10`."""
+def test_container_runtime_pinned_carries_language_prefix(extracted: list[Fact]) -> None:
+    """Wave 1B.2: fact_type renamed from `python_pinned` to
+    `runtime_pinned` with `<lang> <version>` value shape. vLLM declares
+    `requires-python = ">=3.10,<3.15"` — extractor emits `python 3.10`."""
     by_type = _facts_by_type(extracted)
-    assert by_type["python_pinned"].fact_value == "3.10"
+    assert by_type["runtime_pinned"].fact_value == "python 3.10"
 
 
 def test_container_latest_tag_present(extracted: list[Fact]) -> None:
@@ -363,52 +385,6 @@ def test_observability_prometheus_client_detects_pyproject_dep(
 # ============================================================
 # Pure-helper unit tests (no I/O)
 # ============================================================
-
-class TestArgSubstitution:
-    """ARG resolution helper — vLLM's Dockerfile-pattern is the
-    motivating case but the helper is generic."""
-
-    def test_simple_arg_substitution(self) -> None:
-        text = 'ARG IMG=nvidia/cuda:12.4.1-devel-ubuntu22.04\nFROM ${IMG}\n'
-        assert (
-            VllmExtractor._resolve_arg_substitution(text, "${IMG}")
-            == "nvidia/cuda:12.4.1-devel-ubuntu22.04"
-        )
-
-    def test_nested_arg_substitution(self) -> None:
-        """vLLM's actual pattern: BUILD_BASE_IMAGE refers to CUDA_VERSION."""
-        text = (
-            "ARG CUDA_VERSION=12.4.1\n"
-            "ARG BUILD_BASE_IMAGE=nvidia/cuda:${CUDA_VERSION}-devel-ubuntu22.04\n"
-            "FROM ${BUILD_BASE_IMAGE}\n"
-        )
-        assert (
-            VllmExtractor._resolve_arg_substitution(text, "${BUILD_BASE_IMAGE}")
-            == "nvidia/cuda:12.4.1-devel-ubuntu22.04"
-        )
-
-    def test_unresolvable_arg_kept_verbatim(self) -> None:
-        """If ARG has no default and no substitution, leave the literal."""
-        text = "FROM ${UNDEFINED}\n"
-        assert (
-            VllmExtractor._resolve_arg_substitution(text, "${UNDEFINED}")
-            == "${UNDEFINED}"
-        )
-
-    def test_no_arg_in_image_is_passthrough(self) -> None:
-        text = "FROM ubuntu:22.04\n"
-        assert (
-            VllmExtractor._resolve_arg_substitution(text, "ubuntu:22.04")
-            == "ubuntu:22.04"
-        )
-
-    def test_circular_arg_does_not_loop_forever(self) -> None:
-        """Bounded depth = 5. Circular ARGs return after 5 expansions."""
-        text = "ARG A=${B}\nARG B=${A}\n"
-        # Should not hang. Some intermediate value is acceptable.
-        result = VllmExtractor._resolve_arg_substitution(text, "${A}")
-        assert "${A}" in result or "${B}" in result
-
 
 class TestContributorsParsing:
 

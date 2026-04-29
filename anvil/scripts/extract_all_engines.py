@@ -29,17 +29,19 @@ from scripts.extractors.base import (
     ensure_engine_facts_schema,
     load_engines,
 )
+from scripts.extractors.ollama import OllamaExtractor
 from scripts.extractors.vllm import VllmExtractor
 
 log = logging.getLogger(__name__)
 
 #: Registry mapping `engines.yaml` ids → per-engine Extractor classes.
-#: Wave 1B.1 ships vLLM only; Waves 1B.2 / 1C / 1D append entries here
-#: as each engine module lands. Engines absent from this dict are
+#: Wave 1B.1 vLLM + Wave 1B.2 Ollama. Waves 1C / 1D append entries
+#: here as each engine module lands. Engines absent from this dict are
 #: skipped (logged but not failed) — the orchestrator runs cleanly even
 #: when the canonical YAML is ahead of the implementations.
 _ENGINE_EXTRACTORS: dict[str, type[Extractor]] = {
     "vllm": VllmExtractor,
+    "ollama": OllamaExtractor,
 }
 
 #: Status values written to extraction_runs.status. Open-coded here so
