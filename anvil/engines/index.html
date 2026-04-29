@@ -1,0 +1,2368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLM Inference Engine Facts — Soterra Labs Anvil</title>
+  <meta name="description" content="Side-by-side reference of nine open-source LLM inference engines (vLLM, Ollama, TGI, llama.cpp, MLC-LLM, TensorRT-LLM, SGLang, LMDeploy, DeepSpeed-MII) on project health, container, API routes, and observability. Every cell links to its SHA-pinned source." />
+  <link rel="canonical" href="https://soterralabs.ai/anvil/engines" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
+
+  
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="LLM Inference Engine Facts — Soterra Labs Anvil" />
+  <meta property="og:description" content="Side-by-side reference of nine open-source LLM inference engines (vLLM, Ollama, TGI, llama.cpp, MLC-LLM, TensorRT-LLM, SGLang, LMDeploy, DeepSpeed-MII) on project health, container, API routes, and observability. Every cell links to its SHA-pinned source." />
+  <meta property="og:url" content="https://soterralabs.ai/anvil/engines" />
+  <meta property="og:site_name" content="Soterra Labs" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="LLM Inference Engine Facts — Soterra Labs Anvil" />
+  <meta name="twitter:description" content="Side-by-side reference of nine open-source LLM inference engines (vLLM, Ollama, TGI, llama.cpp, MLC-LLM, TensorRT-LLM, SGLang, LMDeploy, DeepSpeed-MII) on project health, container, API routes, and observability. Every cell links to its SHA-pinned source." />
+
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Soterra Labs",
+    "legalName": "Soterra Labs LLC",
+    "url": "https://soterralabs.ai",
+    "logo": "https://soterralabs.ai/logo-lit-circle.svg"
+  }
+  </script>
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "LLM Inference Engine Facts",
+  "description": "Side-by-side literal evidence on nine open-source LLM inference engines.",
+  "url": "https://soterralabs.ai/anvil/engines",
+  "dateModified": "2026-04-29T17:01:45.978818+00:00",
+  "publisher": {"@type": "Organization", "name": "Soterra Labs"}
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "LLM Inference Engine Facts — Soterra Labs Anvil",
+  "description": "Side-by-side reference of nine open-source LLM inference engines (vLLM, Ollama, TGI, llama.cpp, MLC-LLM, TensorRT-LLM, SGLang, LMDeploy, DeepSpeed-MII), covering project health, container packaging, API routes, and observability. Every value is extracted from public source code or published container images and pinned to a commit SHA. Rebuilt weekly.",
+  "url": "https://soterralabs.ai/anvil/engines",
+  "creator": {"@type": "Organization", "name": "Soterra Labs"},
+  "license": "https://soterralabs.ai/legal/",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-04-29T17:01:45.978818+00:00",
+  "keywords": "LLM inference engine, vLLM, Ollama, TGI, llama.cpp, MLC-LLM, TensorRT-LLM, SGLang, LMDeploy, DeepSpeed-MII, Prometheus exporter, OpenAI-compatible API, CUDA, ROCm"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://soterralabs.ai/"},
+    {"@type": "ListItem", "position": 2, "name": "Reference", "item": "https://soterralabs.ai/anvil/"},
+    {"@type": "ListItem", "position": 3, "name": "Engine Facts", "item": "https://soterralabs.ai/anvil/engines"}
+  ]
+}
+</script>
+
+  <link rel="stylesheet" href="/anvil/style.css?v=900a9dd8" />
+</head>
+<body data-active-nav="reference">
+
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a href="/" class="logo" aria-label="Soterra Labs home">
+        <img src="/logo-lit-circle.svg" alt="Soterra Labs" />
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/#services">Services</a></li>
+        <li><a href="/products">Products</a></li>
+        <li class="has-children">
+          <a href="/anvil/" class="active">Reference</a>
+          <ul class="dropdown">
+            <li><a href="/anvil/pricing">&middot; Cloud GPU Pricing</a></li>
+            <li><a href="/anvil/mlperf">&middot; MLPerf Inference Results</a></li>
+          </ul>
+        </li>
+        <li><a href="/#thinking">Thinking</a></li>
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+  <script>
+    (function() {
+      var toggle = document.getElementById('navToggle');
+      var links = document.getElementById('navLinks');
+      if (!toggle || !links) return;
+      toggle.addEventListener('click', function() {
+        var open = links.classList.toggle('open');
+        toggle.classList.toggle('open', open);
+        toggle.setAttribute('aria-expanded', open);
+      });
+      links.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', function() {
+          links.classList.remove('open');
+          toggle.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        });
+      });
+    })();
+    // Live relative-time. Server bakes "Just now" / "53 minutes ago" at
+    // build time; that string goes stale between cron runs AND when a
+    // visitor leaves the tab open for hours after JS first ran. Fix:
+    // (1) re-run on a 60s interval, (2) re-run when the tab becomes
+    // visible again (catches "left open overnight" case).
+    // Python writes 6-digit microseconds (.123456); some browsers
+    // truncate, some don't — normalize to milliseconds before parsing
+    // for cross-browser safety.
+    (function() {
+      function parseIso(s) {
+        if (!s) return null;
+        var clean = s.replace(/\.(\d{3})\d+(?=[+\-Z])/, '.$1');
+        var d = new Date(clean);
+        return isNaN(d.getTime()) ? null : d;
+      }
+      function relativeFrom(then, now) {
+        var diffSec = Math.max(0, (now.getTime() - then.getTime()) / 1000);
+        if (diffSec < 60) return 'Just now';
+        var m = Math.floor(diffSec / 60);
+        if (m === 1) return '1 minute ago';
+        if (m < 60) return m + ' minutes ago';
+        var h = Math.floor(m / 60);
+        if (h === 1) return '1 hour ago';
+        if (h < 24) return h + ' hours ago';
+        var d = Math.floor(h / 24);
+        if (d === 1) return '1 day ago';
+        if (d < 7) return d + ' days ago';
+        var w = Math.floor(d / 7);
+        if (w === 1) return '1 week ago';
+        if (w < 5) return w + ' weeks ago';
+        var mo = Math.floor(d / 30);
+        if (mo === 1) return '1 month ago';
+        return mo + ' months ago';
+      }
+      function refresh() {
+        var now = new Date();
+        document.querySelectorAll('[data-iso]').forEach(function(el) {
+          var then = parseIso(el.getAttribute('data-iso'));
+          if (then) el.textContent = relativeFrom(then, now);
+        });
+      }
+      // The shim runs at the TOP of <body>, before <main> is parsed —
+      // so [data-iso] elements don't exist in the DOM yet. Defer the
+      // initial refresh() until DOMContentLoaded fires (or run
+      // immediately if the document is already complete, which happens
+      // when the script is appended dynamically). Without this the
+      // first refresh hits an empty NodeList; setInterval would
+      // self-correct after 60s but the user sees the build-time bake-in
+      // for that window — which is the bug Sri caught 2026-04-29.
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', refresh);
+      } else {
+        refresh();
+      }
+      setInterval(refresh, 60000);
+      document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) refresh();
+      });
+    })();
+  </script>
+
+  <main>
+    
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="eyebrow">Soterra Labs Anvil &middot; Engine Facts</div>
+    <h1>LLM Inference Engine Facts</h1>
+    <p class="lead">
+      Nine open-source LLM inference engines, side-by-side, on the surface area buyers actually evaluate: project health, container, API routes, observability. Every cell is literal evidence pulled from each project's repo and published image &mdash; not benchmark scores, not vendor claims.
+    </p>
+    
+    <p class="freshness">
+      Last refreshed: <time datetime="2026-04-29T17:01:45.978818+00:00">April 29, 2026 at 17:01 UTC</time>
+      <span class="muted">(<span data-iso="2026-04-29T17:01:45.978818+00:00">today</span>)</span>
+    </p>
+    
+  </div>
+</div>
+
+<div class="body-section">
+
+  
+
+  <div class="info-card">
+    <h3>How to read this page</h3>
+    <ul>
+      <li><strong>Four categories.</strong> Project Meta (is it maintained?), Container (can I pull it?), API Surface (does it speak my client's protocol?), Observability (can I run it in production?).</li>
+      <li><strong>Every cell is literal.</strong> A populated value means we found the string, route, or file in source. A "&mdash;" means we didn't &mdash; and the caption underneath says why.</li>
+      <li><strong>Empty-cell vocabulary.</strong> <em>not applicable</em> (categorically out of scope), <em>not declared</em> (the project's source files don't declare it), <em>not detected</em> (our probe didn't find it; it may exist elsewhere), <em>unsupported runtime</em> (Dockerfile points at a plain-OS base, no GPU runtime).</li>
+      <li><strong>Sort order is editorial.</strong> The default order is alphabetical. Columns are not ranked; rows are not ranked.</li>
+      <li><strong>Audit trail.</strong> Every cell links to the file, line, and commit SHA we read it from.</li>
+      <li><strong>Rebuilt weekly.</strong> The next refresh runs every Monday at 06:00 UTC.</li>
+      <li><strong>Where to start.</strong> If you're filtering for a specific protocol, jump to API Surface. If you're filtering for ops-readiness, jump to Observability.</li>
+    </ul>
+  </div>
+
+  
+  <nav class="anchor-nav engines-nav" aria-label="Jump to category">
+    <span class="label">Jump to:</span>
+    
+    <a href="#project_meta">Project Meta</a>
+    
+    <a href="#container">Container</a>
+    
+    <a href="#api_surface">API Surface</a>
+    
+    <a href="#observability">Observability</a>
+    
+  </nav>
+
+  <p class="scroll-hint">Scroll table sideways to see all columns &rarr;</p>
+
+  
+  <section class="engine-facts-section" id="project_meta">
+    <header class="engine-facts-section-header">
+      <h2>Project Meta</h2>
+      <p class="category-definition">Is this project alive and active?</p>
+    </header>
+    <div class="table-scroll">
+      <table class="engines-table">
+        <thead>
+          <tr>
+            <th class="engine-col">Engine</th>
+            
+            <th>
+              <span class="fact-type-label">Stars</span>
+              <span class="fact-type-definition">GitHub star count, snapshot at fetch time</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">Contributors</span>
+              <span class="fact-type-definition">Distinct authors who landed a commit on default branch</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">Last commit</span>
+              <span class="fact-type-definition">Days since the most recent commit on default branch</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">Languages</span>
+              <span class="fact-type-definition">Top languages reported by GitHub linguist</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">Releases</span>
+              <span class="fact-type-definition">Median days between the last 6 tagged releases</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">Docs &amp; examples</span>
+              <span class="fact-type-definition">Whether /docs, /examples, or an OpenAPI spec are present in repo</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">License</span>
+              <span class="fact-type-definition">SPDX identifier from the LICENSE file</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">README headline</span>
+              <span class="fact-type-definition">First non-blank line of README.md</span>
+            </th>
+            
+          </tr>
+        </thead>
+        <tbody>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII" rel="nofollow noopener">DeepSpeed-MII</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII" class="cell-evidence-link" rel="nofollow noopener">2110</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/deepspeedai/DeepSpeed-MII/contributors?per_page=1&amp;anon=true" class="cell-evidence-link" rel="nofollow noopener">36</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII" class="cell-evidence-link" rel="nofollow noopener">2025-06-30T16:21:45Z</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/deepspeedai/DeepSpeed-MII/languages" class="cell-evidence-link" rel="nofollow noopener">Python, Shell</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII/releases" class="cell-evidence-link" rel="nofollow noopener">21 recent (last: v0.3.3)</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII" class="cell-evidence-link" rel="nofollow noopener">Apache-2.0</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII/blob/8abdd987421988a9d50d8b1dfa71ca6283a30f6c/README.md" class="cell-evidence-link" rel="nofollow noopener">[![Formatting](https://github.com/deepspeedai/DeepSpeed-MII/actions/workflows/formatting.yml/badge.svg?branch=main)](https://github.com/deepspeedai/DeepSpeed-MII/actions/workflows/formatting.yml)</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/ggml-org/llama.cpp" rel="nofollow noopener">llama.cpp</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ggml-org/llama.cpp" class="cell-evidence-link" rel="nofollow noopener">107397</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/ggml-org/llama.cpp/contributors?per_page=1&amp;anon=true" class="cell-evidence-link" rel="nofollow noopener">1650</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ggml-org/llama.cpp" class="cell-evidence-link" rel="nofollow noopener">2026-04-29T16:41:49Z</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/ggml-org/llama.cpp/languages" class="cell-evidence-link" rel="nofollow noopener">Batchfile, C, C++, CMake, CSS, Cuda, Dockerfile, GLSL, Go Template, HTML, JavaScript, Jinja, MDX, Makefile, Metal, Nix, Objective-C, PowerShell, Python, SCSS, Shell, Svelte, TypeScript, WGSL</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/releases" class="cell-evidence-link" rel="nofollow noopener">30 recent (last: b8972)</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/ggml-org/llama.cpp" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ggml-org/llama.cpp" class="cell-evidence-link" rel="nofollow noopener">MIT</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/blob/683c5acb90478a9e7e20eb65a1bfee334635216d/README.md" class="cell-evidence-link" rel="nofollow noopener">[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/InternLM/lmdeploy" rel="nofollow noopener">LMDeploy</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/InternLM/lmdeploy" class="cell-evidence-link" rel="nofollow noopener">7829</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/InternLM/lmdeploy/contributors?per_page=1&amp;anon=true" class="cell-evidence-link" rel="nofollow noopener">140</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/InternLM/lmdeploy" class="cell-evidence-link" rel="nofollow noopener">2026-04-29T12:00:44Z</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/InternLM/lmdeploy/languages" class="cell-evidence-link" rel="nofollow noopener">C, C++, CMake, Cuda, Dockerfile, PowerShell, Python, Shell</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/InternLM/lmdeploy/releases" class="cell-evidence-link" rel="nofollow noopener">30 recent (last: v0.12.3)</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/InternLM/lmdeploy" class="cell-evidence-link" rel="nofollow noopener">https://lmdeploy.readthedocs.io/en/latest</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/InternLM/lmdeploy" class="cell-evidence-link" rel="nofollow noopener">Apache-2.0</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/InternLM/lmdeploy/blob/9df0eff7c38ae69b9d4b9f7ad1441e484d439f92/README.md" class="cell-evidence-link" rel="nofollow noopener">&lt;div align=&#34;center&#34;&gt;</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/mlc-ai/mlc-llm" rel="nofollow noopener">MLC-LLM</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm" class="cell-evidence-link" rel="nofollow noopener">22551</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/mlc-ai/mlc-llm/contributors?per_page=1&amp;anon=true" class="cell-evidence-link" rel="nofollow noopener">164</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm" class="cell-evidence-link" rel="nofollow noopener">2026-04-22T01:01:22Z</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/mlc-ai/mlc-llm/languages" class="cell-evidence-link" rel="nofollow noopener">Batchfile, C, C++, CMake, Groovy, HTML, Java, Kotlin, Makefile, Objective-C, Objective-C++, Python, Ruby, SCSS, Shell, Swift</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm/releases" class="cell-evidence-link" rel="nofollow noopener">1 recent (last: v0.1.dev0)</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm" class="cell-evidence-link" rel="nofollow noopener">https://llm.mlc.ai/</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm" class="cell-evidence-link" rel="nofollow noopener">Apache-2.0</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm/blob/d1ea69a87280e821611643958bfec385b62dafd3/README.md" class="cell-evidence-link" rel="nofollow noopener">&lt;div align=&#34;center&#34;&gt;</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/ollama/ollama" rel="nofollow noopener">Ollama</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ollama/ollama" class="cell-evidence-link" rel="nofollow noopener">170318</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/ollama/ollama/contributors?per_page=1&amp;anon=true" class="cell-evidence-link" rel="nofollow noopener">599</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ollama/ollama" class="cell-evidence-link" rel="nofollow noopener">2026-04-29T00:09:06Z</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/ollama/ollama/languages" class="cell-evidence-link" rel="nofollow noopener">AppleScript, C, C++, CMake, CSS, Dockerfile, Go, Go Template, HTML, Inno Setup, JavaScript, Objective-C, PowerShell, Shell, TypeScript</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ollama/ollama/releases" class="cell-evidence-link" rel="nofollow noopener">30 recent (last: v0.22.1-rc0)</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ollama/ollama" class="cell-evidence-link" rel="nofollow noopener">https://ollama.com</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ollama/ollama" class="cell-evidence-link" rel="nofollow noopener">MIT</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ollama/ollama/blob/321cc8a2bab861ebe7c29e4ca8d81c393388431e/README.md" class="cell-evidence-link" rel="nofollow noopener">&lt;p align=&#34;center&#34;&gt;</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/sgl-project/sglang" rel="nofollow noopener">SGLang</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang" class="cell-evidence-link" rel="nofollow noopener">26711</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/sgl-project/sglang/contributors?per_page=1&amp;anon=true" class="cell-evidence-link" rel="nofollow noopener">1350</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang" class="cell-evidence-link" rel="nofollow noopener">2026-04-29T15:50:44Z</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/sgl-project/sglang/languages" class="cell-evidence-link" rel="nofollow noopener">C, C++, CMake, CSS, Cuda, Dockerfile, Go, HIP, JavaScript, Jinja, Jupyter Notebook, MDX, Makefile, Python, Rust, Shell, Vim Script, mupad</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang/releases" class="cell-evidence-link" rel="nofollow noopener">30 recent (last: v0.5.10.post1)</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang" class="cell-evidence-link" rel="nofollow noopener">https://sglang.io</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang" class="cell-evidence-link" rel="nofollow noopener">Apache-2.0</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang/blob/4cf109bbd10b9c91cec50c07a736d3c49ba624d2/README.md" class="cell-evidence-link" rel="nofollow noopener">&lt;div align=&#34;center&#34; id=&#34;sglangtop&#34;&gt;</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/NVIDIA/TensorRT-LLM" rel="nofollow noopener">TensorRT-LLM</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM" class="cell-evidence-link" rel="nofollow noopener">13510</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/NVIDIA/TensorRT-LLM/contributors?per_page=1&amp;anon=true" class="cell-evidence-link" rel="nofollow noopener">370</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM" class="cell-evidence-link" rel="nofollow noopener">2026-04-29T16:24:23Z</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/NVIDIA/TensorRT-LLM/languages" class="cell-evidence-link" rel="nofollow noopener">C, C++, CMake, Cuda, Groovy, JavaScript, Jinja, Makefile, Python, Shell, Smarty</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM/releases" class="cell-evidence-link" rel="nofollow noopener">30 recent (last: v1.3.0rc13)</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM" class="cell-evidence-link" rel="nofollow noopener">https://nvidia.github.io/TensorRT-LLM</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM" class="cell-evidence-link" rel="nofollow noopener">NOASSERTION</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM/blob/3b7af1c21f1071d57ada08641f0f76c4827ae961/README.md" class="cell-evidence-link" rel="nofollow noopener">&lt;div align=&#34;center&#34;&gt;</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/huggingface/text-generation-inference" rel="nofollow noopener">TGI</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/huggingface/text-generation-inference" class="cell-evidence-link" rel="nofollow noopener">10849</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/huggingface/text-generation-inference/contributors?per_page=1&amp;anon=true" class="cell-evidence-link" rel="nofollow noopener">148</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/huggingface/text-generation-inference" class="cell-evidence-link" rel="nofollow noopener">2026-03-21T11:34:22Z</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/huggingface/text-generation-inference/languages" class="cell-evidence-link" rel="nofollow noopener">C, C++, CMake, Cuda, Dockerfile, JavaScript, Makefile, Nix, Python, Rust, Shell</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/releases" class="cell-evidence-link" rel="nofollow noopener">30 recent (last: v3.3.7)</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/huggingface/text-generation-inference" class="cell-evidence-link" rel="nofollow noopener">http://hf.co/docs/text-generation-inference</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/huggingface/text-generation-inference" class="cell-evidence-link" rel="nofollow noopener">Apache-2.0</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/blob/b4adbf2f6e2e721280bd0ea5f91d70f7d033f5ed/README.md" class="cell-evidence-link" rel="nofollow noopener">&gt; [!CAUTION]</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/vllm-project/vllm" rel="nofollow noopener">vLLM</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/vllm-project/vllm" class="cell-evidence-link" rel="nofollow noopener">78593</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/vllm-project/vllm/contributors?per_page=1&amp;anon=true" class="cell-evidence-link" rel="nofollow noopener">2574</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/vllm-project/vllm" class="cell-evidence-link" rel="nofollow noopener">2026-04-29T16:48:53Z</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://api.github.com/repos/vllm-project/vllm/languages" class="cell-evidence-link" rel="nofollow noopener">C, C++, CMake, Cuda, Dockerfile, HCL, Jinja, Python, Shell</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/vllm-project/vllm/releases" class="cell-evidence-link" rel="nofollow noopener">30 recent (last: v0.20.0)</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/vllm-project/vllm" class="cell-evidence-link" rel="nofollow noopener">https://vllm.ai</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/vllm-project/vllm" class="cell-evidence-link" rel="nofollow noopener">Apache-2.0</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/vllm-project/vllm/blob/4a42aba380bf9cac47009a7307a9d91dd2222d84/README.md" class="cell-evidence-link" rel="nofollow noopener">&lt;!-- markdownlint-disable MD001 MD041 --&gt;</a>
+              
+            </td>
+            
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+  </section>
+  
+  <section class="engine-facts-section" id="container">
+    <header class="engine-facts-section-header">
+      <h2>Container</h2>
+      <p class="category-definition">What does this engine ship as?</p>
+    </header>
+    <div class="table-scroll">
+      <table class="engines-table">
+        <thead>
+          <tr>
+            <th class="engine-col">Engine</th>
+            
+            <th>
+              <span class="fact-type-label">Latest image tag</span>
+              <span class="fact-type-definition">Most recent tag on the project&#39;s published image</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">Image size (MB)</span>
+              <span class="fact-type-definition">Compressed size of the latest tag</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">Base image</span>
+              <span class="fact-type-definition">The FROM line in the published Dockerfile</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">GPU runtime</span>
+              <span class="fact-type-definition">CUDA / ROCm family declared in the base-image string</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">Runtime pinned</span>
+              <span class="fact-type-definition">Whether Python / system runtime is version-locked</span>
+            </th>
+            
+          </tr>
+        </thead>
+        <tbody>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII" rel="nofollow noopener">DeepSpeed-MII</a>
+              
+            </th>
+            
+            
+            <td class="cell-not-applicable">
+              
+              <a href="https://api.github.com/repos/deepspeedai/DeepSpeed-MII" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not applicable: project does not publish a container image</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-applicable">
+              
+              <a href="https://api.github.com/repos/deepspeedai/DeepSpeed-MII" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not applicable: project does not publish a container image</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-applicable">
+              
+              <a href="https://api.github.com/repos/deepspeedai/DeepSpeed-MII" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not applicable: project does not publish a container image</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-applicable">
+              
+              <a href="https://api.github.com/repos/deepspeedai/DeepSpeed-MII" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not applicable: project does not publish a container image</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII/blob/8abdd987421988a9d50d8b1dfa71ca6283a30f6c/pyproject.toml" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: requires-python not in pyproject.toml</span>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/ggml-org/llama.cpp" rel="nofollow noopener">llama.cpp</a>
+              
+            </th>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/pkgs/container/llama.cpp" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: container hosted on GHCR; Docker Hub fetcher does not cover this surface (fetcher work pending)</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/pkgs/container/llama.cpp" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: container hosted on GHCR; Docker Hub fetcher does not cover this surface (fetcher work pending)</span>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/blob/683c5acb90478a9e7e20eb65a1bfee334635216d/.devops/cuda.Dockerfile" class="cell-evidence-link" rel="nofollow noopener">nvidia/cuda:12.8.1-devel-ubuntu24.04</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/blob/683c5acb90478a9e7e20eb65a1bfee334635216d/.devops/cuda.Dockerfile#L9" class="cell-evidence-link" rel="nofollow noopener">cuda 12.8.1</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-applicable">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/blob/683c5acb90478a9e7e20eb65a1bfee334635216d/CMakeLists.txt" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not applicable: C++ project — toolchain pin is in CMakeLists.txt as cmake_minimum_required, not a runtime version</span>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/InternLM/lmdeploy" rel="nofollow noopener">LMDeploy</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://hub.docker.com/r/openmmlab/lmdeploy/tags" class="cell-evidence-link" rel="nofollow noopener">latest</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://hub.docker.com/r/openmmlab/lmdeploy/tags" class="cell-evidence-link" rel="nofollow noopener">5272</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/InternLM/lmdeploy/blob/9df0eff7c38ae69b9d4b9f7ad1441e484d439f92/docker/Dockerfile" class="cell-evidence-link" rel="nofollow noopener">nvidia/cuda:13.0.2-devel-ubuntu22.04</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/InternLM/lmdeploy/blob/9df0eff7c38ae69b9d4b9f7ad1441e484d439f92/docker/Dockerfile#L5" class="cell-evidence-link" rel="nofollow noopener">cuda 13.0.2</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/InternLM/lmdeploy/blob/9df0eff7c38ae69b9d4b9f7ad1441e484d439f92/pyproject.toml" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: requires-python not in pyproject.toml</span>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/mlc-ai/mlc-llm" rel="nofollow noopener">MLC-LLM</a>
+              
+            </th>
+            
+            
+            <td class="cell-not-applicable">
+              
+              <a href="https://api.github.com/repos/mlc-ai/mlc-llm" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not applicable: project does not publish a container image</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-applicable">
+              
+              <a href="https://api.github.com/repos/mlc-ai/mlc-llm" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not applicable: project does not publish a container image</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-applicable">
+              
+              <a href="https://api.github.com/repos/mlc-ai/mlc-llm" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not applicable: project does not publish a container image</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-applicable">
+              
+              <a href="https://api.github.com/repos/mlc-ai/mlc-llm" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not applicable: project does not publish a container image</span>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm/blob/d1ea69a87280e821611643958bfec385b62dafd3/pyproject.toml" class="cell-evidence-link" rel="nofollow noopener">python 3.9</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/ollama/ollama" rel="nofollow noopener">Ollama</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://hub.docker.com/r/ollama/ollama/tags" class="cell-evidence-link" rel="nofollow noopener">latest</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://hub.docker.com/r/ollama/ollama/tags" class="cell-evidence-link" rel="nofollow noopener">3592</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ollama/ollama/blob/321cc8a2bab861ebe7c29e4ca8d81c393388431e/Dockerfile" class="cell-evidence-link" rel="nofollow noopener">rocm/dev-almalinux-8:7.2.1-complete</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ollama/ollama/blob/321cc8a2bab861ebe7c29e4ca8d81c393388431e/Dockerfile#L17" class="cell-evidence-link" rel="nofollow noopener">rocm 7.2.1</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ollama/ollama/blob/321cc8a2bab861ebe7c29e4ca8d81c393388431e/go.mod" class="cell-evidence-link" rel="nofollow noopener">go 1.24.1</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/sgl-project/sglang" rel="nofollow noopener">SGLang</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://hub.docker.com/r/lmsysorg/sglang/tags" class="cell-evidence-link" rel="nofollow noopener">dev-cu13-mistral-medium-3.5</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://hub.docker.com/r/lmsysorg/sglang/tags" class="cell-evidence-link" rel="nofollow noopener">13218</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang/blob/4cf109bbd10b9c91cec50c07a736d3c49ba624d2/docker/Dockerfile" class="cell-evidence-link" rel="nofollow noopener">nvidia/cuda:12.9.1-cudnn-devel-ubuntu24.04</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang/blob/4cf109bbd10b9c91cec50c07a736d3c49ba624d2/docker/Dockerfile#L2" class="cell-evidence-link" rel="nofollow noopener">cuda 12.9.1</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang/blob/4cf109bbd10b9c91cec50c07a736d3c49ba624d2/python/pyproject.toml" class="cell-evidence-link" rel="nofollow noopener">python 3.10</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/NVIDIA/TensorRT-LLM" rel="nofollow noopener">TensorRT-LLM</a>
+              
+            </th>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tritonserver" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: container hosted on NVIDIA NGC (nvcr.io/nvidia/tritonserver); Docker Hub fetcher does not cover this surface (NGC fetcher work pending)</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tritonserver" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: container hosted on NVIDIA NGC (nvcr.io/nvidia/tritonserver); Docker Hub fetcher does not cover this surface (NGC fetcher work pending)</span>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM/blob/3b7af1c21f1071d57ada08641f0f76c4827ae961/docker/Dockerfile.multi" class="cell-evidence-link" rel="nofollow noopener">nvcr.io/nvidia/pytorch:26.02-py3</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM/blob/3b7af1c21f1071d57ada08641f0f76c4827ae961/docker/Dockerfile.multi#L8" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: FROM line points at NGC base image (nvcr.io/nvidia/pytorch:26.02-py3) — CUDA family by convention but the literal probe matches only `nvidia/cuda:` / `rocm/` strings. NGC images carry CUDA via vendor-curated layering rather than a `nvidia/cuda:&lt;ver&gt;` literal.</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM/blob/3b7af1c21f1071d57ada08641f0f76c4827ae961/pyproject.toml" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: requires-python not in pyproject.toml</span>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/huggingface/text-generation-inference" rel="nofollow noopener">TGI</a>
+              
+            </th>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/pkgs/container/text-generation-inference" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: container hosted on GHCR; Docker Hub fetcher does not cover this surface (fetcher work pending)</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/pkgs/container/text-generation-inference" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: container hosted on GHCR; Docker Hub fetcher does not cover this surface (fetcher work pending)</span>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/blob/b4adbf2f6e2e721280bd0ea5f91d70f7d033f5ed/Dockerfile" class="cell-evidence-link" rel="nofollow noopener">nvidia/cuda:12.4.1-devel-ubuntu22.04</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/blob/b4adbf2f6e2e721280bd0ea5f91d70f7d033f5ed/Dockerfile#L47" class="cell-evidence-link" rel="nofollow noopener">cuda 12.4.1</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/blob/b4adbf2f6e2e721280bd0ea5f91d70f7d033f5ed/rust-toolchain.toml" class="cell-evidence-link" rel="nofollow noopener">rust 1.85.1</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/vllm-project/vllm" rel="nofollow noopener">vLLM</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://hub.docker.com/r/vllm/vllm-openai/tags" class="cell-evidence-link" rel="nofollow noopener">cu129-nightly-8b49cf3a37eb1a267a06b0df23328909330af1e6</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://hub.docker.com/r/vllm/vllm-openai/tags" class="cell-evidence-link" rel="nofollow noopener">11422</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/vllm-project/vllm/blob/4a42aba380bf9cac47009a7307a9d91dd2222d84/docker/Dockerfile" class="cell-evidence-link" rel="nofollow noopener">nvidia/cuda:13.0.2-devel-ubuntu22.04</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/vllm-project/vllm/blob/4a42aba380bf9cac47009a7307a9d91dd2222d84/docker/Dockerfile#L93" class="cell-evidence-link" rel="nofollow noopener">cuda 13.0.2</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/vllm-project/vllm/blob/4a42aba380bf9cac47009a7307a9d91dd2222d84/pyproject.toml" class="cell-evidence-link" rel="nofollow noopener">python 3.10</a>
+              
+            </td>
+            
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+  </section>
+  
+  <section class="engine-facts-section" id="api_surface">
+    <header class="engine-facts-section-header">
+      <h2>API Surface</h2>
+      <p class="category-definition">Will my client just work?</p>
+    </header>
+    <div class="table-scroll">
+      <table class="engines-table">
+        <thead>
+          <tr>
+            <th class="engine-col">Engine</th>
+            
+            <th>
+              <span class="fact-type-label">/v1/chat/completions</span>
+              <span class="fact-type-definition">OpenAI-compatible chat route present in source</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">/v1/completions</span>
+              <span class="fact-type-definition">OpenAI-compatible legacy completions route</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">/v1/embeddings</span>
+              <span class="fact-type-definition">OpenAI-compatible embeddings route</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">/generate (HF-native)</span>
+              <span class="fact-type-definition">Hugging Face TGI-style generate route</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">gRPC service</span>
+              <span class="fact-type-definition">A .proto service definition is present in repo</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">SSE streaming</span>
+              <span class="fact-type-definition">Server-Sent Events streaming wired into a route handler</span>
+            </th>
+            
+          </tr>
+        </thead>
+        <tbody>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII" rel="nofollow noopener">DeepSpeed-MII</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII/blob/8abdd987421988a9d50d8b1dfa71ca6283a30f6c/mii/entrypoints/openai_api_server.py#L133" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII/blob/8abdd987421988a9d50d8b1dfa71ca6283a30f6c/mii/entrypoints/openai_api_server.py#L268" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII/blob/8abdd987421988a9d50d8b1dfa71ca6283a30f6c/mii/entrypoints/openai_api_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a deeper file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII/blob/8abdd987421988a9d50d8b1dfa71ca6283a30f6c/mii/entrypoints/openai_api_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a deeper file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII/blob/8abdd987421988a9d50d8b1dfa71ca6283a30f6c/mii/entrypoints/openai_api_server.py#L26" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII/blob/8abdd987421988a9d50d8b1dfa71ca6283a30f6c/mii/entrypoints/openai_api_server.py#L239" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/ggml-org/llama.cpp" rel="nofollow noopener">llama.cpp</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/blob/683c5acb90478a9e7e20eb65a1bfee334635216d/tools/server/server.cpp#L183" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/blob/683c5acb90478a9e7e20eb65a1bfee334635216d/tools/server/server.cpp#L181" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/blob/683c5acb90478a9e7e20eb65a1bfee334635216d/tools/server/server.cpp#L193" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/blob/683c5acb90478a9e7e20eb65a1bfee334635216d/tools/server/server.cpp" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a deeper file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/blob/683c5acb90478a9e7e20eb65a1bfee334635216d/tools/server/server.cpp" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a deeper file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/blob/683c5acb90478a9e7e20eb65a1bfee334635216d/tools/server/server.cpp" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a deeper file we don&#39;t fetch</span>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/InternLM/lmdeploy" rel="nofollow noopener">LMDeploy</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/InternLM/lmdeploy/blob/9df0eff7c38ae69b9d4b9f7ad1441e484d439f92/lmdeploy/serve/openai/api_server.py#L291" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/InternLM/lmdeploy/blob/9df0eff7c38ae69b9d4b9f7ad1441e484d439f92/lmdeploy/serve/openai/api_server.py#L632" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/InternLM/lmdeploy/blob/9df0eff7c38ae69b9d4b9f7ad1441e484d439f92/lmdeploy/serve/openai/api_server.py#L989" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/InternLM/lmdeploy/blob/9df0eff7c38ae69b9d4b9f7ad1441e484d439f92/lmdeploy/serve/openai/api_server.py#L867" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/InternLM/lmdeploy/blob/9df0eff7c38ae69b9d4b9f7ad1441e484d439f92/lmdeploy/serve/openai/api_server.py#L41" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/InternLM/lmdeploy/blob/9df0eff7c38ae69b9d4b9f7ad1441e484d439f92/lmdeploy/serve/openai/api_server.py#L549" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/mlc-ai/mlc-llm" rel="nofollow noopener">MLC-LLM</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm/blob/d1ea69a87280e821611643958bfec385b62dafd3/python/mlc_llm/serve/entrypoints/openai_entrypoints.py#L236" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm/blob/d1ea69a87280e821611643958bfec385b62dafd3/python/mlc_llm/serve/entrypoints/openai_entrypoints.py#L132" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm/blob/d1ea69a87280e821611643958bfec385b62dafd3/python/mlc_llm/serve/entrypoints/openai_entrypoints.py#L45" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm/blob/d1ea69a87280e821611643958bfec385b62dafd3/python/mlc_llm/serve/entrypoints/openai_entrypoints.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a deeper file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm/blob/d1ea69a87280e821611643958bfec385b62dafd3/python/mlc_llm/serve/entrypoints/openai_entrypoints.py#L12" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm/blob/d1ea69a87280e821611643958bfec385b62dafd3/python/mlc_llm/serve/entrypoints/openai_entrypoints.py#L179" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/ollama/ollama" rel="nofollow noopener">Ollama</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ollama/ollama/blob/321cc8a2bab861ebe7c29e4ca8d81c393388431e/server/routes.go#L1732" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ollama/ollama/blob/321cc8a2bab861ebe7c29e4ca8d81c393388431e/server/routes.go#L1733" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ollama/ollama/blob/321cc8a2bab861ebe7c29e4ca8d81c393388431e/server/routes.go#L1734" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ollama/ollama/blob/321cc8a2bab861ebe7c29e4ca8d81c393388431e/server/routes.go#L1724" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/ollama/ollama/blob/321cc8a2bab861ebe7c29e4ca8d81c393388431e/server/routes.go" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a deeper file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/ollama/ollama/blob/321cc8a2bab861ebe7c29e4ca8d81c393388431e/server/routes.go" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a deeper file we don&#39;t fetch</span>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/sgl-project/sglang" rel="nofollow noopener">SGLang</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang/blob/4cf109bbd10b9c91cec50c07a736d3c49ba624d2/python/sglang/srt/entrypoints/http_server.py#L1490" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang/blob/4cf109bbd10b9c91cec50c07a736d3c49ba624d2/python/sglang/srt/entrypoints/http_server.py#L1482" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang/blob/4cf109bbd10b9c91cec50c07a736d3c49ba624d2/python/sglang/srt/entrypoints/http_server.py#L1501" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang/blob/4cf109bbd10b9c91cec50c07a736d3c49ba624d2/python/sglang/srt/entrypoints/http_server.py#L702" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang/blob/4cf109bbd10b9c91cec50c07a736d3c49ba624d2/python/sglang/srt/entrypoints/http_server.py#L64" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang/blob/4cf109bbd10b9c91cec50c07a736d3c49ba624d2/python/sglang/srt/entrypoints/http_server.py#L724" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/NVIDIA/TensorRT-LLM" rel="nofollow noopener">TensorRT-LLM</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM/blob/3b7af1c21f1071d57ada08641f0f76c4827ae961/tensorrt_llm/serve/openai_server.py#L597" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM/blob/3b7af1c21f1071d57ada08641f0f76c4827ae961/tensorrt_llm/serve/openai_server.py#L593" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM/blob/3b7af1c21f1071d57ada08641f0f76c4827ae961/tensorrt_llm/serve/openai_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a deeper file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM/blob/3b7af1c21f1071d57ada08641f0f76c4827ae961/tensorrt_llm/serve/openai_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a deeper file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM/blob/3b7af1c21f1071d57ada08641f0f76c4827ae961/tensorrt_llm/serve/openai_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a deeper file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM/blob/3b7af1c21f1071d57ada08641f0f76c4827ae961/tensorrt_llm/serve/openai_server.py#L1173" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/huggingface/text-generation-inference" rel="nofollow noopener">TGI</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/blob/b4adbf2f6e2e721280bd0ea5f91d70f7d033f5ed/router/src/server.rs#L1138" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/blob/b4adbf2f6e2e721280bd0ea5f91d70f7d033f5ed/router/src/server.rs#L685" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/blob/b4adbf2f6e2e721280bd0ea5f91d70f7d033f5ed/router/src/server.rs" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a deeper file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/blob/b4adbf2f6e2e721280bd0ea5f91d70f7d033f5ed/router/src/server.rs#L247" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/blob/b4adbf2f6e2e721280bd0ea5f91d70f7d033f5ed/router/src/server.rs" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a deeper file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/blob/b4adbf2f6e2e721280bd0ea5f91d70f7d033f5ed/router/src/server.rs#L113" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/vllm-project/vllm" rel="nofollow noopener">vLLM</a>
+              
+            </th>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/vllm-project/vllm/blob/4a42aba380bf9cac47009a7307a9d91dd2222d84/vllm/entrypoints/openai/api_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a sub-router we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/vllm-project/vllm/blob/4a42aba380bf9cac47009a7307a9d91dd2222d84/vllm/entrypoints/openai/api_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a sub-router we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/vllm-project/vllm/blob/4a42aba380bf9cac47009a7307a9d91dd2222d84/vllm/entrypoints/openai/api_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a sub-router we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/vllm-project/vllm/blob/4a42aba380bf9cac47009a7307a9d91dd2222d84/vllm/entrypoints/openai/api_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a sub-router we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/vllm-project/vllm/blob/4a42aba380bf9cac47009a7307a9d91dd2222d84/vllm/entrypoints/openai/api_server.py#L27" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/vllm-project/vllm/blob/4a42aba380bf9cac47009a7307a9d91dd2222d84/vllm/entrypoints/openai/api_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a sub-router we don&#39;t fetch</span>
+              
+            </td>
+            
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+  </section>
+  
+  <section class="engine-facts-section" id="observability">
+    <header class="engine-facts-section-header">
+      <h2>Observability</h2>
+      <p class="category-definition">Can I monitor it in production?</p>
+    </header>
+    <div class="table-scroll">
+      <table class="engines-table">
+        <thead>
+          <tr>
+            <th class="engine-col">Engine</th>
+            
+            <th>
+              <span class="fact-type-label">/metrics endpoint</span>
+              <span class="fact-type-definition">Prometheus-format scrape route exposed by the server</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">/health endpoint</span>
+              <span class="fact-type-definition">Liveness route exposed by the server</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">/ready endpoint</span>
+              <span class="fact-type-definition">Readiness route exposed by the server</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">OpenTelemetry env</span>
+              <span class="fact-type-definition">OTEL_* environment variables referenced in source</span>
+            </th>
+            
+            <th>
+              <span class="fact-type-label">Prometheus exporter</span>
+              <span class="fact-type-definition">A Prometheus client library is imported and used</span>
+            </th>
+            
+          </tr>
+        </thead>
+        <tbody>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII" rel="nofollow noopener">DeepSpeed-MII</a>
+              
+            </th>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII/blob/8abdd987421988a9d50d8b1dfa71ca6283a30f6c/mii/entrypoints/openai_api_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may be declared via middleware or in a file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII/blob/8abdd987421988a9d50d8b1dfa71ca6283a30f6c/mii/entrypoints/openai_api_server.py#L385" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII/blob/8abdd987421988a9d50d8b1dfa71ca6283a30f6c/mii/entrypoints/openai_api_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may be declared via middleware or in a file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII/blob/8abdd987421988a9d50d8b1dfa71ca6283a30f6c/mii/entrypoints/openai_api_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: no OTEL_* env var refs in mii/entrypoints/openai_api_server.py</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/deepspeedai/DeepSpeed-MII/blob/8abdd987421988a9d50d8b1dfa71ca6283a30f6c/pyproject.toml" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: prometheus_client not in pyproject.toml dependencies</span>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/ggml-org/llama.cpp" rel="nofollow noopener">llama.cpp</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/blob/683c5acb90478a9e7e20eb65a1bfee334635216d/tools/server/server.cpp#L174" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/blob/683c5acb90478a9e7e20eb65a1bfee334635216d/tools/server/server.cpp#L172" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/blob/683c5acb90478a9e7e20eb65a1bfee334635216d/tools/server/server.cpp" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may be declared in a file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/blob/683c5acb90478a9e7e20eb65a1bfee334635216d/tools/server/server.cpp" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: no OTEL_* env var refs in tools/server/server.cpp</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/ggml-org/llama.cpp/blob/683c5acb90478a9e7e20eb65a1bfee334635216d/CMakeLists.txt" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: C++ project — polyglot prometheus detection table doesn&#39;t cover C++ (no standard package manifest the probe can read). llama.cpp DOES expose /metrics via api_surface — this is a probe-coverage gap, not a categorical absence.</span>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/InternLM/lmdeploy" rel="nofollow noopener">LMDeploy</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/InternLM/lmdeploy/blob/9df0eff7c38ae69b9d4b9f7ad1441e484d439f92/lmdeploy/serve/openai/api_server.py#L1274" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/InternLM/lmdeploy/blob/9df0eff7c38ae69b9d4b9f7ad1441e484d439f92/lmdeploy/serve/openai/api_server.py#L240" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/InternLM/lmdeploy/blob/9df0eff7c38ae69b9d4b9f7ad1441e484d439f92/lmdeploy/serve/openai/api_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may be declared via middleware or in a file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/InternLM/lmdeploy/blob/9df0eff7c38ae69b9d4b9f7ad1441e484d439f92/lmdeploy/serve/openai/api_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: no OTEL_* env var refs in lmdeploy/serve/openai/api_server.py</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/InternLM/lmdeploy/blob/9df0eff7c38ae69b9d4b9f7ad1441e484d439f92/pyproject.toml" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: LMDeploy declares Prometheus inline via make_asgi_app in lmdeploy/serve/openai/api_server.py rather than as a pyproject dep — /metrics IS exposed but probe table reads pyproject only</span>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/mlc-ai/mlc-llm" rel="nofollow noopener">MLC-LLM</a>
+              
+            </th>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm/blob/d1ea69a87280e821611643958bfec385b62dafd3/python/mlc_llm/serve/entrypoints/openai_entrypoints.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may be declared via middleware or in a file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm/blob/d1ea69a87280e821611643958bfec385b62dafd3/python/mlc_llm/serve/entrypoints/openai_entrypoints.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may be declared via middleware or in a file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm/blob/d1ea69a87280e821611643958bfec385b62dafd3/python/mlc_llm/serve/entrypoints/openai_entrypoints.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may be declared via middleware or in a file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm/blob/d1ea69a87280e821611643958bfec385b62dafd3/python/mlc_llm/serve/entrypoints/openai_entrypoints.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: no OTEL_* env var refs in python/mlc_llm/serve/entrypoints/openai_entrypoints.py</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/mlc-ai/mlc-llm/blob/d1ea69a87280e821611643958bfec385b62dafd3/pyproject.toml" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: prometheus_client not in pyproject.toml dependencies</span>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/ollama/ollama" rel="nofollow noopener">Ollama</a>
+              
+            </th>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/ollama/ollama/blob/321cc8a2bab861ebe7c29e4ca8d81c393388431e/server/routes.go" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may be declared via middleware or in a file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/ollama/ollama/blob/321cc8a2bab861ebe7c29e4ca8d81c393388431e/server/routes.go" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may be declared via middleware or in a file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/ollama/ollama/blob/321cc8a2bab861ebe7c29e4ca8d81c393388431e/server/routes.go" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may be declared via middleware or in a file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/ollama/ollama/blob/321cc8a2bab861ebe7c29e4ca8d81c393388431e/server/routes.go" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: no OTEL_* env var refs in server/routes.go</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/ollama/ollama/blob/321cc8a2bab861ebe7c29e4ca8d81c393388431e/go.mod" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: github.com/prometheus/client_golang not in go.mod</span>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/sgl-project/sglang" rel="nofollow noopener">SGLang</a>
+              
+            </th>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/sgl-project/sglang/blob/4cf109bbd10b9c91cec50c07a736d3c49ba624d2/python/sglang/srt/entrypoints/http_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a deeper file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang/blob/4cf109bbd10b9c91cec50c07a736d3c49ba624d2/python/sglang/srt/entrypoints/http_server.py#L506" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/sgl-project/sglang/blob/4cf109bbd10b9c91cec50c07a736d3c49ba624d2/python/sglang/srt/entrypoints/http_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a deeper file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/sgl-project/sglang/blob/4cf109bbd10b9c91cec50c07a736d3c49ba624d2/python/sglang/srt/entrypoints/http_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: no OTEL_* env var refs in python/sglang/srt/entrypoints/http_server.py</span>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/sgl-project/sglang/blob/4cf109bbd10b9c91cec50c07a736d3c49ba624d2/python/pyproject.toml" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/NVIDIA/TensorRT-LLM" rel="nofollow noopener">TensorRT-LLM</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM/blob/3b7af1c21f1071d57ada08641f0f76c4827ae961/tensorrt_llm/serve/openai_server.py#L573" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM/blob/3b7af1c21f1071d57ada08641f0f76c4827ae961/tensorrt_llm/serve/openai_server.py#L566" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM/blob/3b7af1c21f1071d57ada08641f0f76c4827ae961/tensorrt_llm/serve/openai_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may be declared via middleware or in a file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM/blob/3b7af1c21f1071d57ada08641f0f76c4827ae961/tensorrt_llm/serve/openai_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: no OTEL_* env var refs in tensorrt_llm/serve/openai_server.py</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/NVIDIA/TensorRT-LLM/blob/3b7af1c21f1071d57ada08641f0f76c4827ae961/pyproject.toml" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: prometheus_client not in pyproject.toml dependencies</span>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/huggingface/text-generation-inference" rel="nofollow noopener">TGI</a>
+              
+            </th>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/blob/b4adbf2f6e2e721280bd0ea5f91d70f7d033f5ed/router/src/server.rs#L1331" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-value">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/blob/b4adbf2f6e2e721280bd0ea5f91d70f7d033f5ed/router/src/server.rs#L221" class="cell-evidence-link" rel="nofollow noopener">true</a>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/blob/b4adbf2f6e2e721280bd0ea5f91d70f7d033f5ed/router/src/server.rs" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may be declared via middleware or in a file we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/blob/b4adbf2f6e2e721280bd0ea5f91d70f7d033f5ed/router/src/server.rs" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: no OTEL_* env var refs in router/src/server.rs</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/huggingface/text-generation-inference/blob/b4adbf2f6e2e721280bd0ea5f91d70f7d033f5ed/Cargo.toml" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: TGI uses metrics-exporter-prometheus (not the canonical `prometheus` crate the table probes for) — /metrics is exposed but probe table doesn&#39;t cover this client</span>
+              
+            </td>
+            
+          </tr>
+          
+          
+          <tr>
+            <th class="engine-col" scope="row">
+              <a href="https://github.com/vllm-project/vllm" rel="nofollow noopener">vLLM</a>
+              
+            </th>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/vllm-project/vllm/blob/4a42aba380bf9cac47009a7307a9d91dd2222d84/vllm/entrypoints/openai/api_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a sub-router we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/vllm-project/vllm/blob/4a42aba380bf9cac47009a7307a9d91dd2222d84/vllm/entrypoints/openai/api_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a sub-router we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-detected">
+              
+              <a href="https://github.com/vllm-project/vllm/blob/4a42aba380bf9cac47009a7307a9d91dd2222d84/vllm/entrypoints/openai/api_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not detected: route may live in a sub-router we don&#39;t fetch</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/vllm-project/vllm/blob/4a42aba380bf9cac47009a7307a9d91dd2222d84/vllm/entrypoints/openai/api_server.py" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: no OTEL_* env var refs in api_server.py</span>
+              
+            </td>
+            
+            
+            <td class="cell-not-declared">
+              
+              <a href="https://github.com/vllm-project/vllm/blob/4a42aba380bf9cac47009a7307a9d91dd2222d84/pyproject.toml" class="cell-evidence-link em-dash" rel="nofollow noopener">—</a>
+              <span class="cell-note">not declared: prometheus_client not in pyproject.toml dependencies</span>
+              
+            </td>
+            
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+  </section>
+  
+  
+
+  <footer class="methodology">
+    <h2>How this page is built</h2>
+    <p>
+      Rebuilt weekly from each project's GitHub repository and its published container image (Docker Hub, GHCR, or NGC, whichever the project publishes to). No human edits values on this page. Every cell is pinned to the file path, line number, and commit SHA we read it from &mdash; the audit-trail link in each cell opens the source. New evidence appears the Monday after each project's update; structural changes (new fact_types, new engines) ship after a one-time review by Soterra Labs.
+    </p>
+    <p class="footer-disclaimer">
+      vLLM, Ollama, Text Generation Inference, llama.cpp, MLC-LLM, TensorRT-LLM, SGLang, LMDeploy, and DeepSpeed-MII are projects of their respective maintainers. NVIDIA, AMD, Hugging Face, Microsoft, Docker, GitHub, and the sgl-project organization are trademarks of their respective owners. NGC and GHCR are registry services of NVIDIA Corporation and GitHub respectively. Soterra Labs is not affiliated with, endorsed by, or sponsored by any of the above. Evidence is reproduced from public source repositories and public container registries. See <a href="/legal/" target="_blank" rel="noopener">Terms</a>.
+    </p>
+  </footer>
+
+  <div class="soterra-attribution">
+    <strong>Soterra Labs</strong> &mdash; From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&trade;</sup> &middot; <a href="/products">Products</a> &middot; <a href="/thinking/">Thinking</a>
+  </div>
+
+</div>
+
+
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 <span>Soterra Labs</span> &mdash; From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&trade;</sup>
+<span class="footer-sep">&middot;</span><a href="/legal/" class="footer-link">Legal</a></p>
+  </footer>
+
+</body>
+</html>
