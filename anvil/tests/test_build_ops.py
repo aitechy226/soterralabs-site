@@ -1,4 +1,4 @@
-"""Build / Ops Script regression — Layer 6 Tier 14 per ~/.claude/guides/iterate-testing.md.
+"""Build / Ops Script regression — L6.1 per ~/.claude/rules/testing.md.
 
 Covers the build pipeline's correctness contracts that aren't tier-1
 unit-style or tier-3 render-style:

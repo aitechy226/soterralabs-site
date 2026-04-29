@@ -1,7 +1,7 @@
 """Canonical-truth tests for the Anvil GPU catalog.
 
-Layer 1 / Tier 5 per ~/.claude/guides/iterate-testing.md. Closes the
-gap that property + scenario tiers cannot:
+L1.5 (Canonical Truth tier) per ~/.claude/rules/testing.md. Closes
+the gap that property + scenario tiers cannot:
 
 > Property + Visual-Audit tiers prove the engine is INTERNALLY consistent
 > — they DON'T catch "every consumer agrees on a wrong formula." That's
@@ -24,10 +24,10 @@ Per ~/.claude/rules/testing.md § Canonical Truth Tests:
   when the catalog grows, the suite still hits its design failure
   modes.
 
-Per ~/.claude/rules/persona-claims.md, every claim here is Layer 1
-(first-principles physics / vendor-published spec). Engineering-
-judgment claims (price plausibility bounds) are Layer 3 and live in
-their own validators, not here.
+Per ~/.claude/rules/claims-audits.md § Output-side, every claim here
+is Layer 1 (first-principles physics / vendor-published spec).
+Engineering-judgment claims (price plausibility bounds) are Layer 3
+and live in their own validators, not here.
 """
 from __future__ import annotations
 

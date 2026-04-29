@@ -1,7 +1,7 @@
 """Property-tier tests for the canonical-id grammar + plausibility engine.
 
-Layer 1 / Tier 3 per ~/.claude/guides/iterate-testing.md. Catches the
-gap between Unit (Tier 1) and Canonical Truth (Tier 5):
+L1.3 (Property tier) per ~/.claude/rules/testing.md. Catches the
+gap between Unit (L1.1) and Canonical Truth (L1.5):
 
 - Unit tests pin specific (input, output) pairs but miss the random
   edge cases their authors didn't think of.

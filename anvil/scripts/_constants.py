@@ -1,7 +1,7 @@
 """Anvil pipeline constants. Single source of truth for thresholds.
 
-Layer-3 picks per ~/.claude/rules/persona-claims.md — every threshold
-labeled with the persona who signed it and the rationale.
+Layer-3 picks per ~/.claude/rules/claims-audits.md § Output-side —
+every threshold labeled with the persona who signed it and the rationale.
 
 See docs/superpowers/specs/2026-04-27-anvil-design.md §3.3 for the
 authoritative table; this file is the runtime copy.

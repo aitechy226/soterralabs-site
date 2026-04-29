@@ -1,4 +1,4 @@
-"""Security Regression — Layer 5 Tier 13 per ~/.claude/guides/iterate-testing.md.
+"""Security Regression — L5.2 per ~/.claude/rules/testing.md.
 
 XSS payload survival through the live render path. Engine-isolated:
 populates the in-memory pricing SQLite, calls real build.py functions,
