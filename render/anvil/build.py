@@ -29,6 +29,7 @@ import sqlite3
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Final
 
 import yaml
 from jinja2 import Environment, FileSystemLoader
@@ -83,6 +84,13 @@ OUT_PRICING = REPO_ROOT / "anvil" / "pricing" / "index.html"
 OUT_MLPERF = REPO_ROOT / "anvil" / "mlperf" / "index.html"
 OUT_ENGINES = REPO_ROOT / "anvil" / "engines" / "index.html"
 OUT_STYLE_CSS = REPO_ROOT / "anvil" / "style.css"
+
+# Feature gate — Engine Facts is hidden behind a "Coming soon" placeholder
+# while Jake's UX punch list (2026-04-29) is being worked. Cron continues
+# to extract weekly so the SQLite stays fresh; only the public render is
+# gated. Flip to True (and remove the placeholder template + this flag)
+# once the data-table page ships.
+ENGINE_FACTS_PUBLIC: Final[bool] = False
 
 
 # ---- Display helpers ----
@@ -1350,6 +1358,12 @@ def render_engines_page(env: Environment, engines: EngineFactsContext) -> str:
     )
 
 
+def render_engines_coming_soon(env: Environment) -> str:
+    return env.get_template("engines_coming_soon.html.j2").render(
+        active_nav="reference",
+    )
+
+
 def write_atomic(path: Path, content: str) -> None:
     """Write content to path atomically. Determinism: writes only if changed."""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -1407,13 +1421,15 @@ def build(now: datetime | None = None) -> dict[str, bool]:
     else:
         written["mlperf"] = False
 
-    # Engine Facts — read engine_facts.sqlite when present; render only
-    # when the loader returns a non-None context (engines table populated
-    # AND every (engine, fact_type) cell present per canonical-fact-types
-    # invariant). 1E.4 will extend the landing card to add an
-    # "Engine Facts" tile reading engines_ctx.
+    # Engine Facts — gated on ENGINE_FACTS_PUBLIC while Jake's UX
+    # punch list (2026-04-29) is being worked. Cron continues to
+    # extract weekly, the SQLite stays current, but the public page
+    # renders a "Coming soon" placeholder and the landing card stays
+    # in coming-soon state. Flip the flag to True (and delete the
+    # placeholder template + this comment) once the data-table page
+    # is shipped.
     engines_ctx: EngineFactsContext | None = None
-    if ENGINE_FACTS_DB.exists():
+    if ENGINE_FACTS_PUBLIC and ENGINE_FACTS_DB.exists():
         conn = sqlite3.connect(str(ENGINE_FACTS_DB))
         try:
             engines_ctx = build_engine_facts_context(conn, now)
@@ -1422,10 +1438,10 @@ def build(now: datetime | None = None) -> dict[str, bool]:
 
     if engines_ctx is not None:
         html = render_engines_page(env, engines_ctx)
-        write_atomic(OUT_ENGINES, html)
-        written["engines"] = True
     else:
-        written["engines"] = False
+        html = render_engines_coming_soon(env)
+    write_atomic(OUT_ENGINES, html)
+    written["engines"] = True
 
     # Landing
     landing_ctx = build_landing_context(
