@@ -669,13 +669,27 @@ def build_landing_context(
     mlperf_ready: bool,
     mlperf_round: str | None,
     mlperf_relative_age: str | None,
+    mlperf_fetched_at_iso: str | None = None,
 ) -> LandingContext:
     """Build the /anvil/ landing-page context. Pricing card always present;
-    MLPerf card shows 'Coming soon' until Wave 2 lands real data."""
+    MLPerf card shows 'Coming soon' until Wave 2 lands real data.
+
+    `freshness_iso` + the *_relative split fields populate the
+    client-side recompute markup (see `_base.html.j2` JS shim and
+    `~/.claude/rules/static-site-rendering.md`). When the underlying
+    fetched_at is unavailable (Coming soon, stale, etc.), those fields
+    stay empty and the template falls back to plain server-rendered
+    text — no data-iso wrapper, no recompute attempted.
+    """
     cards: list[AssetCard] = []
 
-    # Pricing card
+    # Pricing card.
+    # Wave 2026-04-29 fix: when fresh, split the "Refreshed " prefix
+    # (static) from the relative phrase (live-updated). Stale + not-ready
+    # branches keep the static-only shape; nothing to recompute when
+    # the data is missing or known-stale.
     pricing_ready = pricing is not None and bool(pricing.gpu_groups)
+    pricing_fresh = pricing_ready and not pricing.is_stale  # type: ignore[union-attr]
     cards.append(AssetCard(
         eyebrow="Pricing",
         title="Cloud GPU Pricing",
@@ -684,17 +698,22 @@ def build_landing_context(
         cta_label="View pricing →",
         is_ready=pricing_ready,
         freshness_main=(
-            f"Refreshed {pricing.relative_age_display}" if pricing_ready and not pricing.is_stale
-            else "Data is stale" if pricing_ready and pricing.is_stale
+            "Refreshed " if pricing_fresh
+            else "Data is stale" if pricing_ready and pricing.is_stale  # type: ignore[union-attr]
             else "Coming soon"
         ),
         freshness_muted=(
-            f"· {pricing.latest_fetch_display}" if pricing_ready and pricing.latest_fetch_display
+            f"· {pricing.latest_fetch_display}" if pricing_ready and pricing.latest_fetch_display  # type: ignore[union-attr]
             else ""
+        ),
+        freshness_iso=(pricing.latest_fetch_iso if pricing_fresh else ""),  # type: ignore[union-attr]
+        freshness_main_relative=(
+            pricing.relative_age_display if pricing_fresh else ""  # type: ignore[union-attr]
         ),
     ))
 
-    # MLPerf card
+    # MLPerf card. Relative phrase appears in `muted` ("· Ingested
+    # 14 hours ago") not `main` ("Round v5.1"), so split there.
     cards.append(AssetCard(
         eyebrow="Benchmarks",
         title="MLPerf Inference Results",
@@ -707,8 +726,11 @@ def build_landing_context(
             else "Coming soon"
         ),
         freshness_muted=(
-            f"· Ingested {mlperf_relative_age}" if mlperf_ready and mlperf_relative_age
-            else ""
+            "· Ingested " if mlperf_ready and mlperf_relative_age else ""
+        ),
+        freshness_iso=(mlperf_fetched_at_iso or "") if mlperf_ready else "",
+        freshness_muted_relative=(
+            mlperf_relative_age if mlperf_ready and mlperf_relative_age else ""
         ),
     ))
 
@@ -839,6 +861,9 @@ def build(now: datetime | None = None) -> dict[str, bool]:
         mlperf_round=mlperf_ctx.latest_round if mlperf_ctx else None,
         mlperf_relative_age=(
             mlperf_ctx.relative_age_display if mlperf_ctx else None
+        ),
+        mlperf_fetched_at_iso=(
+            mlperf_ctx.fetched_at_iso if mlperf_ctx else None
         ),
     )
     html = render_landing_page(env, landing_ctx)

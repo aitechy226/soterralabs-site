@@ -38,7 +38,7 @@
       <h2>{{ card.title }}</h2>
       <p class="description">{{ card.description }}</p>
       <div class="freshness-pill">
-        <span><strong>{{ card.freshness_main }}</strong>{% if card.freshness_muted %} <span class="muted">{{ card.freshness_muted }}</span>{% endif %}</span>
+        <span><strong>{{ card.freshness_main }}{% if card.freshness_iso and card.freshness_main_relative %}<span data-iso="{{ card.freshness_iso }}">{{ card.freshness_main_relative }}</span>{% endif %}</strong>{% if card.freshness_muted or card.freshness_muted_relative %} <span class="muted">{{ card.freshness_muted }}{% if card.freshness_iso and card.freshness_muted_relative %}<span data-iso="{{ card.freshness_iso }}">{{ card.freshness_muted_relative }}</span>{% endif %}</span>{% endif %}</span>
       </div>
       {% if card.is_ready %}
       <a href="{{ card.url }}" class="report-cta">{{ card.cta_label }}</a>

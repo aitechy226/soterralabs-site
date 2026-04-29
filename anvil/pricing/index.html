@@ -156,7 +156,19 @@
           if (then) el.textContent = relativeFrom(then, now);
         });
       }
-      refresh();
+      // The shim runs at the TOP of <body>, before <main> is parsed —
+      // so [data-iso] elements don't exist in the DOM yet. Defer the
+      // initial refresh() until DOMContentLoaded fires (or run
+      // immediately if the document is already complete, which happens
+      // when the script is appended dynamically). Without this the
+      // first refresh hits an empty NodeList; setInterval would
+      // self-correct after 60s but the user sees the build-time bake-in
+      // for that window — which is the bug Sri caught 2026-04-29.
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', refresh);
+      } else {
+        refresh();
+      }
       setInterval(refresh, 60000);
       document.addEventListener('visibilitychange', function() {
         if (!document.hidden) refresh();
@@ -177,7 +189,7 @@
     
     <p class="freshness">
       Last refreshed: <time datetime="2026-04-28T08:18:48.186172+00:00">April 28, 2026 at 08:18 UTC</time>
-      <span class="muted">(<span data-iso="2026-04-28T08:18:48.186172+00:00">5 hours ago</span>)</span>
+      <span class="muted">(<span data-iso="2026-04-28T08:18:48.186172+00:00">18 hours ago</span>)</span>
     </p>
     
   </div>

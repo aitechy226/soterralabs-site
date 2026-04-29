@@ -192,9 +192,58 @@ def test_build_landing_pricing_ready_mlperf_not_ready():
     assert len(landing.cards) == 2
     pricing_card, mlperf_card = landing.cards
     assert pricing_card.is_ready is True
-    assert "Refreshed 2 hours ago" == pricing_card.freshness_main
+    # Wave 2026-04-29 fix: relative phrase split out of freshness_main into
+    # freshness_main_relative so the template can wrap it in <span data-iso=...>
+    # for client-side recompute. freshness_main now carries just the static
+    # prefix "Refreshed " (trailing space intentional).
+    assert pricing_card.freshness_main == "Refreshed "
+    assert pricing_card.freshness_main_relative == "2 hours ago"
+    assert pricing_card.freshness_iso == "2026-04-26T14:35:00+00:00"
     assert mlperf_card.is_ready is False
     assert mlperf_card.freshness_main == "Coming soon"
+    # Coming-soon cards have no fetched_at → no live treatment
+    assert mlperf_card.freshness_iso == ""
+    assert mlperf_card.freshness_main_relative == ""
+    assert mlperf_card.freshness_muted_relative == ""
+
+
+def test_build_landing_card_data_iso_renders_in_html():
+    """Regression: the JS shim recomputes [data-iso] elements on page
+    load. Without the wrapper, bake-in text goes stale between cron
+    runs (the static-site-rendering scar 2026-04-28 + 2026-04-29).
+    Asserts the rendered HTML actually carries data-iso attrs on the
+    landing-page freshness pill — caught the LANDING-card regression
+    after the pricing/mlperf PAGES were fixed."""
+    from render.models import GpuGroup, PricingContext, Quote
+    p_ctx = PricingContext(
+        latest_fetch_iso="2026-04-28T08:18:48+00:00",
+        latest_fetch_display="April 28, 2026 at 08:18 UTC",
+        relative_age_display="2 hours ago",
+        is_stale=False,
+        age_hours=2,
+        gpu_groups=(
+            GpuGroup(canonical_id="x", display_name="X", anchor_id="x",
+                     quotes=(Quote(cloud="aws", cloud_display="AWS", region="r",
+                                   instance_type="i", gpu_count=1,
+                                   price_per_hour_usd=1.0,
+                                   price_per_gpu_per_hour_usd=1.0,
+                                   source_url="https://x"),)),
+        ),
+    )
+    landing = build.build_landing_context(
+        p_ctx, mlperf_ready=True, mlperf_round="v5.1",
+        mlperf_relative_age="14 hours ago",
+        mlperf_fetched_at_iso="2026-04-27T23:11:29+00:00",
+    )
+    env = build.make_jinja_env(mlperf_ready=True)
+    html = build.render_landing_page(env, landing)
+
+    # Pricing card: data-iso wraps the relative phrase ("2 hours ago"),
+    # not the "Refreshed" prefix.
+    assert 'data-iso="2026-04-28T08:18:48+00:00">2 hours ago</span>' in html
+    # MLPerf card: data-iso wraps the muted relative ("14 hours ago"),
+    # the "Round v5.1" main label is plain text.
+    assert 'data-iso="2026-04-27T23:11:29+00:00">14 hours ago</span>' in html
 
 
 def test_build_landing_pricing_stale_shows_data_stale():

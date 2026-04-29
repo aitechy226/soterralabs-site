@@ -109,15 +109,29 @@ class MlperfContext(_Frozen):
 # ---- Landing context ----
 
 class AssetCard(_Frozen):
-    """One card on the /anvil/ landing page."""
+    """One card on the /anvil/ landing page.
+
+    Wave 1B 2026-04-29 fix: relative-time phrases are split out from
+    `freshness_main` / `freshness_muted` so the template can wrap them
+    in `<span data-iso="...">` for the JS shim's client-side recompute.
+    Without that wrapper the bake-in text goes stale between cron runs
+    (the static-site-rendering scar `~/.claude/rules/static-site-rendering.md`).
+    """
     eyebrow: str                        # 'Pricing' | 'Benchmarks'
     title: str                          # 'Cloud GPU Pricing'
     description: str                    # one-paragraph teaser
     url: str                            # '/anvil/pricing'
     cta_label: str                      # 'View pricing →'
     is_ready: bool                      # if False, show "coming soon" instead of freshness pill
-    freshness_main: str                 # 'Refreshed 2 hours ago' | 'Round v5.0'
-    freshness_muted: str                # absolute timestamp / context
+    freshness_main: str                 # 'Refreshed ' | 'Round v5.0' — server-side static
+    freshness_muted: str                # '· April 28, 2026 at 08:18 UTC' — server-side static
+    # Live-updated relative-time pieces. When freshness_iso is set, the
+    # template wraps the relative phrase in `<span data-iso="...">` so
+    # the JS shim recomputes on page load + every 60s. Empty string =
+    # no live treatment (e.g., "Coming soon" cards have no fetched_at).
+    freshness_iso: str = ""             # ISO 8601 UTC timestamp
+    freshness_main_relative: str = ""   # '5 hours ago' (when relative goes inside <strong>)
+    freshness_muted_relative: str = ""  # '14 hours ago' (when relative goes inside .muted span)
 
 
 class LandingContext(_Frozen):

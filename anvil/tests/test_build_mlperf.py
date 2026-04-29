@@ -458,12 +458,19 @@ def test_landing_card_mlperf_ready_shows_round(in_memory_mlperf_db) -> None:
         mlperf_ready=True,
         mlperf_round=mlperf_ctx.latest_round,
         mlperf_relative_age=mlperf_ctx.relative_age_display,
+        mlperf_fetched_at_iso=mlperf_ctx.fetched_at_iso,
     )
     mlperf_card = landing.cards[1]
     assert mlperf_card.is_ready is True
     assert mlperf_card.freshness_main == "Round v5.1"
     assert mlperf_card.cta_label == "View results →"
-    assert "Ingested" in mlperf_card.freshness_muted
+    # Wave 2026-04-29 fix: relative phrase split out so the template can
+    # wrap it in <span data-iso="..."> for client-side recompute. Static
+    # "· Ingested " stays in freshness_muted; the relative goes in
+    # freshness_muted_relative; freshness_iso carries the timestamp.
+    assert mlperf_card.freshness_muted == "· Ingested "
+    assert mlperf_card.freshness_muted_relative == mlperf_ctx.relative_age_display
+    assert mlperf_card.freshness_iso == mlperf_ctx.fetched_at_iso
 
 
 # ---- SEO smoke ----
