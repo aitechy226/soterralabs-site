@@ -24,6 +24,13 @@ historically. 6mo = no banner (normal cadence). 9mo = cadence has
 slipped by ≥ one round = reader should look at MLCommons directly.
 12mo would be too lax (two full missed rounds before warning)."""
 
+ENGINE_FACTS_STALE_DAYS: Final[int] = 14
+"""ENGINEERING (Jen, Wave 1E architect). Engine Facts cron is weekly
+(Mondays 06:00 UTC). 7 days = no banner (normal cadence). 14 days =
+two missed cycles, banner fires. Mirrors STALE_THRESHOLD_HOURS' "1
+missed cycle + grace" logic at the weekly cadence — 8d would over-warn
+on a single delayed run; 21d would tolerate three missed cycles silently."""
+
 # ---- Health-check thresholds ----
 
 ROW_DELTA_WARN: Final[float] = 0.50

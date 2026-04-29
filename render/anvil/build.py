@@ -34,12 +34,25 @@ import yaml
 from jinja2 import Environment, FileSystemLoader
 
 from anvil.scripts._constants import (
+    ENGINE_FACTS_STALE_DAYS,
     STALE_ROUND_MONTHS,
     STALE_THRESHOLD_HOURS,
     TIMESTAMP_DISPLAY_FORMAT,
 )
+from anvil.scripts.extractors._canonical_fact_types import (
+    CANONICAL_FACT_TYPES_BY_CATEGORY,
+    NOTE_NOT_APPLICABLE,
+    NOTE_NOT_DECLARED,
+    NOTE_NOT_DETECTED,
+    NOTE_UNSUPPORTED_RUNTIME,
+)
 from render.anvil.models import (
     AssetCard,
+    EngineCell,
+    EngineColumn,
+    EngineFactsContext,
+    FactGroup,
+    FactRow,
     GpuGroup,
     LandingContext,
     MlperfContext,
@@ -61,6 +74,7 @@ SHARED_TEMPLATES_DIR = REPO_ROOT / "render" / "shared"
 STYLE_CSS = THIS_DIR / "style.css"
 PRICING_DB = ANVIL_ROOT / "data" / "pricing.sqlite"
 MLPERF_DB = ANVIL_ROOT / "data" / "mlperf.sqlite"
+ENGINE_FACTS_DB = ANVIL_ROOT / "data" / "engine_facts.sqlite"
 MLPERF_ROUNDS_YAML = ANVIL_ROOT / "scripts" / "mlperf_rounds.yaml"
 
 # Output paths (committed to repo per D2)
@@ -660,6 +674,360 @@ def build_mlperf_context(
         is_round_stale=is_round_stale,
         workloads=workloads,
     )
+
+
+# ---- Engine Facts display constants (Wave 1E.1) ----
+#
+# Per Mara's column-rename map in PRODUCE artifact §4 + Carol's category
+# headlines. Pre-computed here (SSOT, Principle 3) so templates render
+# `{{ row.fact_type_label }}` directly without lookups.
+
+CATEGORY_DISPLAY: dict[str, tuple[str, str]] = {
+    "project_meta": ("Project Meta", "Is this project alive and active?"),
+    "container": ("Container", "What does this engine ship as?"),
+    "api_surface": ("API Surface", "Will my client just work?"),
+    "observability": ("Observability", "Can I monitor it in production?"),
+}
+
+#: Mara's 24-row rename map (Wave 1E PRODUCE §4): fact_type → (header, definition).
+#: Header ≤ 25 chars; definition is one-line plain English. Templates emit
+#: header in <th> and definition as italic sub-line caption.
+FACT_TYPE_DISPLAY: dict[str, tuple[str, str]] = {
+    # project_meta
+    "stars": ("Stars", "GitHub star count, snapshot at fetch time"),
+    "contributors": ("Contributors", "Distinct authors who landed a commit on default branch"),
+    "last_commit": ("Last commit", "Days since the most recent commit on default branch"),
+    "languages": ("Languages", "Top languages reported by GitHub linguist"),
+    "release_cadence": ("Releases", "Median days between the last 6 tagged releases"),
+    "docs_examples_openapi": ("Docs & examples", "Whether /docs, /examples, or an OpenAPI spec are present in repo"),
+    "license": ("License", "SPDX identifier from the LICENSE file"),
+    "readme_first_line": ("README headline", "First non-blank line of README.md"),
+    # container
+    "latest_tag": ("Latest image tag", "Most recent tag on the project's published image"),
+    "image_size_mb": ("Image size (MB)", "Compressed size of the latest tag"),
+    "base_image": ("Base image", "The FROM line in the published Dockerfile"),
+    "gpu_runtime_in_from_line": ("GPU runtime", "CUDA / ROCm family declared in the base-image string"),
+    "runtime_pinned": ("Runtime pinned", "Whether Python / system runtime is version-locked"),
+    # api_surface
+    "v1_chat_completions": ("/v1/chat/completions", "OpenAI-compatible chat route present in source"),
+    "v1_completions": ("/v1/completions", "OpenAI-compatible legacy completions route"),
+    "v1_embeddings": ("/v1/embeddings", "OpenAI-compatible embeddings route"),
+    "generate_hf_native": ("/generate (HF-native)", "Hugging Face TGI-style generate route"),
+    "grpc_service_def": ("gRPC service", "A .proto service definition is present in repo"),
+    "sse_streaming": ("SSE streaming", "Server-Sent Events streaming wired into a route handler"),
+    # observability
+    "metrics_endpoint": ("/metrics endpoint", "Prometheus-format scrape route exposed by the server"),
+    "health_endpoint": ("/health endpoint", "Liveness route exposed by the server"),
+    "ready_endpoint": ("/ready endpoint", "Readiness route exposed by the server"),
+    "otel_env_refs": ("OpenTelemetry env", "OTEL_* environment variables referenced in source"),
+    "prometheus_client": ("Prometheus exporter", "A Prometheus client library is imported and used"),
+}
+
+#: Cell-state derivation: NOTE_VOCABULARY prefix → (cell_state, cell_state_class).
+#: Per architect.md §1.5 (Wave 1E): 4 distinct CSS classes preserve the Wave
+#: 1C/1D semantic distinction at the render layer.
+_CELL_STATE_BY_NOTE_PREFIX: dict[str, tuple[str, str]] = {
+    NOTE_NOT_APPLICABLE: ("not-applicable", "cell-not-applicable"),
+    NOTE_NOT_DECLARED: ("not-declared", "cell-not-declared"),
+    NOTE_NOT_DETECTED: ("not-detected", "cell-not-detected"),
+    NOTE_UNSUPPORTED_RUNTIME: ("unsupported-runtime", "cell-unsupported-runtime"),
+}
+
+
+def _derive_cell_state(fact_value: str, note: str) -> tuple[str, str]:
+    """Return (cell_state, cell_state_class) for one cell.
+
+    Non-empty fact_value is always 'value' regardless of any note. Empty
+    fact_value with a recognized NOTE_VOCABULARY prefix yields the
+    matching state. Empty + unrecognized note (or no note) falls back
+    to 'not-detected' — the most-conservative state ("we didn't find")
+    rather than 'not-applicable' ("doesn't apply"); the buyer-credibility
+    invariant prefers honest probe-incompleteness over a false categorical
+    claim.
+
+    Wave 1E.1 hardening: `note.strip()` before prefix-match so a single
+    upstream whitespace typo (`"not applicable: "` vs `"not applicable :"`
+    or `" not applicable: …"`) doesn't silently downgrade to not-detected.
+    The Wave 1B.2 `test_every_note_uses_vocabulary` conformance test
+    only asserts `startswith(prefix)` without checking the immediate
+    `:` separator — render layer applies belt-and-suspenders normalization.
+    """
+    if fact_value:
+        return ("value", "cell-value")
+    note_stripped = note.strip()
+    for prefix, (state, css_class) in _CELL_STATE_BY_NOTE_PREFIX.items():
+        if note_stripped.startswith(f"{prefix}:"):
+            return (state, css_class)
+    return ("not-detected", "cell-not-detected")
+
+
+def _format_age_days(age_days: float) -> str:
+    """Display the relative age of the engine_facts DB. Cron is weekly,
+    so the natural unit is days, not hours. Returns 'today' for <1 day."""
+    if age_days < 1:
+        return "today"
+    days = int(age_days)
+    return f"{days} days ago" if days != 1 else "1 day ago"
+
+
+# ---- Engine Facts context builder (Wave 1E.1) ----
+
+def build_engine_facts_context(
+    conn: sqlite3.Connection, now: datetime,
+) -> EngineFactsContext | None:
+    """Read engine_facts.sqlite and return a typed EngineFactsContext.
+
+    Per Jen's Wave 1E architect verdict (PRODUCE artifact §1):
+    - Single SQL query joining engines + facts + evidence_links +
+      latest extraction_runs (snapshot consistency).
+    - Group in Python; pre-compute every display string SSOT
+      (Principle 3) — templates do zero derivation.
+    - Assert every (engine_id, fact_type) cell from the canonical
+      catalog is present; missing cell raises a load-time error
+      rather than silently rendering a hole. This preserves the
+      Wave 1C/1D canonical-fact-types invariant at the render layer.
+
+    Returns None when the DB is empty (no engines, no facts) — caller
+    skips rendering /anvil/engines and the landing-page card stays in
+    "Coming soon" state.
+
+    Wave 1E.1 scope (foundation):
+    - Wires the canonical loader contract.
+    - Picks the FIRST evidence row per fact (canonical-evidence
+      selection between 1+ Evidence rows is Wave 1E.2 polish).
+    - Pre-computes cell_state/class via _derive_cell_state.
+    - Pre-computes engine column extraction status from the latest
+      extraction_runs row per engine.
+
+    Wave 1E.2 will refine: canonical-evidence selection, sort-key
+    richness beyond alphabetical engine display_name, banner-state
+    composition, multi-evidence aggregation.
+    """
+    engine_rows = conn.execute(
+        "SELECT id, display_name, repo_url FROM engines ORDER BY display_name COLLATE NOCASE"
+    ).fetchall()
+    if not engine_rows:
+        return None
+
+    # Latest extraction_runs row per engine — used for column-header status.
+    # Tie-break on MAX(id), not MAX(started_at): id is monotonic
+    # AUTOINCREMENT, started_at can collide on same-second concurrent
+    # writes (orchestrator restarts within one second). MAX(id) is
+    # the true latest insert; MAX(started_at) is non-deterministic on
+    # collisions.
+    extraction_status_rows = conn.execute("""
+        SELECT er.engine_id, er.status, er.finished_at
+        FROM extraction_runs er
+        INNER JOIN (
+            SELECT engine_id, MAX(id) AS id
+            FROM extraction_runs
+            GROUP BY engine_id
+        ) latest
+            ON er.engine_id = latest.engine_id
+           AND er.id = latest.id
+    """).fetchall()
+    extraction_by_engine: dict[str, tuple[str, str | None]] = {
+        r[0]: (r[1], r[2]) for r in extraction_status_rows
+    }
+
+    # MAX(extracted_at) directly from SQL — avoids Python-side string
+    # lex comparison fragility when ISO strings mix `Z` and `+00:00`
+    # offsets across rows. The single MAX is correct iff all rows use
+    # consistent format; the build_pricing_context precedent normalizes
+    # via fromisoformat(.replace('Z', '+00:00')) at parse time, which
+    # we mirror below.
+    extracted_at_max_row = conn.execute(
+        "SELECT MAX(extracted_at) FROM facts"
+    ).fetchone()
+    extracted_at_max: str = extracted_at_max_row[0] or ""
+
+    # All facts + their first Evidence row, ordered for deterministic
+    # grouping. LEFT JOIN evidence_links so empty Evidence (shouldn't
+    # happen per Wave 1B schema, but defensive) doesn't silently drop
+    # the fact row.
+    fact_rows = conn.execute("""
+        SELECT
+            f.engine_id, f.category, f.fact_type, f.fact_value, f.extracted_at,
+            ev.source_url, ev.source_path, ev.note
+        FROM facts f
+        LEFT JOIN evidence_links ev ON ev.fact_id = f.id
+        ORDER BY f.engine_id, f.category, f.fact_type, ev.id
+    """).fetchall()
+    if not fact_rows:
+        return None
+
+    # Group: (engine_id, fact_type) → first matching row tuple
+    # ("first" because rows are ORDER BY ev.id ASC and 1E.1 takes the
+    # foundational evidence — 1E.2 may layer canonical-evidence preference).
+    fact_by_key: dict[tuple[str, str], tuple] = {}
+    for row in fact_rows:
+        key = (row[0], row[2])
+        if key not in fact_by_key:
+            fact_by_key[key] = row
+
+    # Build engine columns in display_name ASC order (Jake's sort default).
+    engines_tuple = tuple(
+        _build_engine_column(eid, dname, repo_url, extraction_by_engine)
+        for (eid, dname, repo_url) in engine_rows
+    )
+    engine_ids_in_order: tuple[str, ...] = tuple(c.engine_id for c in engines_tuple)
+    is_engine_stale_by_id: dict[str, bool] = {
+        c.engine_id: c.is_engine_stale for c in engines_tuple
+    }
+
+    # Canonical-fact-types invariant: every (engine, fact_type) cell
+    # present. Raises on missing cell — render layer must not silently
+    # render a hole when an extractor failed to emit a canonical fact.
+    _assert_canonical_completeness(engine_ids_in_order, fact_by_key)
+
+    # Build fact_groups in canonical category order.
+    fact_groups = tuple(
+        _build_fact_group(category, fact_types, engine_ids_in_order,
+                          fact_by_key, is_engine_stale_by_id)
+        for category, fact_types in CANONICAL_FACT_TYPES_BY_CATEGORY.items()
+    )
+
+    extracted_dt = datetime.fromisoformat(extracted_at_max.replace("Z", "+00:00"))
+    if extracted_dt.tzinfo is None:
+        extracted_dt = extracted_dt.replace(tzinfo=timezone.utc)
+    age_days = (now - extracted_dt).total_seconds() / 86400
+    is_stale = age_days > ENGINE_FACTS_STALE_DAYS
+
+    return EngineFactsContext(
+        extracted_at_iso=extracted_at_max,
+        extracted_at_display=format_timestamp_display(extracted_at_max),
+        extracted_at_relative=_format_age_days(age_days),
+        is_stale=is_stale,
+        age_days=age_days,
+        engines=engines_tuple,
+        fact_groups=fact_groups,
+    )
+
+
+def _build_engine_column(
+    engine_id: str,
+    display_name: str,
+    repo_url: str,
+    extraction_by_engine: dict[str, tuple[str, str | None]],
+) -> EngineColumn:
+    """One EngineColumn — engine identity + extraction status."""
+    status, finished_at = extraction_by_engine.get(engine_id, ("unknown", None))
+    is_engine_stale = status != "success"
+    finished_iso = finished_at or ""
+    finished_display = (
+        format_timestamp_display(finished_iso) if finished_iso else ""
+    )
+    return EngineColumn(
+        engine_id=engine_id,
+        display_name=display_name,
+        repo_url=repo_url,
+        extraction_status=status,
+        extraction_finished_iso=finished_iso,
+        extraction_finished_display=finished_display,
+        is_engine_stale=is_engine_stale,
+    )
+
+
+def _build_fact_group(
+    category: str,
+    fact_types: tuple[str, ...],
+    engine_ids_in_order: tuple[str, ...],
+    fact_by_key: dict[tuple[str, str], tuple],
+    is_engine_stale_by_id: dict[str, bool],
+) -> FactGroup:
+    """One FactGroup — all rows for a single category."""
+    category_label, category_definition = CATEGORY_DISPLAY[category]
+    rows = tuple(
+        _build_fact_row(fact_type, engine_ids_in_order, fact_by_key,
+                        is_engine_stale_by_id)
+        for fact_type in fact_types
+    )
+    return FactGroup(
+        category=category,
+        category_label=category_label,
+        category_definition=category_definition,
+        rows=rows,
+    )
+
+
+def _build_fact_row(
+    fact_type: str,
+    engine_ids_in_order: tuple[str, ...],
+    fact_by_key: dict[tuple[str, str], tuple],
+    is_engine_stale_by_id: dict[str, bool],
+) -> FactRow:
+    """One FactRow — one fact_type across all engines, in column order."""
+    label, definition = FACT_TYPE_DISPLAY[fact_type]
+    cells = tuple(
+        _build_engine_cell(eid, fact_type, fact_by_key,
+                           is_engine_stale_by_id[eid])
+        for eid in engine_ids_in_order
+    )
+    return FactRow(
+        fact_type=fact_type,
+        fact_type_label=label,
+        fact_type_definition=definition,
+        cells=cells,
+    )
+
+
+def _build_engine_cell(
+    engine_id: str,
+    fact_type: str,
+    fact_by_key: dict[tuple[str, str], tuple],
+    is_engine_stale: bool,
+) -> EngineCell:
+    """One EngineCell — pre-computed display state for a single (engine, fact_type)."""
+    row = fact_by_key[(engine_id, fact_type)]
+    fact_value = row[3] or ""
+    source_url = row[5] or ""
+    source_path = row[6] or ""
+    note = row[7] or ""
+
+    cell_state, cell_state_class = _derive_cell_state(fact_value, note)
+    display_value = fact_value if fact_value else "—"
+
+    return EngineCell(
+        fact_value=fact_value,
+        display_value=display_value,
+        cell_state=cell_state,
+        cell_state_class=cell_state_class,
+        note=note,
+        evidence_url=source_url,
+        evidence_path=source_path,
+        is_engine_stale=is_engine_stale,
+    )
+
+
+def _assert_canonical_completeness(
+    engine_ids: tuple[str, ...],
+    fact_by_key: dict[tuple[str, str], tuple],
+) -> None:
+    """Raise if any (engine, canonical fact_type) cell is missing.
+
+    Wave 1C/1D canonical-fact-types invariant carried into the render
+    layer: every extractor emits all 24 canonical fact_types per engine.
+    A missing cell at render time means an extractor regressed silently
+    OR the orchestrator failed to commit a Fact row OR engine_facts.sqlite
+    is partial (e.g., mid-cron mid-write). Any of those are bugs the
+    render path must not paper over.
+    """
+    canonical_fact_types = tuple(
+        ft for fact_types in CANONICAL_FACT_TYPES_BY_CATEGORY.values()
+        for ft in fact_types
+    )
+    missing: list[tuple[str, str]] = []
+    for engine_id in engine_ids:
+        for fact_type in canonical_fact_types:
+            if (engine_id, fact_type) not in fact_by_key:
+                missing.append((engine_id, fact_type))
+    if missing:
+        head = ", ".join(f"{e}/{ft}" for e, ft in missing[:5])
+        tail = f" (+{len(missing) - 5} more)" if len(missing) > 5 else ""
+        raise RuntimeError(
+            f"engine_facts canonical completeness violated: missing "
+            f"{len(missing)} (engine, fact_type) cells: {head}{tail}"
+        )
 
 
 # ---- Landing context builder ----
