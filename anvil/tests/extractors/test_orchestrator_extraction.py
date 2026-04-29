@@ -41,11 +41,25 @@ from scripts.extract_all_engines import (
 )
 from scripts.extractors import _http
 from scripts.extractors.base import Engine, Evidence, Extractor, Fact
+from scripts.extractors.deepspeed_mii import DeepSpeedMiiExtractor
+from scripts.extractors.llama_cpp import LlamaCppExtractor
+from scripts.extractors.lmdeploy import LmdeployExtractor
+from scripts.extractors.mlc_llm import MlcLlmExtractor
 from scripts.extractors.ollama import OllamaExtractor
+from scripts.extractors.sglang import SglangExtractor
+from scripts.extractors.tensorrt_llm import TensorrtLlmExtractor
+from scripts.extractors.tgi import TgiExtractor
 from scripts.extractors.vllm import VllmExtractor
 
 VLLM_FIXTURES = Path(__file__).resolve().parent / "fixtures" / "vllm"
 OLLAMA_FIXTURES = Path(__file__).resolve().parent / "fixtures" / "ollama"
+TGI_FIXTURES = Path(__file__).resolve().parent / "fixtures" / "tgi"
+LLAMA_CPP_FIXTURES = Path(__file__).resolve().parent / "fixtures" / "llama-cpp"
+MLC_LLM_FIXTURES = Path(__file__).resolve().parent / "fixtures" / "mlc-llm"
+TENSORRT_LLM_FIXTURES = Path(__file__).resolve().parent / "fixtures" / "tensorrt-llm"
+SGLANG_FIXTURES = Path(__file__).resolve().parent / "fixtures" / "sglang"
+LMDEPLOY_FIXTURES = Path(__file__).resolve().parent / "fixtures" / "lmdeploy"
+DEEPSPEED_MII_FIXTURES = Path(__file__).resolve().parent / "fixtures" / "deepspeed-mii"
 
 
 # ============================================================
@@ -893,3 +907,517 @@ class TestCrossEngineIsolationWithRealExtractors:
             "SELECT status FROM extraction_runs WHERE engine_id = ?", ("ollama",),
         ).fetchone()[0]
         assert ollama_audit == STATUS_SUCCESS
+
+
+# ============================================================
+# Wave 1C: 5-engine cross-engine isolation
+# ============================================================
+
+@pytest.fixture
+def tgi_engine() -> Engine:
+    return Engine(
+        id="tgi",
+        display_name="TGI",
+        repo_url="https://github.com/huggingface/text-generation-inference",
+        container_source="https://github.com/huggingface/text-generation-inference/pkgs/container/text-generation-inference",
+        license="Apache-2.0",
+        description="Large Language Model Text Generation Inference",
+    )
+
+
+@pytest.fixture
+def llama_cpp_engine() -> Engine:
+    return Engine(
+        id="llama-cpp",
+        display_name="llama.cpp",
+        repo_url="https://github.com/ggml-org/llama.cpp",
+        container_source="https://github.com/ggml-org/llama.cpp/pkgs/container/llama.cpp",
+        license="MIT",
+        description="LLM inference in C/C++",
+    )
+
+
+@pytest.fixture
+def mlc_llm_engine() -> Engine:
+    return Engine(
+        id="mlc-llm",
+        display_name="MLC-LLM",
+        repo_url="https://github.com/mlc-ai/mlc-llm",
+        container_source="",
+        license="Apache-2.0",
+        description="Universal LLM deployment engine with ML compilation",
+    )
+
+
+def _route_engine_fixtures(router: respx.MockRouter, captured: dict, owner: str, repo: str, sha: str) -> None:
+    """Wire up the standard set of GitHub API + raw routes for an engine.
+    Per-engine specifics (extra files) are layered on top by the caller."""
+    router.get(f"https://api.github.com/repos/{owner}/{repo}/commits/HEAD").mock(
+        return_value=httpx.Response(200, json=captured["head_sha"])
+    )
+    router.get(f"https://api.github.com/repos/{owner}/{repo}").mock(
+        return_value=httpx.Response(200, json=captured["repo_meta"])
+    )
+    router.get(f"https://api.github.com/repos/{owner}/{repo}/languages").mock(
+        return_value=httpx.Response(200, json=captured["languages"])
+    )
+    router.get(
+        f"https://api.github.com/repos/{owner}/{repo}/releases",
+        params={"per_page": "30"},
+    ).mock(return_value=httpx.Response(200, json=captured["releases"]))
+    cm = captured["contributors_meta"]
+    router.get(
+        f"https://api.github.com/repos/{owner}/{repo}/contributors",
+        params={"per_page": "1", "anon": "true"},
+    ).mock(return_value=httpx.Response(
+        200,
+        headers={"Link": cm["link_header"] or ""},
+        json=cm["page1_body"],
+    ))
+    router.get(
+        f"https://raw.githubusercontent.com/{owner}/{repo}/{sha}/README.md"
+    ).mock(return_value=httpx.Response(200, text=captured["readme_text"]))
+
+
+@pytest.fixture
+def tgi_upstream_mocked() -> Iterator[respx.MockRouter]:
+    captured = {
+        "head_sha": json.loads((TGI_FIXTURES / "head_sha.json").read_text()),
+        "repo_meta": json.loads((TGI_FIXTURES / "repo_meta.json").read_text()),
+        "languages": json.loads((TGI_FIXTURES / "languages.json").read_text()),
+        "releases": json.loads((TGI_FIXTURES / "releases.json").read_text()),
+        "contributors_meta": json.loads((TGI_FIXTURES / "contributors_meta.json").read_text()),
+        "readme_text": (TGI_FIXTURES / "README.md").read_text(),
+        "dockerfile": (TGI_FIXTURES / "Dockerfile").read_text(),
+        "rust_toolchain": (TGI_FIXTURES / "rust-toolchain.toml").read_text(),
+        "cargo": (TGI_FIXTURES / "Cargo.toml").read_text(),
+        "routes": (TGI_FIXTURES / "server.rs").read_text(),
+    }
+    sha = captured["head_sha"]["sha"]
+    with respx.mock(assert_all_called=False) as router:
+        _route_engine_fixtures(router, captured, "huggingface", "text-generation-inference", sha)
+        router.get(
+            f"https://raw.githubusercontent.com/huggingface/text-generation-inference/{sha}/Dockerfile"
+        ).mock(return_value=httpx.Response(200, text=captured["dockerfile"]))
+        router.get(
+            f"https://raw.githubusercontent.com/huggingface/text-generation-inference/{sha}/rust-toolchain.toml"
+        ).mock(return_value=httpx.Response(200, text=captured["rust_toolchain"]))
+        router.get(
+            f"https://raw.githubusercontent.com/huggingface/text-generation-inference/{sha}/Cargo.toml"
+        ).mock(return_value=httpx.Response(200, text=captured["cargo"]))
+        router.get(
+            f"https://raw.githubusercontent.com/huggingface/text-generation-inference/{sha}/router/src/server.rs"
+        ).mock(return_value=httpx.Response(200, text=captured["routes"]))
+        yield router
+
+
+@pytest.fixture
+def llama_cpp_upstream_mocked() -> Iterator[respx.MockRouter]:
+    captured = {
+        "head_sha": json.loads((LLAMA_CPP_FIXTURES / "head_sha.json").read_text()),
+        "repo_meta": json.loads((LLAMA_CPP_FIXTURES / "repo_meta.json").read_text()),
+        "languages": json.loads((LLAMA_CPP_FIXTURES / "languages.json").read_text()),
+        "releases": json.loads((LLAMA_CPP_FIXTURES / "releases.json").read_text()),
+        "contributors_meta": json.loads((LLAMA_CPP_FIXTURES / "contributors_meta.json").read_text()),
+        "readme_text": (LLAMA_CPP_FIXTURES / "README.md").read_text(),
+        "dockerfile": (LLAMA_CPP_FIXTURES / "Dockerfile").read_text(),
+        "cmake": (LLAMA_CPP_FIXTURES / "CMakeLists.txt").read_text(),
+        "server": (LLAMA_CPP_FIXTURES / "server.cpp").read_text(),
+    }
+    sha = captured["head_sha"]["sha"]
+    with respx.mock(assert_all_called=False) as router:
+        _route_engine_fixtures(router, captured, "ggml-org", "llama.cpp", sha)
+        router.get(
+            f"https://raw.githubusercontent.com/ggml-org/llama.cpp/{sha}/.devops/cuda.Dockerfile"
+        ).mock(return_value=httpx.Response(200, text=captured["dockerfile"]))
+        router.get(
+            f"https://raw.githubusercontent.com/ggml-org/llama.cpp/{sha}/CMakeLists.txt"
+        ).mock(return_value=httpx.Response(200, text=captured["cmake"]))
+        router.get(
+            f"https://raw.githubusercontent.com/ggml-org/llama.cpp/{sha}/tools/server/server.cpp"
+        ).mock(return_value=httpx.Response(200, text=captured["server"]))
+        yield router
+
+
+@pytest.fixture
+def mlc_llm_upstream_mocked() -> Iterator[respx.MockRouter]:
+    captured = {
+        "head_sha": json.loads((MLC_LLM_FIXTURES / "head_sha.json").read_text()),
+        "repo_meta": json.loads((MLC_LLM_FIXTURES / "repo_meta.json").read_text()),
+        "languages": json.loads((MLC_LLM_FIXTURES / "languages.json").read_text()),
+        "releases": json.loads((MLC_LLM_FIXTURES / "releases.json").read_text()),
+        "contributors_meta": json.loads((MLC_LLM_FIXTURES / "contributors_meta.json").read_text()),
+        "readme_text": (MLC_LLM_FIXTURES / "README.md").read_text(),
+        "pyproject": (MLC_LLM_FIXTURES / "pyproject.toml").read_text(),
+        "routes": (MLC_LLM_FIXTURES / "openai_entrypoints.py").read_text(),
+    }
+    sha = captured["head_sha"]["sha"]
+    with respx.mock(assert_all_called=False) as router:
+        _route_engine_fixtures(router, captured, "mlc-ai", "mlc-llm", sha)
+        router.get(
+            f"https://raw.githubusercontent.com/mlc-ai/mlc-llm/{sha}/pyproject.toml"
+        ).mock(return_value=httpx.Response(200, text=captured["pyproject"]))
+        router.get(
+            f"https://raw.githubusercontent.com/mlc-ai/mlc-llm/{sha}/python/mlc_llm/serve/entrypoints/openai_entrypoints.py"
+        ).mock(return_value=httpx.Response(200, text=captured["routes"]))
+        yield router
+
+
+# ============================================================
+# Wave 1D engine fixtures + upstream mocks
+# ============================================================
+
+@pytest.fixture
+def tensorrt_llm_engine() -> Engine:
+    return Engine(
+        id="tensorrt-llm",
+        display_name="TensorRT-LLM",
+        repo_url="https://github.com/NVIDIA/TensorRT-LLM",
+        container_source="https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tritonserver",
+        license="Apache-2.0",
+        description="TensorRT-LLM provides users with an easy-to-use Python API to define LLMs",
+    )
+
+
+@pytest.fixture
+def sglang_engine() -> Engine:
+    return Engine(
+        id="sglang",
+        display_name="SGLang",
+        repo_url="https://github.com/sgl-project/sglang",
+        container_source="https://hub.docker.com/r/lmsysorg/sglang",
+        license="Apache-2.0",
+        description="SGLang is a fast serving framework for large language models and vision language models",
+    )
+
+
+@pytest.fixture
+def lmdeploy_engine() -> Engine:
+    return Engine(
+        id="lmdeploy",
+        display_name="LMDeploy",
+        repo_url="https://github.com/InternLM/lmdeploy",
+        container_source="https://hub.docker.com/r/openmmlab/lmdeploy",
+        license="Apache-2.0",
+        description="LMDeploy is a toolkit for compressing, deploying, and serving LLMs",
+    )
+
+
+@pytest.fixture
+def deepspeed_mii_engine() -> Engine:
+    return Engine(
+        id="deepspeed-mii",
+        display_name="DeepSpeed-MII",
+        repo_url="https://github.com/deepspeedai/DeepSpeed-MII",
+        container_source="",
+        license="Apache-2.0",
+        description="MII makes low-latency and high-throughput inference possible, powered by DeepSpeed",
+    )
+
+
+@pytest.fixture
+def tensorrt_llm_upstream_mocked() -> Iterator[respx.MockRouter]:
+    captured = {
+        "head_sha": json.loads((TENSORRT_LLM_FIXTURES / "head_sha.json").read_text()),
+        "repo_meta": json.loads((TENSORRT_LLM_FIXTURES / "repo_meta.json").read_text()),
+        "languages": json.loads((TENSORRT_LLM_FIXTURES / "languages.json").read_text()),
+        "releases": json.loads((TENSORRT_LLM_FIXTURES / "releases.json").read_text()),
+        "contributors_meta": json.loads((TENSORRT_LLM_FIXTURES / "contributors_meta.json").read_text()),
+        "readme_text": (TENSORRT_LLM_FIXTURES / "README.md").read_text(),
+        "dockerfile": (TENSORRT_LLM_FIXTURES / "Dockerfile").read_text(),
+        "pyproject": (TENSORRT_LLM_FIXTURES / "pyproject.toml").read_text(),
+        "routes": (TENSORRT_LLM_FIXTURES / "openai_server.py").read_text(),
+    }
+    sha = captured["head_sha"]["sha"]
+    with respx.mock(assert_all_called=False) as router:
+        _route_engine_fixtures(router, captured, "NVIDIA", "TensorRT-LLM", sha)
+        router.get(
+            f"https://raw.githubusercontent.com/NVIDIA/TensorRT-LLM/{sha}/docker/Dockerfile.multi"
+        ).mock(return_value=httpx.Response(200, text=captured["dockerfile"]))
+        router.get(
+            f"https://raw.githubusercontent.com/NVIDIA/TensorRT-LLM/{sha}/pyproject.toml"
+        ).mock(return_value=httpx.Response(200, text=captured["pyproject"]))
+        router.get(
+            f"https://raw.githubusercontent.com/NVIDIA/TensorRT-LLM/{sha}/tensorrt_llm/serve/openai_server.py"
+        ).mock(return_value=httpx.Response(200, text=captured["routes"]))
+        yield router
+
+
+@pytest.fixture
+def sglang_upstream_mocked() -> Iterator[respx.MockRouter]:
+    captured = {
+        "head_sha": json.loads((SGLANG_FIXTURES / "head_sha.json").read_text()),
+        "repo_meta": json.loads((SGLANG_FIXTURES / "repo_meta.json").read_text()),
+        "languages": json.loads((SGLANG_FIXTURES / "languages.json").read_text()),
+        "releases": json.loads((SGLANG_FIXTURES / "releases.json").read_text()),
+        "contributors_meta": json.loads((SGLANG_FIXTURES / "contributors_meta.json").read_text()),
+        "readme_text": (SGLANG_FIXTURES / "README.md").read_text(),
+        "dockerfile": (SGLANG_FIXTURES / "Dockerfile").read_text(),
+        "pyproject": (SGLANG_FIXTURES / "pyproject.toml").read_text(),
+        "routes": (SGLANG_FIXTURES / "http_server.py").read_text(),
+        "dockerhub": json.loads((SGLANG_FIXTURES / "dockerhub_tags.json").read_text()),
+    }
+    sha = captured["head_sha"]["sha"]
+    with respx.mock(assert_all_called=False) as router:
+        _route_engine_fixtures(router, captured, "sgl-project", "sglang", sha)
+        router.get(
+            f"https://raw.githubusercontent.com/sgl-project/sglang/{sha}/docker/Dockerfile"
+        ).mock(return_value=httpx.Response(200, text=captured["dockerfile"]))
+        router.get(
+            f"https://raw.githubusercontent.com/sgl-project/sglang/{sha}/python/pyproject.toml"
+        ).mock(return_value=httpx.Response(200, text=captured["pyproject"]))
+        router.get(
+            f"https://raw.githubusercontent.com/sgl-project/sglang/{sha}/python/sglang/srt/entrypoints/http_server.py"
+        ).mock(return_value=httpx.Response(200, text=captured["routes"]))
+        router.get(
+            "https://hub.docker.com/v2/repositories/lmsysorg/sglang/tags",
+            params={"page_size": "25"},
+        ).mock(return_value=httpx.Response(200, json=captured["dockerhub"]))
+        yield router
+
+
+@pytest.fixture
+def lmdeploy_upstream_mocked() -> Iterator[respx.MockRouter]:
+    captured = {
+        "head_sha": json.loads((LMDEPLOY_FIXTURES / "head_sha.json").read_text()),
+        "repo_meta": json.loads((LMDEPLOY_FIXTURES / "repo_meta.json").read_text()),
+        "languages": json.loads((LMDEPLOY_FIXTURES / "languages.json").read_text()),
+        "releases": json.loads((LMDEPLOY_FIXTURES / "releases.json").read_text()),
+        "contributors_meta": json.loads((LMDEPLOY_FIXTURES / "contributors_meta.json").read_text()),
+        "readme_text": (LMDEPLOY_FIXTURES / "README.md").read_text(),
+        "dockerfile": (LMDEPLOY_FIXTURES / "Dockerfile").read_text(),
+        "pyproject": (LMDEPLOY_FIXTURES / "pyproject.toml").read_text(),
+        "routes": (LMDEPLOY_FIXTURES / "api_server.py").read_text(),
+        "dockerhub": json.loads((LMDEPLOY_FIXTURES / "dockerhub_tags.json").read_text()),
+    }
+    sha = captured["head_sha"]["sha"]
+    with respx.mock(assert_all_called=False) as router:
+        _route_engine_fixtures(router, captured, "InternLM", "lmdeploy", sha)
+        router.get(
+            f"https://raw.githubusercontent.com/InternLM/lmdeploy/{sha}/docker/Dockerfile"
+        ).mock(return_value=httpx.Response(200, text=captured["dockerfile"]))
+        router.get(
+            f"https://raw.githubusercontent.com/InternLM/lmdeploy/{sha}/pyproject.toml"
+        ).mock(return_value=httpx.Response(200, text=captured["pyproject"]))
+        router.get(
+            f"https://raw.githubusercontent.com/InternLM/lmdeploy/{sha}/lmdeploy/serve/openai/api_server.py"
+        ).mock(return_value=httpx.Response(200, text=captured["routes"]))
+        router.get(
+            "https://hub.docker.com/v2/repositories/openmmlab/lmdeploy/tags",
+            params={"page_size": "25"},
+        ).mock(return_value=httpx.Response(200, json=captured["dockerhub"]))
+        yield router
+
+
+@pytest.fixture
+def deepspeed_mii_upstream_mocked() -> Iterator[respx.MockRouter]:
+    captured = {
+        "head_sha": json.loads((DEEPSPEED_MII_FIXTURES / "head_sha.json").read_text()),
+        "repo_meta": json.loads((DEEPSPEED_MII_FIXTURES / "repo_meta.json").read_text()),
+        "languages": json.loads((DEEPSPEED_MII_FIXTURES / "languages.json").read_text()),
+        "releases": json.loads((DEEPSPEED_MII_FIXTURES / "releases.json").read_text()),
+        "contributors_meta": json.loads((DEEPSPEED_MII_FIXTURES / "contributors_meta.json").read_text()),
+        "readme_text": (DEEPSPEED_MII_FIXTURES / "README.md").read_text(),
+        "pyproject": (DEEPSPEED_MII_FIXTURES / "pyproject.toml").read_text(),
+        "routes": (DEEPSPEED_MII_FIXTURES / "openai_api_server.py").read_text(),
+    }
+    sha = captured["head_sha"]["sha"]
+    with respx.mock(assert_all_called=False) as router:
+        _route_engine_fixtures(router, captured, "deepspeedai", "DeepSpeed-MII", sha)
+        router.get(
+            f"https://raw.githubusercontent.com/deepspeedai/DeepSpeed-MII/{sha}/pyproject.toml"
+        ).mock(return_value=httpx.Response(200, text=captured["pyproject"]))
+        router.get(
+            f"https://raw.githubusercontent.com/deepspeedai/DeepSpeed-MII/{sha}/mii/entrypoints/openai_api_server.py"
+        ).mock(return_value=httpx.Response(200, text=captured["routes"]))
+        yield router
+
+
+class TestExtractorYamlInvariant:
+    """Wave 1C code-reviewer Finding 7 — engines.yaml is the canonical
+    source of truth for repo_url and container_source. Each registered
+    extractor's class attributes MUST match the YAML row exactly.
+
+    Drift would surface as: the engines table (UPSERT'd from YAML)
+    points at the new repo, while the extractor's HTTP calls still
+    target the old repo — leading to silent mis-attribution where the
+    facts table records data fetched from repo X under engine_id Y.
+
+    Real precedent: llama.cpp moved from `ggerganov/llama.cpp` to
+    `ggml-org/llama.cpp` in early 2026. Catching that mismatch needed
+    a test, not eyeballing — this is that test.
+    """
+
+    def test_each_registered_extractor_repo_url_matches_yaml(self) -> None:
+        from scripts.extractors.base import load_engines
+
+        engines_by_id = {e.id: e for e in load_engines()}
+        for engine_id, extractor_cls in extract_all_engines._ENGINE_EXTRACTORS.items():
+            assert engine_id in engines_by_id, (
+                f"extractor registered for {engine_id!r} but no engines.yaml row"
+            )
+            yaml_row = engines_by_id[engine_id]
+            assert extractor_cls.repo_url == yaml_row.repo_url, (
+                f"{engine_id}: extractor.repo_url={extractor_cls.repo_url!r} "
+                f"but engines.yaml repo_url={yaml_row.repo_url!r}"
+            )
+            assert extractor_cls.container_source == yaml_row.container_source, (
+                f"{engine_id}: extractor.container_source={extractor_cls.container_source!r} "
+                f"but engines.yaml container_source={yaml_row.container_source!r}"
+            )
+
+    def test_each_registered_extractor_engine_id_matches_yaml(self) -> None:
+        """Belt-and-suspenders: the registry key already comes from
+        YAML, but verify the class attribute matches too — the FK
+        target for facts.engine_id is the class's `engine_id`, so a
+        registry/class drift would silently corrupt the fact rows."""
+        from scripts.extractors.base import load_engines
+
+        yaml_ids = {e.id for e in load_engines()}
+        for engine_id, extractor_cls in extract_all_engines._ENGINE_EXTRACTORS.items():
+            assert extractor_cls.engine_id == engine_id, (
+                f"registry key {engine_id!r} != extractor.engine_id "
+                f"{extractor_cls.engine_id!r}"
+            )
+            assert extractor_cls.engine_id in yaml_ids
+
+
+class TestNineEngineCrossIsolation:
+    """Wave 1D: extends Wave 1C's 5-engine isolation test to all 9 V1
+    engines (vLLM + Ollama + TGI + llama.cpp + MLC-LLM + TensorRT-LLM
+    + SGLang + LMDeploy + DeepSpeed-MII). Asserts the full loop reports
+    (9, 0, 0); 216 facts total (24 × 9); no state leakage across
+    structurally-divergent engines:
+      - Python+FastAPI: vLLM, SGLang, LMDeploy, MLC-LLM, DeepSpeed-MII,
+        TensorRT-LLM
+      - Go+Gin: Ollama
+      - Rust+axum: TGI
+      - C++: llama.cpp
+      - No container: MLC-LLM, DeepSpeed-MII
+      - GHCR: TGI, llama.cpp
+      - NGC: TensorRT-LLM
+      - Docker Hub: vLLM, Ollama, SGLang, LMDeploy
+
+    Wave 1C code-reviewer Finding 6 — respx stacking caveat:
+    Each `*_upstream_mocked` fixture is its own `respx.mock(...)`
+    context. They stack here because all 9 routers register routes
+    for DIFFERENT owner/repo pairs — vllm-project/vllm, ollama/ollama,
+    huggingface/text-generation-inference, ggml-org/llama.cpp,
+    mlc-ai/mlc-llm, NVIDIA/TensorRT-LLM, sgl-project/sglang,
+    InternLM/lmdeploy, deepspeedai/DeepSpeed-MII — and Docker Hub
+    namespaces are also distinct (vllm/, ollama/, lmsysorg/, openmmlab/).
+    No URL overlap across fixtures. If a future engine reuses an
+    owner/repo path that another engine already mocks, respx route-
+    resolution order becomes implementation-defined and this test will
+    need a single consolidated mock router instead of stacked ones.
+    The invariant the test relies on is: NO TWO MOCK FIXTURES MOCK
+    THE SAME URL.
+    """
+
+    def test_all_nine_engines_extract_independently_in_one_run(
+        self,
+        db: sqlite3.Connection,
+        vllm_engine: Engine,
+        ollama_engine: Engine,
+        tgi_engine: Engine,
+        llama_cpp_engine: Engine,
+        mlc_llm_engine: Engine,
+        tensorrt_llm_engine: Engine,
+        sglang_engine: Engine,
+        lmdeploy_engine: Engine,
+        deepspeed_mii_engine: Engine,
+        vllm_upstream_mocked: respx.MockRouter,
+        ollama_upstream_mocked: respx.MockRouter,
+        tgi_upstream_mocked: respx.MockRouter,
+        llama_cpp_upstream_mocked: respx.MockRouter,
+        mlc_llm_upstream_mocked: respx.MockRouter,
+        tensorrt_llm_upstream_mocked: respx.MockRouter,
+        sglang_upstream_mocked: respx.MockRouter,
+        lmdeploy_upstream_mocked: respx.MockRouter,
+        deepspeed_mii_upstream_mocked: respx.MockRouter,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setattr(
+            extract_all_engines,
+            "_ENGINE_EXTRACTORS",
+            {
+                "vllm": VllmExtractor,
+                "ollama": OllamaExtractor,
+                "tgi": TgiExtractor,
+                "llama-cpp": LlamaCppExtractor,
+                "mlc-llm": MlcLlmExtractor,
+                "tensorrt-llm": TensorrtLlmExtractor,
+                "sglang": SglangExtractor,
+                "lmdeploy": LmdeployExtractor,
+                "deepspeed-mii": DeepSpeedMiiExtractor,
+            },
+        )
+        engines = [
+            vllm_engine, ollama_engine, tgi_engine, llama_cpp_engine, mlc_llm_engine,
+            tensorrt_llm_engine, sglang_engine, lmdeploy_engine, deepspeed_mii_engine,
+        ]
+        success, failed, skipped = run_extraction_loop(db, engines)
+
+        assert (success, failed, skipped) == (9, 0, 0)
+        # 24 facts × 9 engines = 216 facts total
+        total = db.execute("SELECT COUNT(*) FROM facts").fetchone()[0]
+        assert total == 216
+        per_engine = {
+            r[0]: r[1] for r in db.execute(
+                "SELECT engine_id, COUNT(*) FROM facts GROUP BY engine_id"
+            ).fetchall()
+        }
+        assert per_engine == {
+            "vllm": 24, "ollama": 24, "tgi": 24, "llama-cpp": 24, "mlc-llm": 24,
+            "tensorrt-llm": 24, "sglang": 24, "lmdeploy": 24, "deepspeed-mii": 24,
+        }
+
+        # Each engine's runtime_pinned reflects its respective source —
+        # no state leakage. Python: vLLM, MLC-LLM, SGLang. Empty (no
+        # requires-python in pyproject): TRT-LLM, LMDeploy, DeepSpeed-MII.
+        # Go: Ollama. Rust: TGI. C++ (NOT_APPLICABLE): llama.cpp.
+        runtime_per_engine = {
+            r[0]: r[1] for r in db.execute(
+                "SELECT engine_id, fact_value FROM facts WHERE fact_type = 'runtime_pinned'"
+            ).fetchall()
+        }
+        assert runtime_per_engine["vllm"].startswith("python")
+        assert runtime_per_engine["ollama"].startswith("go")
+        assert runtime_per_engine["tgi"].startswith("rust")
+        assert runtime_per_engine["llama-cpp"] == ""
+        assert runtime_per_engine["mlc-llm"].startswith("python")
+        assert runtime_per_engine["sglang"].startswith("python")
+        assert runtime_per_engine["tensorrt-llm"] == ""
+        assert runtime_per_engine["lmdeploy"] == ""
+        assert runtime_per_engine["deepspeed-mii"] == ""
+
+        # gpu_runtime_in_from_line — vLLM/SGLang/LMDeploy/llama.cpp/TGI=cuda,
+        # Ollama=rocm, TRT-LLM=empty (NGC base, parser doesn't match),
+        # MLC-LLM/DeepSpeed-MII=empty (no Dockerfile).
+        gpu_per_engine = {
+            r[0]: r[1] for r in db.execute(
+                "SELECT engine_id, fact_value FROM facts "
+                "WHERE fact_type = 'gpu_runtime_in_from_line'"
+            ).fetchall()
+        }
+        assert gpu_per_engine["vllm"].startswith("cuda")
+        assert gpu_per_engine["ollama"].startswith("rocm")
+        assert gpu_per_engine["tgi"].startswith("cuda")
+        assert gpu_per_engine["llama-cpp"].startswith("cuda")
+        assert gpu_per_engine["mlc-llm"] == ""
+        assert gpu_per_engine["sglang"].startswith("cuda")
+        assert gpu_per_engine["lmdeploy"].startswith("cuda")
+        assert gpu_per_engine["tensorrt-llm"] == ""  # NGC pytorch — parser doesn't match
+        assert gpu_per_engine["deepspeed-mii"] == ""
+
+        # All 9 audit rows = success
+        statuses = {
+            r[0]: r[1] for r in db.execute(
+                "SELECT engine_id, status FROM extraction_runs"
+            ).fetchall()
+        }
+        assert all(s == STATUS_SUCCESS for s in statuses.values())
+        assert set(statuses.keys()) == {
+            "vllm", "ollama", "tgi", "llama-cpp", "mlc-llm",
+            "tensorrt-llm", "sglang", "lmdeploy", "deepspeed-mii",
+        }

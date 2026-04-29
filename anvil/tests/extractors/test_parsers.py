@@ -12,6 +12,7 @@ from scripts.extractors._parsers import (
     PROMETHEUS_CLIENT_DETECTION,
     detect_prometheus_client,
     find_dockerfile_from_lines,
+    find_first_gpu_runtime_base_image_from_line,
     find_first_real_base_image_from_line,
     format_gpu_runtime_value,
     normalize_python_version_floor,
@@ -337,6 +338,74 @@ def test_find_first_real_base_image_returns_zero_when_all_stubs() -> None:
 
 def test_find_first_real_base_image_returns_zero_when_no_from_lines() -> None:
     line, image = find_first_real_base_image_from_line("# no FROM here\n", [])
+    assert (line, image) == (0, "")
+
+
+# ============================================================
+# find_first_gpu_runtime_base_image_from_line (Wave 1C — TGI scar)
+# ============================================================
+
+def test_find_first_gpu_runtime_prefers_cuda_over_builder_image() -> None:
+    """TGI's pattern: cargo-chef Rust builder is the FIRST real base,
+    but the buyer-relevant GPU runtime is on a later FROM line. The
+    helper walks past the chef image and returns the cuda one."""
+    text = (
+        "FROM lukemathwalker/cargo-chef:latest-rust-1.85.1 AS chef\n"
+        "FROM chef AS planner\n"
+        "FROM chef AS builder\n"
+        "FROM nvidia/cuda:12.4.1-devel-ubuntu22.04 AS pytorch-install\n"
+    )
+    from_lines = find_dockerfile_from_lines(text)
+    line, image = find_first_gpu_runtime_base_image_from_line(text, from_lines)
+    assert line == 4
+    assert image == "nvidia/cuda:12.4.1-devel-ubuntu22.04"
+
+
+def test_find_first_gpu_runtime_picks_cuda_at_first_position_when_present() -> None:
+    """vLLM's pattern: the first real base IS the cuda image."""
+    text = (
+        "ARG CUDA_VERSION=12.4.1\n"
+        "ARG BUILD_BASE_IMAGE=nvidia/cuda:${CUDA_VERSION}-devel-ubuntu22.04\n"
+        "FROM ${BUILD_BASE_IMAGE} AS base\n"
+        "FROM base AS build\n"
+    )
+    from_lines = find_dockerfile_from_lines(text)
+    line, image = find_first_gpu_runtime_base_image_from_line(text, from_lines)
+    assert line == 3
+    assert image == "nvidia/cuda:12.4.1-devel-ubuntu22.04"
+
+
+def test_find_first_gpu_runtime_picks_rocm() -> None:
+    """Ollama's pattern: rocm base after scratch stubs."""
+    text = (
+        "FROM scratch AS local-mlx\n"
+        "FROM rocm/dev-almalinux-8:7.2.1 AS base-amd64\n"
+    )
+    from_lines = find_dockerfile_from_lines(text)
+    line, image = find_first_gpu_runtime_base_image_from_line(text, from_lines)
+    assert line == 2
+    assert image == "rocm/dev-almalinux-8:7.2.1"
+
+
+def test_find_first_gpu_runtime_falls_back_to_real_base_when_no_gpu() -> None:
+    """CPU-only Dockerfile: no GPU base in any FROM line. Helper falls
+    back to find_first_real_base_image_from_line so the caller's
+    `format_gpu_runtime_value` can emit the `cpu` vocabulary slot."""
+    text = (
+        "FROM ubuntu:22.04 AS builder\n"
+        "FROM ubuntu:22.04 AS runtime\n"
+    )
+    from_lines = find_dockerfile_from_lines(text)
+    line, image = find_first_gpu_runtime_base_image_from_line(text, from_lines)
+    assert line == 1
+    assert image == "ubuntu:22.04"
+
+
+def test_find_first_gpu_runtime_returns_zero_when_no_real_base() -> None:
+    """All-stub Dockerfile (only `scratch` and stage refs)."""
+    text = "FROM scratch AS empty\nFROM empty AS final\n"
+    from_lines = find_dockerfile_from_lines(text)
+    line, image = find_first_gpu_runtime_base_image_from_line(text, from_lines)
     assert (line, image) == (0, "")
 
 

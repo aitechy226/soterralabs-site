@@ -29,19 +29,34 @@ from scripts.extractors.base import (
     ensure_engine_facts_schema,
     load_engines,
 )
+from scripts.extractors.deepspeed_mii import DeepSpeedMiiExtractor
+from scripts.extractors.llama_cpp import LlamaCppExtractor
+from scripts.extractors.lmdeploy import LmdeployExtractor
+from scripts.extractors.mlc_llm import MlcLlmExtractor
 from scripts.extractors.ollama import OllamaExtractor
+from scripts.extractors.sglang import SglangExtractor
+from scripts.extractors.tensorrt_llm import TensorrtLlmExtractor
+from scripts.extractors.tgi import TgiExtractor
 from scripts.extractors.vllm import VllmExtractor
 
 log = logging.getLogger(__name__)
 
 #: Registry mapping `engines.yaml` ids → per-engine Extractor classes.
-#: Wave 1B.1 vLLM + Wave 1B.2 Ollama. Waves 1C / 1D append entries
-#: here as each engine module lands. Engines absent from this dict are
-#: skipped (logged but not failed) — the orchestrator runs cleanly even
-#: when the canonical YAML is ahead of the implementations.
+#: Wave 1B.1 vLLM + Wave 1B.2 Ollama + Wave 1C (TGI/llama.cpp/MLC-LLM)
+#: + Wave 1D (TensorRT-LLM/SGLang/LMDeploy/DeepSpeed-MII) → all 9
+#: V1 engines now wired. Engines absent from this dict would be skipped
+#: (logged but not failed); after Wave 1D no engine should be missing
+#: an extractor.
 _ENGINE_EXTRACTORS: dict[str, type[Extractor]] = {
     "vllm": VllmExtractor,
     "ollama": OllamaExtractor,
+    "tgi": TgiExtractor,
+    "llama-cpp": LlamaCppExtractor,
+    "mlc-llm": MlcLlmExtractor,
+    "tensorrt-llm": TensorrtLlmExtractor,
+    "sglang": SglangExtractor,
+    "lmdeploy": LmdeployExtractor,
+    "deepspeed-mii": DeepSpeedMiiExtractor,
 }
 
 #: Status values written to extraction_runs.status. Open-coded here so

@@ -1,0 +1,13 @@
+{
+  "Python": 4087757,
+  "Rust": 844240,
+  "Cuda": 150444,
+  "C++": 44170,
+  "Nix": 16065,
+  "Shell": 13181,
+  "Makefile": 11868,
+  "Dockerfile": 9117,
+  "CMake": 8691,
+  "JavaScript": 6346,
+  "C": 1001
+}

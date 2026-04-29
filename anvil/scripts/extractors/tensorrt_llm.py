@@ -1,23 +1,37 @@
-"""Ollama extractor — Wave 1B.2.
+"""TensorRT-LLM extractor — Wave 1D.
 
-Implements every fact_type in `_canonical_fact_types.CANONICAL_FACT_TYPES_BY_CATEGORY`
-for Ollama. Structurally distinct from vLLM (Wave 1B.1):
+NVIDIA's TRT-LLM engine. Python entry layered over a C++ runtime.
 
-  - **Language: Go.** No `pyproject.toml`; reads `go.mod` for the
-    `runtime_pinned` value (`go 1.24.1` shape per the Wave 1B.2
-    catalog rename).
-  - **Web framework: gin-gonic/gin.** Routes declared as literal
-    strings in `server/routes.go` — opposite of vLLM's deep sub-router
-    pattern. Most api_surface fact_types resolve to non-empty here.
-  - **Dockerfile: ROCm-base, multi-stage.** First FROM line is
-    `scratch`; the meaningful base (`rocm/dev-almalinux-8:7.2.1`) is
-    on line 17. The polyglot helper `find_first_real_base_image_from_line`
-    skips stub stages. `gpu_runtime_in_from_line` value is `rocm 7.2.1`
-    via the new vocabulary.
+Container hosting:
+  - Published serving container hosted on NVIDIA NGC
+    (`nvcr.io/nvidia/tritonserver` per engines.yaml) — NOT Docker Hub.
+    Same shape as TGI's GHCR handling: latest_tag and image_size_mb
+    empty with NOTE_NOT_DETECTED ("NGC fetcher pending"); base_image
+    and gpu_runtime_in_from_line resolved from the in-repo Dockerfile.
+  - The Dockerfile-derived `base_image` is a *different* NGC image
+    than the published serving container: the Dockerfile FROMs
+    `nvcr.io/nvidia/pytorch:26.02-py3` (the BUILDER image used to
+    compile TRT-LLM kernels and Python wheel). Both names live under
+    `nvcr.io/nvidia/`, but pytorch ≠ tritonserver. The
+    `_format_ngc_gpu_runtime` override key is the `nvcr.io/nvidia/`
+    prefix, so it correctly handles either base.
 
-Per Wave 1B.2 PRODUCE §1.7 (Jen): NO shared `BaseRunContext` until
-N=3 — `_OllamaRunContext` is per-engine, mirrors `_VllmRunContext`
-shape minus pyproject + plus go_mod.
+Dockerfile shape:
+  - Multi-stage at `docker/Dockerfile.multi`. Uses ARG-substituted FROM:
+    `FROM ${BASE_IMAGE}:${BASE_TAG} AS base` where defaults are
+    `BASE_IMAGE=nvcr.io/nvidia/pytorch` and `BASE_TAG=26.02-py3`.
+  - The resolved base `nvcr.io/nvidia/pytorch:26.02-py3` is NOT matched
+    by the standard `_GPU_RUNTIME_PATTERNS` table (which looks for
+    `nvidia/cuda:` or `rocm/`). Per Wave 1D conservative-port choice,
+    the parser table stays unchanged; this extractor adds a
+    NGC-specific note so the buyer understands "the FROM line points
+    at NGC PyTorch, which is CUDA underneath but not matched by our
+    literal probe."
+
+Routes:
+  - `tensorrt_llm/serve/openai_server.py` declares routes via
+    `self.app.add_api_route("/v1/...", ...)` (FastAPI, method-call form
+    rather than decorator). Literal grep on the path string still works.
 """
 from __future__ import annotations
 
@@ -29,7 +43,6 @@ from scripts.extractors._canonical_fact_types import (
     NOTE_NOT_DETECTED,
 )
 from scripts.extractors._http import (
-    fetch_dockerhub_tags,
     fetch_github_contributors_count,
     fetch_github_file,
     fetch_github_languages,
@@ -44,41 +57,33 @@ from scripts.extractors._parsers import (
     find_dockerfile_from_lines,
     find_first_gpu_runtime_base_image_from_line,
     format_gpu_runtime_value as _format_gpu_runtime_value,
+    normalize_python_version_floor,
     parse_cuda_version_from_image,
+    parse_pyproject_python_requires,
     parse_readme_first_nonempty,
 )
 from scripts.extractors.base import Evidence, Extractor, Fact
 
 # ============================================================
-# Constants — Ollama-specific upstream paths
+# Constants
 # ============================================================
 
-OLLAMA_OWNER: str = "ollama"
-OLLAMA_REPO: str = "ollama"
-OLLAMA_DOCKERHUB_REPO: str = "ollama/ollama"
-
-#: Dockerfile path candidates. Ollama keeps it at repo root; the list
-#: shape mirrors vLLM's discipline so a future move is a one-line edit.
-OLLAMA_DOCKERFILE_CANDIDATES: tuple[str, ...] = ("Dockerfile",)
-
-#: Routes file — Gin router with literal `/v1/...` and `/api/...`
-#: declarations. Replaces vLLM's api_server.py role.
-OLLAMA_ROUTES_PATH: str = "server/routes.go"
-
-#: Go module manifest — `runtime_pinned` source.
-OLLAMA_GO_MOD_PATH: str = "go.mod"
+TENSORRT_LLM_OWNER: str = "NVIDIA"
+TENSORRT_LLM_REPO: str = "TensorRT-LLM"
+TENSORRT_LLM_DOCKERFILE_CANDIDATES: tuple[str, ...] = (
+    "docker/Dockerfile.multi",
+    "docker/Dockerfile",
+)
+TENSORRT_LLM_PYPROJECT_PATH: str = "pyproject.toml"
+TENSORRT_LLM_ROUTES_PATH: str = "tensorrt_llm/serve/openai_server.py"
 
 
 # ============================================================
-# Run context (per-engine; no shared base until Wave 1C N=3)
+# Run context
 # ============================================================
 
 @dataclass(frozen=True)
-class _OllamaRunContext:
-    """Bundle of every upstream byte fetched for one Ollama
-    extraction run. Threaded through the per-category emitters so
-    every Evidence URL pins to the same commit SHA."""
-
+class _TensorrtLlmRunContext:
     sha: str
     repo_meta: dict
     repo_meta_fetched_at: str
@@ -93,30 +98,26 @@ class _OllamaRunContext:
     dockerfile_text: str
     dockerfile_path: str
     dockerfile_fetched_at: str
-    go_mod_text: str
-    go_mod_fetched_at: str
+    pyproject_text: str
+    pyproject_fetched_at: str
     routes_text: str
     routes_fetched_at: str
-    dockerhub: dict
-    dockerhub_fetched_at: str
 
 
 # ============================================================
 # Extractor
 # ============================================================
 
-class OllamaExtractor(Extractor):
-    """Per-engine extractor for Ollama. Hyphen form `engine_id = "ollama"`
-    matches `engines.yaml` exactly."""
+class TensorrtLlmExtractor(Extractor):
+    """Per-engine extractor for TensorRT-LLM (NGC container)."""
 
-    engine_id = "ollama"
-    repo_url = "https://github.com/ollama/ollama"
-    container_source = "https://hub.docker.com/r/ollama/ollama"
+    engine_id = "tensorrt-llm"
+    repo_url = "https://github.com/NVIDIA/TensorRT-LLM"
+    container_source = (
+        "https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tritonserver"
+    )
 
     def extract(self) -> list[Fact]:
-        """Drive the full upstream-fetch + parse + Fact-construction
-        pipeline. Exceptions propagate to the orchestrator's
-        per-engine try/except wrapper."""
         ctx = self._fetch_run_context()
         return [
             *self._project_meta_facts(ctx),
@@ -125,25 +126,26 @@ class OllamaExtractor(Extractor):
             *self._observability_facts(ctx),
         ]
 
-    # ----------------------------------------------------------------
-    # Upstream fetch — one network round per data source
-    # ----------------------------------------------------------------
-
-    def _fetch_run_context(self) -> _OllamaRunContext:
-        """Fetch every upstream byte for one run. SHA resolved first;
-        every github_file URL pins to the same tree state."""
-        sha, _ = resolve_repo_head_sha(OLLAMA_OWNER, OLLAMA_REPO)
-        repo_meta_r = fetch_github_repo_meta(OLLAMA_OWNER, OLLAMA_REPO)
-        languages_r = fetch_github_languages(OLLAMA_OWNER, OLLAMA_REPO)
-        releases_r = fetch_github_releases(OLLAMA_OWNER, OLLAMA_REPO, per_page=30)
-        contributors_r = fetch_github_contributors_count(OLLAMA_OWNER, OLLAMA_REPO)
-        readme_r = fetch_github_readme(OLLAMA_OWNER, OLLAMA_REPO, sha)
+    def _fetch_run_context(self) -> _TensorrtLlmRunContext:
+        sha, _ = resolve_repo_head_sha(TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO)
+        repo_meta_r = fetch_github_repo_meta(TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO)
+        languages_r = fetch_github_languages(TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO)
+        releases_r = fetch_github_releases(
+            TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO, per_page=30,
+        )
+        contributors_r = fetch_github_contributors_count(
+            TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO,
+        )
+        readme_r = fetch_github_readme(TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO, sha)
         dockerfile_path, dockerfile_r = self._fetch_dockerfile(sha)
-        go_mod_r = fetch_github_file(OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_GO_MOD_PATH, sha)
-        routes_r = fetch_github_file(OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_ROUTES_PATH, sha)
-        dockerhub_r = fetch_dockerhub_tags(OLLAMA_DOCKERHUB_REPO)
+        pyproject_r = fetch_github_file(
+            TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO, TENSORRT_LLM_PYPROJECT_PATH, sha,
+        )
+        routes_r = fetch_github_file(
+            TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO, TENSORRT_LLM_ROUTES_PATH, sha,
+        )
 
-        return _OllamaRunContext(
+        return _TensorrtLlmRunContext(
             sha=sha,
             repo_meta=repo_meta_r.response.json(),
             repo_meta_fetched_at=repo_meta_r.fetched_at,
@@ -158,23 +160,21 @@ class OllamaExtractor(Extractor):
             dockerfile_text=dockerfile_r.response.text,
             dockerfile_path=dockerfile_path,
             dockerfile_fetched_at=dockerfile_r.fetched_at,
-            go_mod_text=go_mod_r.response.text,
-            go_mod_fetched_at=go_mod_r.fetched_at,
+            pyproject_text=pyproject_r.response.text,
+            pyproject_fetched_at=pyproject_r.fetched_at,
             routes_text=routes_r.response.text,
             routes_fetched_at=routes_r.fetched_at,
-            dockerhub=dockerhub_r.response.json(),
-            dockerhub_fetched_at=dockerhub_r.fetched_at,
         )
 
     @staticmethod
     def _fetch_dockerfile(sha: str) -> tuple[str, object]:
-        """Try each candidate path in order; return (path, HttpResult)
-        for the first one that resolves 200."""
         import httpx
         last_error: Exception | None = None
-        for path in OLLAMA_DOCKERFILE_CANDIDATES:
+        for path in TENSORRT_LLM_DOCKERFILE_CANDIDATES:
             try:
-                result = fetch_github_file(OLLAMA_OWNER, OLLAMA_REPO, path, sha)
+                result = fetch_github_file(
+                    TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO, path, sha,
+                )
                 return path, result
             except httpx.HTTPStatusError as exc:
                 if exc.response.status_code == 404:
@@ -182,20 +182,16 @@ class OllamaExtractor(Extractor):
                     continue
                 raise
         raise RuntimeError(
-            f"Ollama Dockerfile not found at any of {OLLAMA_DOCKERFILE_CANDIDATES}: {last_error}"
+            f"TensorRT-LLM Dockerfile not found at any of "
+            f"{TENSORRT_LLM_DOCKERFILE_CANDIDATES}: {last_error}"
         )
 
     # ----------------------------------------------------------------
-    # Category emitters
-    # ----------------------------------------------------------------
 
-    def _project_meta_facts(self, ctx: _OllamaRunContext) -> list[Fact]:
-        """8 fact_types from GitHub meta APIs + README parsing.
-        Identical shape to vLLM since these come from generic GitHub APIs
-        (no language-specific source files involved)."""
+    def _project_meta_facts(self, ctx: _TensorrtLlmRunContext) -> list[Fact]:
         meta = ctx.repo_meta
         repo_evidence = Evidence(
-            source_url=f"https://github.com/{OLLAMA_OWNER}/{OLLAMA_REPO}",
+            source_url=f"https://github.com/{TENSORRT_LLM_OWNER}/{TENSORRT_LLM_REPO}",
             source_type="github_api",
             fetched_at=ctx.repo_meta_fetched_at,
         )
@@ -211,7 +207,7 @@ class OllamaExtractor(Extractor):
                 str(contrib_count) if contrib_count is not None else "",
                 (Evidence(
                     source_url=(
-                        f"https://api.github.com/repos/{OLLAMA_OWNER}/{OLLAMA_REPO}/contributors"
+                        f"https://api.github.com/repos/{TENSORRT_LLM_OWNER}/{TENSORRT_LLM_REPO}/contributors"
                         "?per_page=1&anon=true"
                     ),
                     source_type="github_api",
@@ -227,7 +223,7 @@ class OllamaExtractor(Extractor):
                 "project_meta", "languages",
                 ", ".join(sorted(ctx.languages.keys())),
                 (Evidence(
-                    source_url=f"https://api.github.com/repos/{OLLAMA_OWNER}/{OLLAMA_REPO}/languages",
+                    source_url=f"https://api.github.com/repos/{TENSORRT_LLM_OWNER}/{TENSORRT_LLM_REPO}/languages",
                     source_type="github_api",
                     fetched_at=ctx.languages_fetched_at,
                 ),),
@@ -236,7 +232,7 @@ class OllamaExtractor(Extractor):
                 "project_meta", "release_cadence",
                 self._format_release_cadence(ctx.releases),
                 (Evidence(
-                    source_url=f"https://github.com/{OLLAMA_OWNER}/{OLLAMA_REPO}/releases",
+                    source_url=f"https://github.com/{TENSORRT_LLM_OWNER}/{TENSORRT_LLM_REPO}/releases",
                     source_type="github_release",
                     fetched_at=ctx.releases_fetched_at,
                 ),),
@@ -250,51 +246,61 @@ class OllamaExtractor(Extractor):
             Fact(
                 "project_meta", "readme_first_line", readme_first,
                 (Evidence(
-                    source_url=github_file_blob_url(OLLAMA_OWNER, OLLAMA_REPO, "README.md", ctx.sha),
+                    source_url=github_file_blob_url(
+                        TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO, "README.md", ctx.sha,
+                    ),
                     source_type="github_file",
                     fetched_at=ctx.readme_fetched_at,
                     source_path="README.md",
                     commit_sha=ctx.sha,
-                    note=None if readme_first else f"{NOTE_NOT_DETECTED}: README has no non-empty prose line before headers",
+                    note=(
+                        None if readme_first
+                        else f"{NOTE_NOT_DETECTED}: README has no non-empty prose line before headers"
+                    ),
                 ),),
             ),
         ]
 
-    def _container_facts(self, ctx: _OllamaRunContext) -> list[Fact]:
-        """5 fact_types: Docker Hub tags + Dockerfile FROM line + go.mod
-        runtime pin. Wave 1B.2 catalog renames + Go-aware runtime_pinned."""
-        results = ctx.dockerhub.get("results", [])
-        latest_tag, image_size_mb, hub_fetched_at = self._dockerhub_latest(
-            results, ctx.dockerhub_fetched_at,
+    def _container_facts(self, ctx: _TensorrtLlmRunContext) -> list[Fact]:
+        """5 fact_types. NGC-hosted container — latest_tag and
+        image_size_mb empty with NOTE_NOT_DETECTED + NGC explanation
+        (mirrors TGI's GHCR pattern). base_image + gpu_runtime extracted
+        from in-repo Dockerfile."""
+        ngc_note = (
+            f"{NOTE_NOT_DETECTED}: container hosted on NVIDIA NGC "
+            f"(nvcr.io/nvidia/tritonserver); Docker Hub fetcher does not "
+            f"cover this surface (NGC fetcher work pending)"
         )
-        hub_url = f"https://hub.docker.com/r/{OLLAMA_DOCKERHUB_REPO}/tags"
+        ngc_url = (
+            "https://catalog.ngc.nvidia.com/orgs/nvidia/containers/tritonserver"
+        )
         dockerfile_url = github_file_blob_url(
-            OLLAMA_OWNER, OLLAMA_REPO, ctx.dockerfile_path, ctx.sha,
+            TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO, ctx.dockerfile_path, ctx.sha,
         )
         from_lines = find_dockerfile_from_lines(ctx.dockerfile_text)
         base_image, cuda_version, base_line = self._resolve_dockerfile_base(
             ctx.dockerfile_text, from_lines,
         )
-        gpu_runtime_value, gpu_runtime_note = _format_gpu_runtime_value(
+        gpu_runtime_value, gpu_runtime_note = self._format_ngc_gpu_runtime(
             base_image, cuda_version,
         )
-        runtime_pinned_value = self._runtime_pinned_value(ctx.go_mod_text)
+        runtime_pinned_value = self._runtime_pinned_value(ctx.pyproject_text)
 
         return [
             Fact(
-                "container", "latest_tag", latest_tag,
+                "container", "latest_tag", "",
                 (Evidence(
-                    source_url=hub_url, source_type="docker_hub",
-                    fetched_at=hub_fetched_at,
-                    note=None if latest_tag else f"{NOTE_NOT_DECLARED}: Docker Hub returned no tags",
+                    source_url=ngc_url, source_type="ngc",
+                    fetched_at=ctx.repo_meta_fetched_at,
+                    note=ngc_note,
                 ),),
             ),
             Fact(
-                "container", "image_size_mb", image_size_mb,
+                "container", "image_size_mb", "",
                 (Evidence(
-                    source_url=hub_url, source_type="docker_hub",
-                    fetched_at=hub_fetched_at,
-                    note=None if image_size_mb else f"{NOTE_NOT_DECLARED}: latest tag carries no full_size",
+                    source_url=ngc_url, source_type="ngc",
+                    fetched_at=ctx.repo_meta_fetched_at,
+                    note=ngc_note,
                 ),),
             ),
             Fact(
@@ -313,7 +319,7 @@ class OllamaExtractor(Extractor):
                 "container", "gpu_runtime_in_from_line", gpu_runtime_value,
                 (Evidence(
                     source_url=github_file_blob_url(
-                        OLLAMA_OWNER, OLLAMA_REPO, ctx.dockerfile_path, ctx.sha,
+                        TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO, ctx.dockerfile_path, ctx.sha,
                         line=base_line,
                     ),
                     source_type="github_file",
@@ -330,31 +336,27 @@ class OllamaExtractor(Extractor):
                 "container", "runtime_pinned", runtime_pinned_value,
                 (Evidence(
                     source_url=github_file_blob_url(
-                        OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_GO_MOD_PATH, ctx.sha,
+                        TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO,
+                        TENSORRT_LLM_PYPROJECT_PATH, ctx.sha,
                     ),
                     source_type="github_file",
-                    source_path=OLLAMA_GO_MOD_PATH, commit_sha=ctx.sha,
-                    fetched_at=ctx.go_mod_fetched_at,
+                    source_path=TENSORRT_LLM_PYPROJECT_PATH, commit_sha=ctx.sha,
+                    fetched_at=ctx.pyproject_fetched_at,
                     note=(
                         None if runtime_pinned_value
-                        else f"{NOTE_NOT_DECLARED}: go directive not found in go.mod"
+                        else f"{NOTE_NOT_DECLARED}: requires-python not in pyproject.toml"
                     ),
                 ),),
             ),
         ]
 
-    def _api_surface_facts(self, ctx: _OllamaRunContext) -> list[Fact]:
-        """6 fact_types — literal grep over server/routes.go. Ollama's
-        Gin router declares routes as literal strings, so most fact_types
-        resolve to non-empty here (vs vLLM where most were empty)."""
+    def _api_surface_facts(self, ctx: _TensorrtLlmRunContext) -> list[Fact]:
+        """6 fact_types — literal grep over openai_server.py. TRT-LLM
+        uses `add_api_route("/v1/...", ...)` (FastAPI method-call form)."""
         routes_url = github_file_blob_url(
-            OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_ROUTES_PATH, ctx.sha,
+            TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO, TENSORRT_LLM_ROUTES_PATH, ctx.sha,
         )
         text = ctx.routes_text
-        # source layer: EMPIRICAL — negative claim from incomplete grep.
-        # Routes may live in middleware or a deeper file we don't fetch;
-        # NOT_DETECTED carries the right epistemics for "couldn't find
-        # in this file" vs NOT_DECLARED's "definitively absent."
         not_in_routes = (
             f"{NOTE_NOT_DETECTED}: route may live in a deeper file we don't fetch"
         )
@@ -366,11 +368,13 @@ class OllamaExtractor(Extractor):
                 "api_surface", fact_type, value,
                 (Evidence(
                     source_url=github_file_blob_url(
-                        OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_ROUTES_PATH, ctx.sha, line=line,
+                        TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO,
+                        TENSORRT_LLM_ROUTES_PATH, ctx.sha, line=line,
                     ) if line else routes_url,
                     source_type="github_file",
                     source_path=(
-                        f"{OLLAMA_ROUTES_PATH}:{line}" if line else OLLAMA_ROUTES_PATH
+                        f"{TENSORRT_LLM_ROUTES_PATH}:{line}"
+                        if line else TENSORRT_LLM_ROUTES_PATH
                     ),
                     commit_sha=ctx.sha,
                     fetched_at=ctx.routes_fetched_at,
@@ -382,24 +386,21 @@ class OllamaExtractor(Extractor):
             grep_fact("v1_chat_completions", '"/v1/chat/completions"'),
             grep_fact("v1_completions", '"/v1/completions"'),
             grep_fact("v1_embeddings", '"/v1/embeddings"'),
-            grep_fact("generate_hf_native", '"/api/generate"'),
+            grep_fact("generate_hf_native", '"/generate"'),
             grep_fact("grpc_service_def", ".proto"),
             grep_fact("sse_streaming", "text/event-stream"),
         ]
 
-    def _observability_facts(self, ctx: _OllamaRunContext) -> list[Fact]:
-        """5 fact_types — literal grep over routes.go + go.mod (polyglot
-        prometheus detection through the shared table)."""
+    def _observability_facts(self, ctx: _TensorrtLlmRunContext) -> list[Fact]:
+        """5 fact_types — routes grep over openai_server.py + polyglot
+        prometheus detection through pyproject.toml (Python path)."""
         routes_url = github_file_blob_url(
-            OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_ROUTES_PATH, ctx.sha,
+            TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO, TENSORRT_LLM_ROUTES_PATH, ctx.sha,
         )
-        go_mod_url = github_file_blob_url(
-            OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_GO_MOD_PATH, ctx.sha,
+        pyproject_url = github_file_blob_url(
+            TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO, TENSORRT_LLM_PYPROJECT_PATH, ctx.sha,
         )
         text = ctx.routes_text
-        # source layer: EMPIRICAL — negative claim from incomplete grep.
-        # Endpoints may be wired through middleware (e.g., gin metrics
-        # middleware) — NOT_DETECTED carries the right epistemics.
         not_in_routes = (
             f"{NOTE_NOT_DETECTED}: route may be declared via middleware "
             f"or in a file we don't fetch"
@@ -411,11 +412,13 @@ class OllamaExtractor(Extractor):
                 "observability", fact_type, "true" if line else "",
                 (Evidence(
                     source_url=github_file_blob_url(
-                        OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_ROUTES_PATH, ctx.sha, line=line,
+                        TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO,
+                        TENSORRT_LLM_ROUTES_PATH, ctx.sha, line=line,
                     ) if line else routes_url,
                     source_type="github_file",
                     source_path=(
-                        f"{OLLAMA_ROUTES_PATH}:{line}" if line else OLLAMA_ROUTES_PATH
+                        f"{TENSORRT_LLM_ROUTES_PATH}:{line}"
+                        if line else TENSORRT_LLM_ROUTES_PATH
                     ),
                     commit_sha=ctx.sha,
                     fetched_at=ctx.routes_fetched_at,
@@ -423,14 +426,10 @@ class OllamaExtractor(Extractor):
                 ),),
             )
 
-        # OTEL env var refs — same pattern as vLLM but searching routes.go
         otel_names = sorted(set(re.findall(r"OTEL_[A-Z_]+", text)))
-        otel_line = (
-            self._first_line_with(text, otel_names[0]) if otel_names else 0
-        )
+        otel_line = self._first_line_with(text, otel_names[0]) if otel_names else 0
         otel_value = ", ".join(otel_names)
-        # Polyglot Prometheus detection via the shared table (Carol's call)
-        prometheus_present = detect_prometheus_client("go", ctx.go_mod_text)
+        prometheus_present = detect_prometheus_client("python", ctx.pyproject_text)
 
         return [
             routes_grep("metrics_endpoint", '"/metrics"'),
@@ -440,19 +439,20 @@ class OllamaExtractor(Extractor):
                 "observability", "otel_env_refs", otel_value,
                 (Evidence(
                     source_url=github_file_blob_url(
-                        OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_ROUTES_PATH, ctx.sha,
+                        TENSORRT_LLM_OWNER, TENSORRT_LLM_REPO,
+                        TENSORRT_LLM_ROUTES_PATH, ctx.sha,
                         line=otel_line,
                     ) if otel_line else routes_url,
                     source_type="github_file",
                     source_path=(
-                        f"{OLLAMA_ROUTES_PATH}:{otel_line}" if otel_line
-                        else OLLAMA_ROUTES_PATH
+                        f"{TENSORRT_LLM_ROUTES_PATH}:{otel_line}" if otel_line
+                        else TENSORRT_LLM_ROUTES_PATH
                     ),
                     commit_sha=ctx.sha,
                     fetched_at=ctx.routes_fetched_at,
                     note=(
                         None if otel_value
-                        else f"{NOTE_NOT_DECLARED}: no OTEL_* env var refs in {OLLAMA_ROUTES_PATH}"
+                        else f"{NOTE_NOT_DECLARED}: no OTEL_* env var refs in {TENSORRT_LLM_ROUTES_PATH}"
                     ),
                 ),),
             ),
@@ -460,21 +460,21 @@ class OllamaExtractor(Extractor):
                 "observability", "prometheus_client",
                 "true" if prometheus_present else "",
                 (Evidence(
-                    source_url=go_mod_url,
+                    source_url=pyproject_url,
                     source_type="github_file",
-                    source_path=OLLAMA_GO_MOD_PATH,
+                    source_path=TENSORRT_LLM_PYPROJECT_PATH,
                     commit_sha=ctx.sha,
-                    fetched_at=ctx.go_mod_fetched_at,
+                    fetched_at=ctx.pyproject_fetched_at,
                     note=(
                         None if prometheus_present
-                        else f"{NOTE_NOT_DECLARED}: github.com/prometheus/client_golang not in go.mod"
+                        else f"{NOTE_NOT_DECLARED}: prometheus_client not in pyproject.toml dependencies"
                     ),
                 ),),
             ),
         ]
 
     # ----------------------------------------------------------------
-    # Pure helpers (no I/O — easy to unit-test)
+    # Pure helpers
     # ----------------------------------------------------------------
 
     @staticmethod
@@ -482,11 +482,12 @@ class OllamaExtractor(Extractor):
         text: str,
         from_lines: list[tuple[int, str]],
     ) -> tuple[str, str, int]:
-        """Return (base_image_string, cuda_version, line_number) for the
-        first REAL base image — skipping `scratch` and stage-name FROMs.
-        Same pattern as VllmExtractor._resolve_dockerfile_base; could be
-        promoted to a shared base when N=3 forces it (Wave 1B.2 §1.7
-        deferred decision)."""
+        """Return (base_image, cuda_version, line_number) — first
+        GPU-runtime FROM line. TRT-LLM specifically: the helper falls
+        back to `find_first_real_base_image_from_line` since
+        `nvcr.io/nvidia/pytorch` doesn't match the canonical
+        `_GPU_RUNTIME_PATTERNS` table; that's still the right answer
+        (the FROM line we want to show the buyer)."""
         line_num, resolved = find_first_gpu_runtime_base_image_from_line(text, from_lines)
         if not resolved:
             return "", "", 0
@@ -494,20 +495,48 @@ class OllamaExtractor(Extractor):
         return resolved, cuda, line_num
 
     @staticmethod
-    def _runtime_pinned_value(go_mod_text: str) -> str:
-        """Parse `go <version>` directive from go.mod.
+    def _format_ngc_gpu_runtime(
+        base_image: str,
+        cuda_version: str,
+    ) -> tuple[str, str | None]:
+        """Wrap `format_gpu_runtime_value` with an NGC-specific note when
+        the standard probe doesn't match.
 
-        go.mod declares the toolchain pin as `go 1.24.1` on its own line.
-        Return `go <version>` per the Wave 1B.2 vocabulary, or "" when
-        the directive is missing.
+        TRT-LLM's first FROM resolves to `nvcr.io/nvidia/pytorch:26.02-py3`
+        which is NOT in the `_GPU_RUNTIME_PATTERNS` table — the standard
+        helper returns ("", "not detected: ... did not match a known GPU
+        runtime family"). Buyer reading "—" with that note is confused
+        ("but it's literally an NVIDIA container, why doesn't it count?").
+
+        Override the note for `nvcr.io/nvidia/` prefixes to clarify:
+        "FROM line points at NGC base image — CUDA family by convention,
+        but our literal probe only matches `nvidia/cuda:` and `rocm/`."
+
+        Source layer: ENGINEERING (the override is a buyer-credibility
+        choice, not physics — buyer sees the same empty value but a
+        more useful note).
         """
-        match = re.search(r"^\s*go\s+(\d+\.\d+(?:\.\d+)?)\s*$", go_mod_text, re.MULTILINE)
-        return f"go {match.group(1)}" if match else ""
+        value, note = _format_gpu_runtime_value(base_image, cuda_version)
+        if value == "" and base_image and base_image.startswith("nvcr.io/nvidia/"):
+            note = (
+                f"{NOTE_NOT_DETECTED}: FROM line points at NGC base image "
+                f"({base_image}) — CUDA family by convention but the literal "
+                f"probe matches only `nvidia/cuda:` / `rocm/` strings. NGC "
+                f"images carry CUDA via vendor-curated layering rather than "
+                f"a `nvidia/cuda:<ver>` literal."
+            )
+        return value, note
+
+    @staticmethod
+    def _runtime_pinned_value(pyproject_text: str) -> str:
+        spec = parse_pyproject_python_requires(pyproject_text)
+        if not spec:
+            return ""
+        floor = normalize_python_version_floor(spec)
+        return f"python {floor}" if floor else ""
 
     @staticmethod
     def _parse_contributors_count(link_header: str | None) -> int | None:
-        """Same pattern as VllmExtractor — could be promoted to base
-        when N=3 forces it (deferred per §1.7)."""
         if not link_header:
             return None
         match = re.search(r'<[^>]*[?&]page=(\d+)[^>]*>;\s*rel="last"', link_header)
@@ -526,20 +555,6 @@ class OllamaExtractor(Extractor):
         if homepage and isinstance(homepage, str) and homepage.startswith(("http://", "https://")):
             return homepage
         return ""
-
-    @staticmethod
-    def _dockerhub_latest(
-        results: list, fetched_at: str,
-    ) -> tuple[str, str, str]:
-        if not results:
-            return "", "", fetched_at
-        for r in results:
-            name = r.get("name") or ""
-            size = r.get("full_size")
-            if name and isinstance(size, int) and size > 0:
-                return name, str(round(size / (1024 * 1024))), fetched_at
-        first = results[0]
-        return first.get("name") or "", "", fetched_at
 
     @staticmethod
     def _first_line_with(text: str, needle: str) -> int:

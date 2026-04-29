@@ -147,6 +147,23 @@ def parse_readme_first_nonempty(text: str) -> str | None:
     return None
 
 
+def parse_rust_toolchain_channel(text: str) -> str | None:
+    """Return the `channel` value from a `rust-toolchain.toml`, or None
+    when the file doesn't declare one.
+
+    rust-toolchain.toml shape:
+        [toolchain]
+        channel = "1.85.1"
+        components = ["rustfmt", "clippy"]
+
+    Caller wraps the result in the `runtime_pinned` vocabulary
+    (`rust <ver>`). Wave 1C addition for TGI (Rust+Python hybrid where
+    the HTTP server is Rust).
+    """
+    match = re.search(r'^\s*channel\s*=\s*["\']([^"\']+)["\']', text, re.MULTILINE)
+    return match.group(1) if match else None
+
+
 def normalize_python_version_floor(spec: str) -> str | None:
     """Given a requires-python spec string (e.g., '>=3.10', '^3.11',
     '~=3.10.0', '>= 3.9, <4'), extract the floor version as a clean
@@ -244,7 +261,7 @@ def find_first_real_base_image_from_line(
 
     Source layer: ENGINEERING (the heuristic — "real base = registry/
     or :tag, not scratch, not bare-identifier" — is judgment about what
-    a buyer wants to read in the gpu_runtime_in_from_line cell).
+    a buyer wants to read in the base_image cell).
     """
     for line_num, raw_image in from_lines:
         # Drop the `AS stage_name` suffix if present.
@@ -269,10 +286,15 @@ def find_first_real_base_image_from_line(
 #: against the (ARG-resolved) base_image string and returns the value
 #: vocabulary slot per Wave 1B.2 PRODUCE §1.1. Order matters — first
 #: match wins; check more-specific patterns first.
+#:
+#: Wave 1C tightening: nvidia/cuda pattern requires the trailing `:`
+#: so it doesn't match unrelated tools like `nvidia/cuda-helper-tools`
+#: or `nvidia/cuda-samples`. The colon anchors to the official runtime
+#: image series whose tags carry the version (`nvidia/cuda:12.4.1-…`).
 _GPU_RUNTIME_PATTERNS: tuple[tuple[str, str], ...] = (
     # (regex pattern, value-vocabulary prefix)
-    (r"nvidia/cuda", "cuda"),     # extracts version via parse_cuda_version_from_image
-    (r"nvcr\.io/nvidia/cuda", "cuda"),
+    (r"nvidia/cuda:", "cuda"),     # extracts version via parse_cuda_version_from_image
+    (r"nvcr\.io/nvidia/cuda:", "cuda"),
     (r"rocm/", "rocm"),
     (r"vulkan", "vulkan"),
     # Apple Silicon images don't have a single canonical registry — match on the
@@ -281,6 +303,47 @@ _GPU_RUNTIME_PATTERNS: tuple[tuple[str, str], ...] = (
     # Fallthrough for plain-OS bases — explicitly cpu so renderer shows it.
     (r"^(ubuntu|debian|alpine|fedora|almalinux|rocky|centos):", "cpu"),
 )
+
+
+def find_first_gpu_runtime_base_image_from_line(
+    text: str,
+    from_lines: list[tuple[int, str]],
+) -> tuple[int, str]:
+    """Return (line_number, ARG-resolved image) of the first FROM line
+    that resolves to a known GPU-runtime base (nvidia/cuda, rocm,
+    vulkan, metal). Falls back to `find_first_real_base_image_from_line`
+    when no FROM line carries a GPU runtime — the caller's
+    `format_gpu_runtime_value` then emits `cpu` / `not detected` per
+    the vocabulary.
+
+    Wave 1C scar (TGI): TGI's Dockerfile starts on a Rust-toolchain
+    builder image (`lukemathwalker/cargo-chef:latest-rust-1.85.1`)
+    BEFORE switching to `nvidia/cuda:12.4.1-devel-ubuntu22.04` for the
+    runtime stage. The plain `find_first_real_base_image_from_line`
+    returns the chef image, which has no GPU runtime — buyer sees
+    `gpu_runtime_in_from_line: —` for TGI even though TGI ships
+    against CUDA 12.4.1. Same class as Ollama's `scratch`-skip scar,
+    one layer up.
+
+    Source layer: ENGINEERING (preference for GPU-runtime FROM lines
+    is a judgment about what answers the buyer's actual question:
+    "what GPU stack is this engine built against?").
+    """
+    for line_num, raw_image in from_lines:
+        candidate = raw_image.split()[0] if raw_image else ""
+        resolved = resolve_dockerfile_arg_substitution(text, candidate)
+        if not resolved or resolved in _DOCKERFILE_STUB_FROM_VALUES:
+            continue
+        if "/" not in resolved and ":" not in resolved:
+            continue
+        # Match against the same family table format_gpu_runtime_value uses.
+        for pattern, _family in _GPU_RUNTIME_PATTERNS:
+            if re.search(pattern, resolved, re.IGNORECASE):
+                return line_num, resolved
+    # No GPU-runtime FROM found — return whatever the first real base
+    # is, so the caller's `format_gpu_runtime_value` can emit the right
+    # vocabulary slot (`cpu` for plain OS, empty for unknown family).
+    return find_first_real_base_image_from_line(text, from_lines)
 
 
 def format_gpu_runtime_value(

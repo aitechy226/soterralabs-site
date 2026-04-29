@@ -1,23 +1,18 @@
-"""Ollama extractor — Wave 1B.2.
+"""TGI extractor — Wave 1C.
 
-Implements every fact_type in `_canonical_fact_types.CANONICAL_FACT_TYPES_BY_CATEGORY`
-for Ollama. Structurally distinct from vLLM (Wave 1B.1):
-
-  - **Language: Go.** No `pyproject.toml`; reads `go.mod` for the
-    `runtime_pinned` value (`go 1.24.1` shape per the Wave 1B.2
-    catalog rename).
-  - **Web framework: gin-gonic/gin.** Routes declared as literal
-    strings in `server/routes.go` — opposite of vLLM's deep sub-router
-    pattern. Most api_surface fact_types resolve to non-empty here.
-  - **Dockerfile: ROCm-base, multi-stage.** First FROM line is
-    `scratch`; the meaningful base (`rocm/dev-almalinux-8:7.2.1`) is
-    on line 17. The polyglot helper `find_first_real_base_image_from_line`
-    skips stub stages. `gpu_runtime_in_from_line` value is `rocm 7.2.1`
-    via the new vocabulary.
-
-Per Wave 1B.2 PRODUCE §1.7 (Jen): NO shared `BaseRunContext` until
-N=3 — `_OllamaRunContext` is per-engine, mirrors `_VllmRunContext`
-shape minus pyproject + plus go_mod.
+Hugging Face Text Generation Inference is a Rust+Python hybrid:
+  - Rust router serves HTTP routes (`router/src/server.rs`) — uses
+    axum framework, declares routes via `.route("/v1/...", post(...))`.
+  - Python backend loads models (`server/text_generation_server/`).
+  - rust-toolchain.toml pins the Rust toolchain (canonical `channel`
+    field). Cargo.toml workspace declares Rust deps.
+  - Container hosted on GHCR (NOT Docker Hub) — emit empty container
+    Facts with NOTE_NOT_DETECTED per Wave 1C scope (GHCR fetcher
+    work pending).
+  - Multi-stage Dockerfile: starts on a `lukemathwalker/cargo-chef`
+    Rust builder before switching to `nvidia/cuda:12.4.1` for the
+    runtime stage. The new `find_first_gpu_runtime_base_image_from_line`
+    helper walks past the chef builder to find the cuda image.
 """
 from __future__ import annotations
 
@@ -29,7 +24,6 @@ from scripts.extractors._canonical_fact_types import (
     NOTE_NOT_DETECTED,
 )
 from scripts.extractors._http import (
-    fetch_dockerhub_tags,
     fetch_github_contributors_count,
     fetch_github_file,
     fetch_github_languages,
@@ -46,39 +40,28 @@ from scripts.extractors._parsers import (
     format_gpu_runtime_value as _format_gpu_runtime_value,
     parse_cuda_version_from_image,
     parse_readme_first_nonempty,
+    parse_rust_toolchain_channel,
 )
 from scripts.extractors.base import Evidence, Extractor, Fact
 
 # ============================================================
-# Constants — Ollama-specific upstream paths
+# Constants
 # ============================================================
 
-OLLAMA_OWNER: str = "ollama"
-OLLAMA_REPO: str = "ollama"
-OLLAMA_DOCKERHUB_REPO: str = "ollama/ollama"
-
-#: Dockerfile path candidates. Ollama keeps it at repo root; the list
-#: shape mirrors vLLM's discipline so a future move is a one-line edit.
-OLLAMA_DOCKERFILE_CANDIDATES: tuple[str, ...] = ("Dockerfile",)
-
-#: Routes file — Gin router with literal `/v1/...` and `/api/...`
-#: declarations. Replaces vLLM's api_server.py role.
-OLLAMA_ROUTES_PATH: str = "server/routes.go"
-
-#: Go module manifest — `runtime_pinned` source.
-OLLAMA_GO_MOD_PATH: str = "go.mod"
+TGI_OWNER: str = "huggingface"
+TGI_REPO: str = "text-generation-inference"
+TGI_DOCKERFILE_CANDIDATES: tuple[str, ...] = ("Dockerfile",)
+TGI_ROUTES_PATH: str = "router/src/server.rs"
+TGI_RUST_TOOLCHAIN_PATH: str = "rust-toolchain.toml"
+TGI_CARGO_PATH: str = "Cargo.toml"
 
 
 # ============================================================
-# Run context (per-engine; no shared base until Wave 1C N=3)
+# Run context
 # ============================================================
 
 @dataclass(frozen=True)
-class _OllamaRunContext:
-    """Bundle of every upstream byte fetched for one Ollama
-    extraction run. Threaded through the per-category emitters so
-    every Evidence URL pins to the same commit SHA."""
-
+class _TgiRunContext:
     sha: str
     repo_meta: dict
     repo_meta_fetched_at: str
@@ -93,30 +76,26 @@ class _OllamaRunContext:
     dockerfile_text: str
     dockerfile_path: str
     dockerfile_fetched_at: str
-    go_mod_text: str
-    go_mod_fetched_at: str
+    rust_toolchain_text: str
+    rust_toolchain_fetched_at: str
+    cargo_text: str
+    cargo_fetched_at: str
     routes_text: str
     routes_fetched_at: str
-    dockerhub: dict
-    dockerhub_fetched_at: str
 
 
 # ============================================================
 # Extractor
 # ============================================================
 
-class OllamaExtractor(Extractor):
-    """Per-engine extractor for Ollama. Hyphen form `engine_id = "ollama"`
-    matches `engines.yaml` exactly."""
+class TgiExtractor(Extractor):
+    """Per-engine extractor for TGI."""
 
-    engine_id = "ollama"
-    repo_url = "https://github.com/ollama/ollama"
-    container_source = "https://hub.docker.com/r/ollama/ollama"
+    engine_id = "tgi"
+    repo_url = "https://github.com/huggingface/text-generation-inference"
+    container_source = "https://github.com/huggingface/text-generation-inference/pkgs/container/text-generation-inference"
 
     def extract(self) -> list[Fact]:
-        """Drive the full upstream-fetch + parse + Fact-construction
-        pipeline. Exceptions propagate to the orchestrator's
-        per-engine try/except wrapper."""
         ctx = self._fetch_run_context()
         return [
             *self._project_meta_facts(ctx),
@@ -125,25 +104,21 @@ class OllamaExtractor(Extractor):
             *self._observability_facts(ctx),
         ]
 
-    # ----------------------------------------------------------------
-    # Upstream fetch — one network round per data source
-    # ----------------------------------------------------------------
-
-    def _fetch_run_context(self) -> _OllamaRunContext:
-        """Fetch every upstream byte for one run. SHA resolved first;
-        every github_file URL pins to the same tree state."""
-        sha, _ = resolve_repo_head_sha(OLLAMA_OWNER, OLLAMA_REPO)
-        repo_meta_r = fetch_github_repo_meta(OLLAMA_OWNER, OLLAMA_REPO)
-        languages_r = fetch_github_languages(OLLAMA_OWNER, OLLAMA_REPO)
-        releases_r = fetch_github_releases(OLLAMA_OWNER, OLLAMA_REPO, per_page=30)
-        contributors_r = fetch_github_contributors_count(OLLAMA_OWNER, OLLAMA_REPO)
-        readme_r = fetch_github_readme(OLLAMA_OWNER, OLLAMA_REPO, sha)
+    def _fetch_run_context(self) -> _TgiRunContext:
+        sha, _ = resolve_repo_head_sha(TGI_OWNER, TGI_REPO)
+        repo_meta_r = fetch_github_repo_meta(TGI_OWNER, TGI_REPO)
+        languages_r = fetch_github_languages(TGI_OWNER, TGI_REPO)
+        releases_r = fetch_github_releases(TGI_OWNER, TGI_REPO, per_page=30)
+        contributors_r = fetch_github_contributors_count(TGI_OWNER, TGI_REPO)
+        readme_r = fetch_github_readme(TGI_OWNER, TGI_REPO, sha)
         dockerfile_path, dockerfile_r = self._fetch_dockerfile(sha)
-        go_mod_r = fetch_github_file(OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_GO_MOD_PATH, sha)
-        routes_r = fetch_github_file(OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_ROUTES_PATH, sha)
-        dockerhub_r = fetch_dockerhub_tags(OLLAMA_DOCKERHUB_REPO)
+        rust_toolchain_r = fetch_github_file(
+            TGI_OWNER, TGI_REPO, TGI_RUST_TOOLCHAIN_PATH, sha,
+        )
+        cargo_r = fetch_github_file(TGI_OWNER, TGI_REPO, TGI_CARGO_PATH, sha)
+        routes_r = fetch_github_file(TGI_OWNER, TGI_REPO, TGI_ROUTES_PATH, sha)
 
-        return _OllamaRunContext(
+        return _TgiRunContext(
             sha=sha,
             repo_meta=repo_meta_r.response.json(),
             repo_meta_fetched_at=repo_meta_r.fetched_at,
@@ -158,23 +133,21 @@ class OllamaExtractor(Extractor):
             dockerfile_text=dockerfile_r.response.text,
             dockerfile_path=dockerfile_path,
             dockerfile_fetched_at=dockerfile_r.fetched_at,
-            go_mod_text=go_mod_r.response.text,
-            go_mod_fetched_at=go_mod_r.fetched_at,
+            rust_toolchain_text=rust_toolchain_r.response.text,
+            rust_toolchain_fetched_at=rust_toolchain_r.fetched_at,
+            cargo_text=cargo_r.response.text,
+            cargo_fetched_at=cargo_r.fetched_at,
             routes_text=routes_r.response.text,
             routes_fetched_at=routes_r.fetched_at,
-            dockerhub=dockerhub_r.response.json(),
-            dockerhub_fetched_at=dockerhub_r.fetched_at,
         )
 
     @staticmethod
     def _fetch_dockerfile(sha: str) -> tuple[str, object]:
-        """Try each candidate path in order; return (path, HttpResult)
-        for the first one that resolves 200."""
         import httpx
         last_error: Exception | None = None
-        for path in OLLAMA_DOCKERFILE_CANDIDATES:
+        for path in TGI_DOCKERFILE_CANDIDATES:
             try:
-                result = fetch_github_file(OLLAMA_OWNER, OLLAMA_REPO, path, sha)
+                result = fetch_github_file(TGI_OWNER, TGI_REPO, path, sha)
                 return path, result
             except httpx.HTTPStatusError as exc:
                 if exc.response.status_code == 404:
@@ -182,20 +155,17 @@ class OllamaExtractor(Extractor):
                     continue
                 raise
         raise RuntimeError(
-            f"Ollama Dockerfile not found at any of {OLLAMA_DOCKERFILE_CANDIDATES}: {last_error}"
+            f"TGI Dockerfile not found at any of {TGI_DOCKERFILE_CANDIDATES}: {last_error}"
         )
 
     # ----------------------------------------------------------------
     # Category emitters
     # ----------------------------------------------------------------
 
-    def _project_meta_facts(self, ctx: _OllamaRunContext) -> list[Fact]:
-        """8 fact_types from GitHub meta APIs + README parsing.
-        Identical shape to vLLM since these come from generic GitHub APIs
-        (no language-specific source files involved)."""
+    def _project_meta_facts(self, ctx: _TgiRunContext) -> list[Fact]:
         meta = ctx.repo_meta
         repo_evidence = Evidence(
-            source_url=f"https://github.com/{OLLAMA_OWNER}/{OLLAMA_REPO}",
+            source_url=f"https://github.com/{TGI_OWNER}/{TGI_REPO}",
             source_type="github_api",
             fetched_at=ctx.repo_meta_fetched_at,
         )
@@ -211,7 +181,7 @@ class OllamaExtractor(Extractor):
                 str(contrib_count) if contrib_count is not None else "",
                 (Evidence(
                     source_url=(
-                        f"https://api.github.com/repos/{OLLAMA_OWNER}/{OLLAMA_REPO}/contributors"
+                        f"https://api.github.com/repos/{TGI_OWNER}/{TGI_REPO}/contributors"
                         "?per_page=1&anon=true"
                     ),
                     source_type="github_api",
@@ -227,7 +197,7 @@ class OllamaExtractor(Extractor):
                 "project_meta", "languages",
                 ", ".join(sorted(ctx.languages.keys())),
                 (Evidence(
-                    source_url=f"https://api.github.com/repos/{OLLAMA_OWNER}/{OLLAMA_REPO}/languages",
+                    source_url=f"https://api.github.com/repos/{TGI_OWNER}/{TGI_REPO}/languages",
                     source_type="github_api",
                     fetched_at=ctx.languages_fetched_at,
                 ),),
@@ -236,7 +206,7 @@ class OllamaExtractor(Extractor):
                 "project_meta", "release_cadence",
                 self._format_release_cadence(ctx.releases),
                 (Evidence(
-                    source_url=f"https://github.com/{OLLAMA_OWNER}/{OLLAMA_REPO}/releases",
+                    source_url=f"https://github.com/{TGI_OWNER}/{TGI_REPO}/releases",
                     source_type="github_release",
                     fetched_at=ctx.releases_fetched_at,
                 ),),
@@ -250,7 +220,7 @@ class OllamaExtractor(Extractor):
             Fact(
                 "project_meta", "readme_first_line", readme_first,
                 (Evidence(
-                    source_url=github_file_blob_url(OLLAMA_OWNER, OLLAMA_REPO, "README.md", ctx.sha),
+                    source_url=github_file_blob_url(TGI_OWNER, TGI_REPO, "README.md", ctx.sha),
                     source_type="github_file",
                     fetched_at=ctx.readme_fetched_at,
                     source_path="README.md",
@@ -260,16 +230,21 @@ class OllamaExtractor(Extractor):
             ),
         ]
 
-    def _container_facts(self, ctx: _OllamaRunContext) -> list[Fact]:
-        """5 fact_types: Docker Hub tags + Dockerfile FROM line + go.mod
-        runtime pin. Wave 1B.2 catalog renames + Go-aware runtime_pinned."""
-        results = ctx.dockerhub.get("results", [])
-        latest_tag, image_size_mb, hub_fetched_at = self._dockerhub_latest(
-            results, ctx.dockerhub_fetched_at,
+    def _container_facts(self, ctx: _TgiRunContext) -> list[Fact]:
+        """5 fact_types. Container hosted on GHCR — empty Facts for
+        latest_tag / image_size_mb (GHCR fetcher pending V3+); the
+        Dockerfile-derived facts (base_image, gpu_runtime, runtime_pinned)
+        populate normally."""
+        ghcr_note = (
+            f"{NOTE_NOT_DETECTED}: container hosted on GHCR; "
+            "Docker Hub fetcher does not cover this surface (fetcher work pending)"
         )
-        hub_url = f"https://hub.docker.com/r/{OLLAMA_DOCKERHUB_REPO}/tags"
+        ghcr_url = (
+            "https://github.com/huggingface/text-generation-inference/"
+            "pkgs/container/text-generation-inference"
+        )
         dockerfile_url = github_file_blob_url(
-            OLLAMA_OWNER, OLLAMA_REPO, ctx.dockerfile_path, ctx.sha,
+            TGI_OWNER, TGI_REPO, ctx.dockerfile_path, ctx.sha,
         )
         from_lines = find_dockerfile_from_lines(ctx.dockerfile_text)
         base_image, cuda_version, base_line = self._resolve_dockerfile_base(
@@ -278,23 +253,23 @@ class OllamaExtractor(Extractor):
         gpu_runtime_value, gpu_runtime_note = _format_gpu_runtime_value(
             base_image, cuda_version,
         )
-        runtime_pinned_value = self._runtime_pinned_value(ctx.go_mod_text)
+        runtime_pinned_value = self._runtime_pinned_value(ctx.rust_toolchain_text)
 
         return [
             Fact(
-                "container", "latest_tag", latest_tag,
+                "container", "latest_tag", "",
                 (Evidence(
-                    source_url=hub_url, source_type="docker_hub",
-                    fetched_at=hub_fetched_at,
-                    note=None if latest_tag else f"{NOTE_NOT_DECLARED}: Docker Hub returned no tags",
+                    source_url=ghcr_url, source_type="ghcr",
+                    fetched_at=ctx.repo_meta_fetched_at,
+                    note=ghcr_note,
                 ),),
             ),
             Fact(
-                "container", "image_size_mb", image_size_mb,
+                "container", "image_size_mb", "",
                 (Evidence(
-                    source_url=hub_url, source_type="docker_hub",
-                    fetched_at=hub_fetched_at,
-                    note=None if image_size_mb else f"{NOTE_NOT_DECLARED}: latest tag carries no full_size",
+                    source_url=ghcr_url, source_type="ghcr",
+                    fetched_at=ctx.repo_meta_fetched_at,
+                    note=ghcr_note,
                 ),),
             ),
             Fact(
@@ -313,7 +288,7 @@ class OllamaExtractor(Extractor):
                 "container", "gpu_runtime_in_from_line", gpu_runtime_value,
                 (Evidence(
                     source_url=github_file_blob_url(
-                        OLLAMA_OWNER, OLLAMA_REPO, ctx.dockerfile_path, ctx.sha,
+                        TGI_OWNER, TGI_REPO, ctx.dockerfile_path, ctx.sha,
                         line=base_line,
                     ),
                     source_type="github_file",
@@ -330,31 +305,26 @@ class OllamaExtractor(Extractor):
                 "container", "runtime_pinned", runtime_pinned_value,
                 (Evidence(
                     source_url=github_file_blob_url(
-                        OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_GO_MOD_PATH, ctx.sha,
+                        TGI_OWNER, TGI_REPO, TGI_RUST_TOOLCHAIN_PATH, ctx.sha,
                     ),
                     source_type="github_file",
-                    source_path=OLLAMA_GO_MOD_PATH, commit_sha=ctx.sha,
-                    fetched_at=ctx.go_mod_fetched_at,
+                    source_path=TGI_RUST_TOOLCHAIN_PATH, commit_sha=ctx.sha,
+                    fetched_at=ctx.rust_toolchain_fetched_at,
                     note=(
                         None if runtime_pinned_value
-                        else f"{NOTE_NOT_DECLARED}: go directive not found in go.mod"
+                        else f"{NOTE_NOT_DECLARED}: channel directive not found in rust-toolchain.toml"
                     ),
                 ),),
             ),
         ]
 
-    def _api_surface_facts(self, ctx: _OllamaRunContext) -> list[Fact]:
-        """6 fact_types — literal grep over server/routes.go. Ollama's
-        Gin router declares routes as literal strings, so most fact_types
-        resolve to non-empty here (vs vLLM where most were empty)."""
+    def _api_surface_facts(self, ctx: _TgiRunContext) -> list[Fact]:
+        """6 fact_types — literal grep over router/src/server.rs.
+        TGI declares routes with axum's `.route("/path", ...)` syntax."""
         routes_url = github_file_blob_url(
-            OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_ROUTES_PATH, ctx.sha,
+            TGI_OWNER, TGI_REPO, TGI_ROUTES_PATH, ctx.sha,
         )
         text = ctx.routes_text
-        # source layer: EMPIRICAL — negative claim from incomplete grep.
-        # Routes may live in middleware or a deeper file we don't fetch;
-        # NOT_DETECTED carries the right epistemics for "couldn't find
-        # in this file" vs NOT_DECLARED's "definitively absent."
         not_in_routes = (
             f"{NOTE_NOT_DETECTED}: route may live in a deeper file we don't fetch"
         )
@@ -366,11 +336,11 @@ class OllamaExtractor(Extractor):
                 "api_surface", fact_type, value,
                 (Evidence(
                     source_url=github_file_blob_url(
-                        OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_ROUTES_PATH, ctx.sha, line=line,
+                        TGI_OWNER, TGI_REPO, TGI_ROUTES_PATH, ctx.sha, line=line,
                     ) if line else routes_url,
                     source_type="github_file",
                     source_path=(
-                        f"{OLLAMA_ROUTES_PATH}:{line}" if line else OLLAMA_ROUTES_PATH
+                        f"{TGI_ROUTES_PATH}:{line}" if line else TGI_ROUTES_PATH
                     ),
                     commit_sha=ctx.sha,
                     fetched_at=ctx.routes_fetched_at,
@@ -382,24 +352,21 @@ class OllamaExtractor(Extractor):
             grep_fact("v1_chat_completions", '"/v1/chat/completions"'),
             grep_fact("v1_completions", '"/v1/completions"'),
             grep_fact("v1_embeddings", '"/v1/embeddings"'),
-            grep_fact("generate_hf_native", '"/api/generate"'),
+            grep_fact("generate_hf_native", '"/generate"'),
             grep_fact("grpc_service_def", ".proto"),
             grep_fact("sse_streaming", "text/event-stream"),
         ]
 
-    def _observability_facts(self, ctx: _OllamaRunContext) -> list[Fact]:
-        """5 fact_types — literal grep over routes.go + go.mod (polyglot
-        prometheus detection through the shared table)."""
+    def _observability_facts(self, ctx: _TgiRunContext) -> list[Fact]:
+        """5 fact_types — literal grep over router/src/server.rs +
+        polyglot prometheus detection through Cargo.toml (Rust path)."""
         routes_url = github_file_blob_url(
-            OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_ROUTES_PATH, ctx.sha,
+            TGI_OWNER, TGI_REPO, TGI_ROUTES_PATH, ctx.sha,
         )
-        go_mod_url = github_file_blob_url(
-            OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_GO_MOD_PATH, ctx.sha,
+        cargo_url = github_file_blob_url(
+            TGI_OWNER, TGI_REPO, TGI_CARGO_PATH, ctx.sha,
         )
         text = ctx.routes_text
-        # source layer: EMPIRICAL — negative claim from incomplete grep.
-        # Endpoints may be wired through middleware (e.g., gin metrics
-        # middleware) — NOT_DETECTED carries the right epistemics.
         not_in_routes = (
             f"{NOTE_NOT_DETECTED}: route may be declared via middleware "
             f"or in a file we don't fetch"
@@ -411,11 +378,11 @@ class OllamaExtractor(Extractor):
                 "observability", fact_type, "true" if line else "",
                 (Evidence(
                     source_url=github_file_blob_url(
-                        OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_ROUTES_PATH, ctx.sha, line=line,
+                        TGI_OWNER, TGI_REPO, TGI_ROUTES_PATH, ctx.sha, line=line,
                     ) if line else routes_url,
                     source_type="github_file",
                     source_path=(
-                        f"{OLLAMA_ROUTES_PATH}:{line}" if line else OLLAMA_ROUTES_PATH
+                        f"{TGI_ROUTES_PATH}:{line}" if line else TGI_ROUTES_PATH
                     ),
                     commit_sha=ctx.sha,
                     fetched_at=ctx.routes_fetched_at,
@@ -423,14 +390,18 @@ class OllamaExtractor(Extractor):
                 ),),
             )
 
-        # OTEL env var refs — same pattern as vLLM but searching routes.go
         otel_names = sorted(set(re.findall(r"OTEL_[A-Z_]+", text)))
         otel_line = (
             self._first_line_with(text, otel_names[0]) if otel_names else 0
         )
         otel_value = ", ".join(otel_names)
-        # Polyglot Prometheus detection via the shared table (Carol's call)
-        prometheus_present = detect_prometheus_client("go", ctx.go_mod_text)
+        # Polyglot prometheus detection: TGI is Rust → Cargo.toml. The
+        # canonical Rust prometheus library would match `^\s*prometheus\s*=`,
+        # but TGI uses `metrics-exporter-prometheus` instead — distinct
+        # crate with different match. Rather than special-case TGI, route
+        # through the table: detect_prometheus_client returns False for
+        # TGI's Cargo.toml. Honest evidence per the V1 discipline.
+        prometheus_present = detect_prometheus_client("rust", ctx.cargo_text)
 
         return [
             routes_grep("metrics_endpoint", '"/metrics"'),
@@ -440,19 +411,19 @@ class OllamaExtractor(Extractor):
                 "observability", "otel_env_refs", otel_value,
                 (Evidence(
                     source_url=github_file_blob_url(
-                        OLLAMA_OWNER, OLLAMA_REPO, OLLAMA_ROUTES_PATH, ctx.sha,
+                        TGI_OWNER, TGI_REPO, TGI_ROUTES_PATH, ctx.sha,
                         line=otel_line,
                     ) if otel_line else routes_url,
                     source_type="github_file",
                     source_path=(
-                        f"{OLLAMA_ROUTES_PATH}:{otel_line}" if otel_line
-                        else OLLAMA_ROUTES_PATH
+                        f"{TGI_ROUTES_PATH}:{otel_line}" if otel_line
+                        else TGI_ROUTES_PATH
                     ),
                     commit_sha=ctx.sha,
                     fetched_at=ctx.routes_fetched_at,
                     note=(
                         None if otel_value
-                        else f"{NOTE_NOT_DECLARED}: no OTEL_* env var refs in {OLLAMA_ROUTES_PATH}"
+                        else f"{NOTE_NOT_DECLARED}: no OTEL_* env var refs in {TGI_ROUTES_PATH}"
                     ),
                 ),),
             ),
@@ -460,21 +431,25 @@ class OllamaExtractor(Extractor):
                 "observability", "prometheus_client",
                 "true" if prometheus_present else "",
                 (Evidence(
-                    source_url=go_mod_url,
+                    source_url=cargo_url,
                     source_type="github_file",
-                    source_path=OLLAMA_GO_MOD_PATH,
+                    source_path=TGI_CARGO_PATH,
                     commit_sha=ctx.sha,
-                    fetched_at=ctx.go_mod_fetched_at,
+                    fetched_at=ctx.cargo_fetched_at,
                     note=(
                         None if prometheus_present
-                        else f"{NOTE_NOT_DECLARED}: github.com/prometheus/client_golang not in go.mod"
+                        else (
+                            f"{NOTE_NOT_DETECTED}: TGI uses metrics-exporter-prometheus "
+                            f"(not the canonical `prometheus` crate the table probes for) "
+                            f"— /metrics is exposed but probe table doesn't cover this client"
+                        )
                     ),
                 ),),
             ),
         ]
 
     # ----------------------------------------------------------------
-    # Pure helpers (no I/O — easy to unit-test)
+    # Pure helpers
     # ----------------------------------------------------------------
 
     @staticmethod
@@ -482,11 +457,11 @@ class OllamaExtractor(Extractor):
         text: str,
         from_lines: list[tuple[int, str]],
     ) -> tuple[str, str, int]:
-        """Return (base_image_string, cuda_version, line_number) for the
-        first REAL base image — skipping `scratch` and stage-name FROMs.
-        Same pattern as VllmExtractor._resolve_dockerfile_base; could be
-        promoted to a shared base when N=3 forces it (Wave 1B.2 §1.7
-        deferred decision)."""
+        """Return (base_image, cuda_version, line_number) for the first
+        GPU-runtime FROM line. Falls back to the first real base when no
+        GPU runtime is found. TGI specifically: walks past the
+        `lukemathwalker/cargo-chef` Rust builder to the `nvidia/cuda`
+        runtime stage."""
         line_num, resolved = find_first_gpu_runtime_base_image_from_line(text, from_lines)
         if not resolved:
             return "", "", 0
@@ -494,20 +469,13 @@ class OllamaExtractor(Extractor):
         return resolved, cuda, line_num
 
     @staticmethod
-    def _runtime_pinned_value(go_mod_text: str) -> str:
-        """Parse `go <version>` directive from go.mod.
-
-        go.mod declares the toolchain pin as `go 1.24.1` on its own line.
-        Return `go <version>` per the Wave 1B.2 vocabulary, or "" when
-        the directive is missing.
-        """
-        match = re.search(r"^\s*go\s+(\d+\.\d+(?:\.\d+)?)\s*$", go_mod_text, re.MULTILINE)
-        return f"go {match.group(1)}" if match else ""
+    def _runtime_pinned_value(rust_toolchain_text: str) -> str:
+        """Parse rust-toolchain.toml `channel = "1.85.1"` → `rust 1.85.1`."""
+        channel = parse_rust_toolchain_channel(rust_toolchain_text)
+        return f"rust {channel}" if channel else ""
 
     @staticmethod
     def _parse_contributors_count(link_header: str | None) -> int | None:
-        """Same pattern as VllmExtractor — could be promoted to base
-        when N=3 forces it (deferred per §1.7)."""
         if not link_header:
             return None
         match = re.search(r'<[^>]*[?&]page=(\d+)[^>]*>;\s*rel="last"', link_header)
@@ -526,20 +494,6 @@ class OllamaExtractor(Extractor):
         if homepage and isinstance(homepage, str) and homepage.startswith(("http://", "https://")):
             return homepage
         return ""
-
-    @staticmethod
-    def _dockerhub_latest(
-        results: list, fetched_at: str,
-    ) -> tuple[str, str, str]:
-        if not results:
-            return "", "", fetched_at
-        for r in results:
-            name = r.get("name") or ""
-            size = r.get("full_size")
-            if name and isinstance(size, int) and size > 0:
-                return name, str(round(size / (1024 * 1024))), fetched_at
-        first = results[0]
-        return first.get("name") or "", "", fetched_at
 
     @staticmethod
     def _first_line_with(text: str, needle: str) -> int:

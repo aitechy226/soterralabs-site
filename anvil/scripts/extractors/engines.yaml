@@ -73,8 +73,8 @@ engines:
 
   - id: llama-cpp
     display_name: llama.cpp
-    repo_url: https://github.com/ggerganov/llama.cpp
-    container_source: https://github.com/ggerganov/llama.cpp/pkgs/container/llama.cpp
+    repo_url: https://github.com/ggml-org/llama.cpp
+    container_source: https://github.com/ggml-org/llama.cpp/pkgs/container/llama.cpp
     license: MIT
     description: LLM inference in C/C++
 
@@ -87,7 +87,7 @@ engines:
 
   - id: deepspeed-mii
     display_name: DeepSpeed-MII
-    repo_url: https://github.com/microsoft/DeepSpeed-MII
+    repo_url: https://github.com/deepspeedai/DeepSpeed-MII
     container_source: ""
     license: Apache-2.0
     description: MII makes low-latency and high-throughput inference possible, powered by DeepSpeed

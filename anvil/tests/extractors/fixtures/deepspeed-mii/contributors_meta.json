@@ -1,0 +1,27 @@
+{
+  "link_header": "<https://api.github.com/repositories/473378688/contributors?per_page=1&anon=true&page=2>; rel=\"next\", <https://api.github.com/repositories/473378688/contributors?per_page=1&anon=true&page=36>; rel=\"last\"",
+  "page1_body": [
+    {
+      "login": "mrwyattii",
+      "id": 18311180,
+      "node_id": "MDQ6VXNlcjE4MzExMTgw",
+      "avatar_url": "https://avatars.githubusercontent.com/u/18311180?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/mrwyattii",
+      "html_url": "https://github.com/mrwyattii",
+      "followers_url": "https://api.github.com/users/mrwyattii/followers",
+      "following_url": "https://api.github.com/users/mrwyattii/following{/other_user}",
+      "gists_url": "https://api.github.com/users/mrwyattii/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/mrwyattii/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/mrwyattii/subscriptions",
+      "organizations_url": "https://api.github.com/users/mrwyattii/orgs",
+      "repos_url": "https://api.github.com/users/mrwyattii/repos",
+      "events_url": "https://api.github.com/users/mrwyattii/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/mrwyattii/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false,
+      "contributions": 75
+    }
+  ]
+}
