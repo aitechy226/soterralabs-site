@@ -466,9 +466,9 @@ main { padding: 0; }
    accent so the eye sees "new chip family starts here". Paired with
    the alternating .gpu-group-shaded bg below, the boundary is doubly
    reinforced; the imbalanced-group problem (H100 has 22 rows, A100 has
-   3) is mitigated by keeping the shade subtle (#f0f6fc, ~5% tint). */
+   3) is mitigated by keeping the shade subtle (#e8eef4, ~5% tint). */
 .pricing-table tr.gpu-group-start td { border-top: 2px solid var(--teal-deep); }
-.pricing-table tr.gpu-group-shaded td { background: #f0f6fc; }
+.pricing-table tr.gpu-group-shaded td { background: #e8eef4; }
 .pricing-table tr.gpu-group-shaded:hover td { background: var(--bg-hover); }
 .pricing-table .cloud-tag,
 .pricing-table .gpu-cell,
@@ -492,10 +492,15 @@ main { padding: 0; }
 .mlperf-table th:nth-child(4) { width: 1%; white-space: nowrap; }
 /* Pricing Instance Type — it's an identifier (e.g. Standard_ND96isr_H100_v5,
    p5.48xlarge); treat like one. Col 4 after the GPU-Type-first reorder
-   (cols: GPU Type, Cloud, Region, Instance Type, # GPUs, $/hr, $/GPU/hr). */
+   (cols: GPU Type, Cloud, Region, Instance Type, # GPUs, $/hr, $/GPU/hr).
+   max-width caps GCP's verbose descriptions ("A4 Nvidia B200 (1 gpu slice)
+   attached to DWS Defined Duration VMs running in Netherlands") which
+   otherwise hog the row. word-break wraps long instance strings cleanly. */
 .pricing-table td:nth-child(4) {
   font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 12px;
+  max-width: 240px;
+  word-break: break-word;
 }
 /* Engine: short pill of identifying tag — TensorRT, vLLM, LLMBoost. */
 .mlperf-table .engine-cell {
@@ -546,7 +551,7 @@ main { padding: 0; }
   /* Sticky col must inherit the row's group shade when scrolled,
      otherwise the alternating bg breaks across the boundary. */
   .pricing-table tr.gpu-group-shaded td:first-child {
-    background: #f0f6fc;
+    background: #e8eef4;
   }
   .pricing-table tr:hover td:first-child,
   .mlperf-table tr:hover td:first-child {
