@@ -424,7 +424,12 @@ main { padding: 0; }
   border-collapse: collapse;
   font-size: 14px;
 }
-.pricing-table { min-width: 640px; }
+/* Explicit white bg so unshaded rows pop against the shaded ones.
+   Without this, transparent default rows fall through to the body's
+   #f5f7fa, producing two-greys-no-white instead of clean banding.
+   MLPerf gets white via its details.workload wrapper; pricing has no
+   such wrapper, so the table itself owns the white. */
+.pricing-table { min-width: 640px; background: #fff; }
 .mlperf-table { min-width: 720px; font-size: 13px; }
 
 .pricing-table th, .mlperf-table th {
