@@ -459,17 +459,20 @@ main { padding: 0; }
 }
 .pricing-table tr:hover, .mlperf-table tr:hover { background: var(--bg-hover); }
 /* MLPerf table bands by GPU family — workload tables are short enough
-   that alternating chip groups read cleanly as zebra. Pricing uses a
-   different mechanism (gpu-group-start, below) because its groups are
-   too imbalanced for banding to read. */
+   that alternating chip groups read cleanly as zebra. */
 .mlperf-table tr.gpu-band td { background: #e8eef4; }
 .mlperf-table tr.gpu-band:hover td { background: var(--bg-hover); }
-/* Pricing table — first quote of each GPU group gets a top-border accent
-   so the eye sees "new chip family starts here" without painting a full
-   band. Avoids the imbalanced-group problem (H100 has 22 rows; A100 has
-   3) where banding produced one mega-tinted block. */
+/* Pricing table — first quote of each GPU group gets a top-border
+   accent so the eye sees "new chip family starts here". Paired with
+   the alternating .gpu-group-shaded bg below, the boundary is doubly
+   reinforced; the imbalanced-group problem (H100 has 22 rows, A100 has
+   3) is mitigated by keeping the shade subtle (#f0f6fc, ~5% tint). */
 .pricing-table tr.gpu-group-start td { border-top: 2px solid var(--teal-deep); }
-.pricing-table .cloud-tag, .mlperf-table .gpu-cell {
+.pricing-table tr.gpu-group-shaded td { background: #f0f6fc; }
+.pricing-table tr.gpu-group-shaded:hover td { background: var(--bg-hover); }
+.pricing-table .cloud-tag,
+.pricing-table .gpu-cell,
+.mlperf-table .gpu-cell {
   font-weight: 600;
   color: var(--teal-deep);
 }
@@ -488,8 +491,9 @@ main { padding: 0; }
 .mlperf-table td:nth-child(4),
 .mlperf-table th:nth-child(4) { width: 1%; white-space: nowrap; }
 /* Pricing Instance Type — it's an identifier (e.g. Standard_ND96isr_H100_v5,
-   p5.48xlarge); treat like one. Col 3 after the causal-order reorder. */
-.pricing-table td:nth-child(3) {
+   p5.48xlarge); treat like one. Col 4 after the GPU-Type-first reorder
+   (cols: GPU Type, Cloud, Region, Instance Type, # GPUs, $/hr, $/GPU/hr). */
+.pricing-table td:nth-child(4) {
   font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 12px;
 }
@@ -538,6 +542,11 @@ main { padding: 0; }
   }
   .pricing-table th:first-child, .mlperf-table th:first-child {
     background: var(--bg-alt);
+  }
+  /* Sticky col must inherit the row's group shade when scrolled,
+     otherwise the alternating bg breaks across the boundary. */
+  .pricing-table tr.gpu-group-shaded td:first-child {
+    background: #f0f6fc;
   }
   .pricing-table tr:hover td:first-child,
   .mlperf-table tr:hover td:first-child {

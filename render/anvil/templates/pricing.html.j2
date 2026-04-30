@@ -88,10 +88,10 @@
     <table class="pricing-table">
       <thead>
         <tr>
+          <th>GPU Type</th>
           <th>Cloud</th>
           <th>Region</th>
           <th>Instance Type</th>
-          <th>GPU Type</th>
           <th class="num"># GPUs</th>
           <th class="num">$/hr</th>
           <th class="num">$/GPU/hr</th>
@@ -99,12 +99,13 @@
       </thead>
       <tbody>
         {% for group in pricing.gpu_groups %}
+        {% set group_shade_class = 'gpu-group-shaded' if loop.index0 % 2 == 1 else '' %}
         {% for q in group.quotes %}
-        <tr{% if loop.first %} class="gpu-group-start" id="{{ group.anchor_id }}"{% endif %}>
+        <tr class="{{ group_shade_class }}{% if loop.first %} gpu-group-start{% endif %}"{% if loop.first %} id="{{ group.anchor_id }}"{% endif %}>
+          <td class="gpu-cell">{{ group.display_name }}</td>
           <td><span class="cloud-tag">{{ q.cloud_display }}</span></td>
           <td>{{ q.region }}</td>
           <td>{{ q.instance_type }}</td>
-          <td class="gpu-cell">{{ group.display_name }}</td>
           <td class="num">{{ q.gpu_count }}</td>
           <td class="num">${{ "%.2f"|format(q.price_per_hour_usd) }}</td>
           <td class="num">${{ "%.2f"|format(q.price_per_gpu_per_hour_usd) }}</td>
