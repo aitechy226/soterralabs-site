@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soterra Labs — From GPU to Revenue.</title>
+  <meta name="description" content="Soterra Labs delivers production-grade AI for any business — from bare metal GPU infrastructure to agentic AI applications that generate business value." />
+  <link rel="canonical" href="https://soterralabs.ai/" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
+
+  <!-- Schema.org entity graph: Organization + Founder (Person) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Soterra Labs",
+    "legalName": "Soterra Labs LLC",
+    "alternateName": "Soterra Labs AI",
+    "url": "https://soterralabs.ai",
+    "logo": "https://soterralabs.ai/logo-lit-circle.svg",
+    "description": "Production-grade AI engineering: GTM intelligence tools, agentic systems on LangGraph, and GPU infrastructure for enterprise vendors and VARs. Not affiliated with Soterra Labs Limited (UK agricultural technology).",
+    "slogan": "From GPU to Revenue",
+    "areaServed": "Global",
+    "foundingDate": "2026-03",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "300 Carnegie Center, Suite 150",
+      "addressLocality": "Princeton",
+      "addressRegion": "NJ",
+      "postalCode": "08540",
+      "addressCountry": "US"
+    },
+    "knowsAbout": [
+      "AI infrastructure",
+      "GPU cluster architecture",
+      "Agentic AI systems",
+      "LangGraph orchestration",
+      "Retrieval-augmented generation",
+      "GTM intelligence tools",
+      "Bare metal GPU deployment",
+      "KYC onboarding orchestration",
+      "Enterprise AI for regulated industries"
+    ],
+    "founder": {
+      "@type": "Person",
+      "name": "Srikanth Samudrla",
+      "jobTitle": "Founder & CTO",
+      "description": "30 years production engineering across Bell Labs, Lehman Brothers, JPMorgan Chase, Dell Technologies, and SHI International.",
+      "sameAs": [
+        "https://www.linkedin.com/in/srikanthsamudrla/",
+        "https://aitechy226.github.io"
+      ]
+    },
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "contactType": "Sales",
+        "email": "sales@soterralabs.ai",
+        "areaServed": "US"
+      },
+      {
+        "@type": "ContactPoint",
+        "contactType": "Legal",
+        "email": "legal@soterralabs.ai",
+        "areaServed": "US"
+      }
+    ]
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal:       #0070c0;
+      --teal-light: #e3f2fd;
+      --teal-deep:  #0a1f44;
+      --accent:     #7ec8e3;
+      --dark:       #1a1a2e;
+      --mid:        #374151;
+      --muted:      #374151;
+      --border:     #e5e7eb;
+      --bg:         #f5f7fa;
+      --bg-alt:     #f0f2f5;
+      --bg-card:    #ffffff;
+      --max-w:      960px;
+      --shadow-sm:  0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.04);
+      --shadow-md:  0 2px 6px rgba(0,0,0,0.05), 0 8px 20px rgba(0,0,0,0.06);
+      --shadow-lg:  0 4px 10px rgba(0,0,0,0.06), 0 14px 36px rgba(10,31,68,0.10);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: var(--dark);
+      background: var(--bg-card);
+      line-height: 1.6;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+    }
+    .nav-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 96px;
+    }
+    @media (max-width: 540px) { .nav-inner { height: 72px; } }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .logo svg { height: 32px; width: auto; }
+    .logo img { height: 72px; width: auto; display: block; }
+    @media (max-width: 540px) {
+      .logo img { height: 52px; }
+    }
+    .nav-links {
+      display: flex;
+      gap: 4px;
+      list-style: none;
+      align-items: center;
+    }
+    .nav-links a {
+      position: relative;
+      text-decoration: none;
+      color: var(--dark);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      padding: 10px 16px;
+      border-radius: 4px;
+      white-space: nowrap;
+      transition: color 0.2s ease, background 0.2s ease;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 4px;
+      height: 2px;
+      background: var(--teal);
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 0.25s ease;
+    }
+    .nav-links a:hover {
+      color: var(--teal);
+      background: var(--teal-light);
+    }
+    .nav-links a:hover::after { transform: scaleX(1); }
+
+    /* hamburger button — hidden on desktop */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      width: 36px;
+      height: 36px;
+    }
+    .nav-toggle span {
+      display: block;
+      height: 2px;
+      width: 22px;
+      background: var(--mid);
+      border-radius: 2px;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    /* X state */
+    .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-toggle.open span:nth-child(2) { opacity: 0; }
+    .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    @media (max-width: 1100px) {
+      .nav-toggle { display: flex; }
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(255,255,255,0.98);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        gap: 0;
+        padding: 8px 0 12px;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links li a {
+        display: block;
+        padding: 14px 24px;
+        font-size: 12px;
+        border-radius: 0;
+        letter-spacing: 1.5px;
+      }
+      .nav-links li a::after { display: none; }
+      .nav-links li a:hover { background: var(--teal-light); }
+    }
+
+    /* ── SECTIONS ── */
+    section { padding: 40px 24px; background: #edf0f4; scroll-margin-top: 100px; }
+    #services   { background: #e3e8ef; }
+    #principles { background: #edf0f4; }
+    #thinking   { background: #e3e8ef; }
+    #about      { background: #edf0f4; }
+
+    .inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+    }
+
+    /* ── HERO ── */
+    #hero {
+      padding: 48px 24px 40px;
+      background: linear-gradient(135deg, #0a1f44 0%, #0070c0 100%);
+      color: #fff;
+    }
+    @media (max-width: 540px) {
+      #hero { padding: 36px 20px 32px; }
+      section { padding: 32px 20px; }
+      .card-featured { padding: 24px !important; }
+      .contact-row { flex-direction: column; align-items: stretch; }
+      .contact-link { justify-content: center; }
+    }
+    .hero-label {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: #7ec8e3;
+      background: rgba(255,255,255,0.08);
+      padding: 5px 12px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: clamp(28px, 4.3vw, 42px);
+      font-weight: 700;
+      line-height: 1.15;
+      color: #fff;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+    }
+    h1 span { color: #7ec8e3; }
+    h1 span.gpu { color: #4ade80; }
+    .hero-sub {
+      font-size: 18px;
+      color: rgba(255,255,255,0.82);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .hero-cred {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 28px;
+    }
+    #hero .btn-secondary {
+      border-color: rgba(255,255,255,0.4);
+      color: #fff;
+    }
+    #hero .btn-secondary:hover {
+      border-color: #fff;
+      color: #fff;
+      background: rgba(255,255,255,0.08);
+    }
+    .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-block;
+      background: var(--teal);
+      color: #fff;
+      text-decoration: none;
+      padding: 9px 20px;
+      border-radius: 5px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover { background: #0f766e; }
+    .btn-secondary {
+      display: inline-block;
+      border: 1.5px solid var(--border);
+      color: var(--mid);
+      text-decoration: none;
+      padding: 9px 20px;
+      border-radius: 5px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-secondary:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* ── SECTION HEADERS ── */
+    .section-label {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--teal);
+      background: var(--teal-light);
+      border-left: 3px solid var(--teal);
+      padding: 5px 12px 5px 10px;
+      border-radius: 3px;
+      margin-bottom: 10px;
+    }
+    #services .section-label { color: #0a3d80; background: #e3f2fd; border-left-color: #0070c0; }
+    #principles .section-label { color: #6b3410; background: #fde8d4; border-left-color: #92400e; }
+    #thinking .section-label { color: #3730a3; background: #e0e7ff; border-left-color: #4338ca; }
+    #about .section-label { color: #14401a; background: #e8f5e9; border-left-color: #2e7d32; }
+
+    h2 {
+      font-size: clamp(24px, 3.5vw, 32px);
+      font-weight: 700;
+      color: var(--dark);
+      letter-spacing: -0.3px;
+      margin-bottom: 10px;
+      line-height: 1.25;
+    }
+    .section-intro {
+      font-size: 17px;
+      color: var(--mid);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      border: none;
+      border-left: 3px solid var(--teal);
+      border-radius: 12px;
+      padding: 20px 20px 20px 24px;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    .card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 10px;
+    }
+    .card p {
+      font-size: 15px;
+      color: var(--mid);
+      line-height: 1.65;
+      margin-bottom: 16px;
+    }
+    .card-tag {
+      font-size: 12px;
+      color: var(--teal);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── FEATURED GTM CARD ── */
+    .card-featured {
+      border: none;
+      border-top: 4px solid var(--teal);
+      border-radius: 12px;
+      padding: 28px;
+      background: var(--bg-card);
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-md);
+    }
+    .card-featured-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 6px;
+    }
+    .card-featured-subtitle {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+    .card-featured-intro {
+      font-size: 16px;
+      color: var(--mid);
+      line-height: 1.75;
+      margin-bottom: 20px;
+    }
+    .gpu-nav-block {
+      background: var(--bg-alt);
+      border: none;
+      border-left: 3px solid var(--teal);
+      border-radius: 10px;
+      padding: 20px 20px 20px 24px;
+      margin-bottom: 16px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .gpu-nav-block h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 10px;
+    }
+    .gpu-nav-block p {
+      font-size: 15px;
+      color: var(--mid);
+      line-height: 1.7;
+      margin-bottom: 0;
+    }
+    .proof-placeholder {
+      border: 1.5px dashed var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: #d1d5db;
+      margin-bottom: 12px;
+      font-style: italic;
+    }
+    .card-featured-closing {
+      font-size: 15px;
+      color: var(--mid);
+      margin-bottom: 20px;
+      margin-top: 8px;
+    }
+    .supporting-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 540px) { .supporting-cards { grid-template-columns: 1fr; } }
+
+    /* ── ABOUT ── */
+    .about-text {
+      border: none;
+      border-left: 3px solid #2e7d32;
+      border-radius: 12px;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-sm);
+      padding: 28px 28px 28px 32px;
+    }
+    .about-text p {
+      font-size: 16px;
+      color: var(--mid);
+      line-height: 1.75;
+      margin-bottom: 16px;
+    }
+    .about-text p:last-child { margin-bottom: 0; }
+    .about-text strong { color: var(--dark); }
+
+    .credentials {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .credential {
+      border-left: 3px solid var(--teal);
+      padding-left: 16px;
+    }
+    .credential-company {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--dark);
+      letter-spacing: 0.3px;
+    }
+    .credential-detail {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+      line-height: 1.5;
+    }
+
+    /* ── PRINCIPLES ── */
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 8px;
+    }
+    @media (max-width: 640px) { .principles { grid-template-columns: 1fr; } }
+
+    .principle {
+      padding: 22px 22px 22px 26px;
+      border: none;
+      border-left: 3px solid #92400e;
+      border-radius: 12px;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .principle:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .principle-num {
+      font-size: 12px;
+      font-weight: 700;
+      color: #92400e;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+    .principle h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+    .principle p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── BLOG ── */
+    .blog-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 600px) { .blog-grid { grid-template-columns: 1fr; } }
+
+    .post-card {
+      border: none;
+      border-left: 3px solid #4338ca;
+      border-radius: 12px;
+      padding: 26px 26px 26px 30px;
+      background: var(--bg-card);
+      text-decoration: none;
+      display: block;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .post-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+    .post-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #4338ca;
+      margin-bottom: 10px;
+    }
+    .post-card h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dark);
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+    .post-card::after {
+      content: 'Read \2192';
+      display: block;
+      margin-top: 14px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #ea580c;
+    }
+    .post-card p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .blog-cta {
+      margin-top: 32px;
+      font-size: 14px;
+      color: var(--mid);
+    }
+    .blog-cta a {
+      color: var(--teal);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .blog-cta a:hover { text-decoration: underline; }
+
+    /* ── CONTACT ── */
+    #contact { background: linear-gradient(135deg, #0a1f44 0%, #0070c0 100%); }
+    #contact .section-label {
+      color: #0a1f44;
+      background: #7ec8e3;
+      border-left-color: #fff;
+    }
+    #contact h2 { color: #fff; }
+    #contact .section-intro { color: rgba(255,255,255,0.82); }
+
+    .contact-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: 1.5px solid rgba(255,255,255,0.35);
+      border-radius: 5px;
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .contact-link:hover { border-color: #fff; background: rgba(255,255,255,0.15); color: #fff; }
+    .contact-link svg { width: 16px; height: 16px; stroke: currentColor; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--dark);
+      border-top: 1px solid #1f2937;
+      padding: 24px;
+      text-align: center;
+    }
+    footer p {
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+    footer span { color: #60a5fa; }
+    footer .footer-sep { color: #64748b; margin: 0 8px; }
+    footer .footer-link { color: #60a5fa; text-decoration: none; }
+    footer .footer-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a href="#" class="logo">
+        <img src="logo-lit-circle.svg" alt="Soterra Labs" />
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#services">Services</a></li>
+        <li><a href="/gpu-navigator">Products</a></li>
+        <li><a href="/anvil/">Reference</a></li>
+        <li><a href="#thinking">Thinking</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <script>
+    const toggle = document.getElementById('navToggle');
+    const links  = document.getElementById('navLinks');
+    toggle.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      toggle.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', open);
+    });
+    links.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        links.classList.remove('open');
+        toggle.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+  </script>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="inner">
+      <div class="hero-label">AI Built for Your Business</div>
+      <h1>From <span class="gpu">GPU</span><br/>To <span>Revenue<sup style="font-size:0.4em; font-weight:600; vertical-align:super; margin-left:2px;">&#8482;</sup></span></h1>
+      <p class="hero-sub">
+        Buying with confidence is hard when the technology is moving faster than the buyer can evaluate it. Shipping AI is hard when the gap between pilot and production is wider than it looks. We work the full stack, from pre-sale intelligence tools that close the discovery gap, to production AI systems and infrastructure built to run.
+      </p>
+      <div class="hero-cred">30 years of production engineering · Bell Labs · JPMorgan Chase · Dell</div>
+      <div class="cta-row">
+        <a href="#contact" class="btn-primary">Start a conversation</a>
+        <a href="#services" class="btn-secondary">How we do it &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="inner">
+      <div class="section-label">Services</div>
+      <h2>Three ways we engage</h2>
+      <p class="section-intro">
+        Our From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&#8482;</sup> framework spans your sales motion, your internal workflows, and your infrastructure. Three engagements. One standard: every one delivers a running system in your environment, designed and implemented to your specs.
+      </p>
+
+      <!-- GTM INTELLIGENCE — featured -->
+      <div class="card-featured">
+        <div class="card-featured-label">GTM Intelligence</div>
+        <div class="card-featured-subtitle">Pre-sale tools that surface what matters before the first conversation.</div>
+        <p class="card-featured-intro">Most people don't have 30 minutes with a sales rep for a discovery call. They have five minutes when the calendar clears. They need a way to figure out what they need, on their own, at their own pace.</p>
+
+        <div class="gpu-nav-block">
+          <h4>GPU Navigator<sup style="font-size:0.6em; vertical-align:super;">&#8482;</sup></h4>
+          <p>
+            Built for bare metal GPU infrastructure vendors. The prospect walks through a guided assessment and gets a personalized GPU recommendation with cost comparison. The vendor's sales rep gets the lead brief. Five minutes, no phone call required.
+          </p>
+          <a href="/gpu-navigator" class="btn-primary" style="display:inline-block; margin-top:12px;">See how it works &rarr;</a>
+        </div>
+
+        <div class="card-tag">Pre-Sale Discovery · Qualification Scoring · Domain-Aware Intelligence</div>
+      </div>
+
+      <!-- SUPPORTING SERVICES -->
+      <div class="supporting-cards">
+
+        <div class="card">
+          <div class="card-featured-label" style="margin-bottom:4px;">AI Systems</div>
+          <h3 style="font-size:20px; margin-bottom:10px;">Agentic systems where deterministic code owns the decisions, and LLMs own the prose.</h3>
+          <p>Multi-agent pipelines built on LangGraph. Retrieval with governance, tool-calling with audit trails, orchestration that survives model-version changes. Scoped to your workflow and built to your spec.</p>
+          <div class="card-tag">LangGraph · Multi-Agent · Governed RAG · Audit-Ready Pipelines</div>
+        </div>
+
+        <div class="card">
+          <div class="card-featured-label" style="margin-bottom:4px;">AI Infrastructure</div>
+          <h3 style="font-size:20px; margin-bottom:10px;">Inference stacks tuned for the workloads your team actually runs.</h3>
+          <p>You bought the GPUs. Now make them earn. We deploy the full AI stack: inference serving, model deployment, orchestration, monitoring.</p>
+          <div class="card-tag">GPU Stack · Inference Serving · Model Deployment · Monitoring</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- PRINCIPLES -->
+  <section id="principles">
+    <div class="inner">
+      <div class="section-label">How we build</div>
+      <h2>What you can count on.</h2>
+      <p class="section-intro">
+        Not slogans. Engineering commitments, learned from watching what breaks at scale.
+      </p>
+      <div class="principles">
+        <div class="principle">
+          <div class="principle-num">01</div>
+          <h4>Tested against what actually breaks it.</h4>
+          <p>Happy-path tests prove nothing. Every system we deliver is verified against the failure it's supposed to handle: retries, timeouts, data edge cases, and the scenarios that only show up in production.</p>
+        </div>
+        <div class="principle">
+          <div class="principle-num">02</div>
+          <h4>Every decision is explainable.</h4>
+          <p>Routing, scoring, and risk rules live in deterministic code: inspectable, testable, auditable. AI generates narratives and synthesizes results. It doesn't make decisions you can't trace.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- THINKING / BLOG -->
+  <section id="thinking">
+    <div class="inner">
+      <div class="section-label">Thinking</div>
+      <h2>What we've learned building it.</h2>
+      <p class="section-intro">
+        No hype, no 'thought leadership'. The failures, the fixes, and what the architecture actually looks like after it survives contact with a real environment.
+      </p>
+      <div class="blog-grid">
+
+        <a class="post-card" href="/thinking/gpu-infrastructure-five-calculations">
+          <div class="post-tag">GPU · Infrastructure · TCO</div>
+          <h4>GPU Infrastructure: The Five Calculations That Actually Matter</h4>
+          <p>$/hr is the last number to calculate. VRAM fit, quantization impact, multi-node threshold, egress cost, and real TCO, in that order.</p>
+        </a>
+
+        <a class="post-card" href="/thinking/enterprise-rag-trust-layer">
+          <div class="post-tag">RAG · FSI · Production</div>
+          <h4>The Trust Layer: What Separates Good RAG from Enterprise RAG</h4>
+          <p>Four bugs found while hardening a RAG system for FSI, and what they reveal about the gap between a working system and a trustworthy one.</p>
+        </a>
+
+        <a class="post-card" href="/thinking/agentic-hype-vs-reality">
+          <div class="post-tag">Agents · Architecture</div>
+          <h4>Why Your AI Agent Demo Looks Great and Your Production System Doesn't</h4>
+          <p>The gap between the demo and production: the reliability argument, the auditability argument, and which one survives model improvements.</p>
+        </a>
+
+        <a class="post-card" href="/thinking/mcp-service-to-service">
+          <div class="post-tag">MCP · LangGraph · KYC</div>
+          <h4>I Used MCP as a Service-to-Service Protocol. Here's What I Learned.</h4>
+          <p>MCP was designed as an LLM-to-tool protocol. The tradeoffs of using it as a service layer between a LangGraph orchestrator and integration servers.</p>
+        </a>
+
+      </div>
+      <p class="blog-cta">
+        <a href="/thinking/">More posts →</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="inner">
+      <div class="section-label">About</div>
+      <h2><span style="color:#4ade80;">Soterra</span> <span style="color:var(--teal);">Labs.</span></h2>
+      <div class="about-text">
+        <p>Soterra Labs exists to put AI to work on real problems: faster decisions, better economics, and leaner operations.</p>
+        <p>Our approach is rooted in three decades of production engineering, forged through cycles of extreme scale and complexity. We've been on both sides of the table: building systems as engineering leadership at Lehman Brothers and JPMorgan Chase, and selling them as Field CTOs at Dell. That dual perspective shapes everything we build: we know which questions buyers actually ask, and which answers hold up under scrutiny.</p>
+        <p>Today our focus is the modern AI stack: foundation models, generative architecture, and production deployment on real hardware. We don't hand off to an outside engineering team; we are the engineering team.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="inner">
+      <div class="section-label">Contact</div>
+      <h2>Let's talk.</h2>
+      <p class="section-intro">
+        Ready to move From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&#8482;</sup>? Reach out directly. Every engagement starts with a conversation. Tell us what you're working on.
+      </p>
+      <div class="contact-row">
+        <a href="mailto:sales@soterralabs.ai" class="contact-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/>
+          </svg>
+          Contact Us
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 <span>Soterra Labs</span> — From GPU to Revenue<sup style="font-size:0.6em; vertical-align:super;">&#8482;</sup><span class="footer-sep">·</span><a href="/legal/" class="footer-link">Legal</a></p>
+  </footer>
+
+</body>
+</html>
