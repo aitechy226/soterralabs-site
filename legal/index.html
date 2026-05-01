@@ -74,12 +74,12 @@
       height: 72px;
     }
     .logo { display: flex; align-items: center; }
-    .logo img { height: 40px; width: auto; }
+    .logo img { height: 60px; width: auto; }
 
-    /* nav-links — matches products.html / index.html chrome */
+    /* nav-links — matches homepage chrome */
     .nav-links {
       display: flex;
-      gap: 4px;
+      gap: 20px;
       list-style: none;
       align-items: center;
       margin-left: auto;
@@ -87,21 +87,17 @@
     }
     .nav-links a {
       text-decoration: none;
-      color: var(--dark);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 1.8px;
-      text-transform: uppercase;
-      padding: 10px 16px;
-      border-radius: 4px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 0;
       white-space: nowrap;
-      transition: color 0.2s ease, background 0.2s ease;
+      transition: color 0.2s ease;
     }
     .nav-links a:hover {
-      color: var(--teal);
-      background: var(--teal-light);
+      color: var(--teal-deep);
     }
-    .nav-links a.active { color: var(--teal); }
+    .nav-links a.active { color: var(--teal); font-weight: 600; }
 
     /* ── MAIN ── */
     main {
