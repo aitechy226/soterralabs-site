@@ -61,10 +61,10 @@ nav.site-nav {
   justify-content: space-between;
   height: 96px;
 }
-@media (max-width: 540px) { .nav-inner { height: 72px; } }
+@media (max-width: 540px) { .nav-inner { height: auto; padding: 12px 16px; } }
 .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .logo img { height: 60px; width: auto; display: block; }
-@media (max-width: 540px) { .logo img { height: 48px; } }
+@media (max-width: 540px) { .logo img { height: 40px; max-width: 100%; } }
 .nav-links { display: flex; gap: 20px; list-style: none; align-items: center; }
 .nav-links > li { position: relative; }
 .nav-links a {
