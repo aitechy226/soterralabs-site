@@ -558,9 +558,17 @@ main { padding: 0; }
   .pricing-table tr.gpu-group-shaded td:first-child {
     background: #e8eef4;
   }
+  /* Solid hover bg ONLY for sticky cells — the rgba(...,0.12) hover used
+     elsewhere is 88% transparent and lets scrolled-left cells bleed
+     through underneath the sticky column. Pre-mix the alpha to a solid
+     for first-child only; non-sticky hover stays rgba (correct there). */
   .pricing-table tr:hover td:first-child,
   .mlperf-table tr:hover td:first-child {
-    background: var(--bg-hover);
+    background: #e9fbef;
+  }
+  .pricing-table tr.gpu-group-shaded:hover td:first-child,
+  .mlperf-table tr.gpu-band:hover td:first-child {
+    background: #d5ece2;
   }
 }
 
