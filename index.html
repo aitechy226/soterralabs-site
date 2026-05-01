@@ -126,7 +126,7 @@
       position: relative;
     }
     .logo { display: inline-flex; align-items: center; }
-    .logo img { height: 60px; width: auto; display: block; }
+    .logo img { height: 68px; width: auto; display: block; }
     .nav-toggle {
       display: none;
       background: transparent; border: none;
@@ -144,8 +144,8 @@
     .nav-toggle.open span:nth-child(1) { transform: translateY(10px) rotate(45deg); }
     .nav-toggle.open span:nth-child(2) { opacity: 0; }
     .nav-toggle.open span:nth-child(3) { transform: translateY(-10px) rotate(-45deg); }
-    .nav-links { display: flex; gap: 24px; font-size: 14px; font-weight: 500; align-items: center; }
-    .nav-links a { color: var(--mid); }
+    .nav-links { display: flex; gap: 20px; font-size: 14px; font-weight: 500; align-items: center; }
+    .nav-links a { color: var(--mid); white-space: nowrap; }
     .nav-links a:hover { color: var(--teal-deep); }
 
     /* ---- Hero — single column, pitch's exact dark gradient ---- */
@@ -175,7 +175,7 @@
       margin: 0 0 16px;
     }
     .hero h1 {
-      font-size: 44px; font-weight: 800; line-height: 1.08;
+      font-size: 40px; font-weight: 800; line-height: 1.08;
       letter-spacing: -0.025em;
       color: #fff;
       margin: 0 0 18px;
@@ -465,9 +465,9 @@
     /* Responsive */
     @media (max-width: 900px) {
       .post-grid { grid-template-columns: repeat(2, 1fr); }
-      .hero h1 { font-size: 40px; }
+      .hero h1 { font-size: 36px; }
     }
-    @media (max-width: 768px) {
+    @media (max-width: 1400px) {
       .nav-toggle { display: flex; }
       .nav-links {
         display: none;
@@ -502,7 +502,7 @@
       .contact-band { padding: 30px 0 32px; }
       .contact-title { font-size: 26px; margin: 10px 0 8px; }
       .contact-intro { font-size: 15px; margin-bottom: 16px; }
-      .logo img { height: 48px; }
+      .logo img { height: 56px; }
       section.band { padding: 24px 0; }
       .build-blocks { gap: 18px; }
       .build-block { padding: 20px 22px; }
