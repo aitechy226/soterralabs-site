@@ -39,7 +39,7 @@
   "headline": "MLPerf Inference Results",
   "description": "Latest schema-audited MLPerf Inference Datacenter results, filtered to common workloads.",
   "url": "https://soterralabs.ai/anvil/mlperf",
-  "dateModified": "2026-04-27T23:11:29.772770+00:00",
+  "dateModified": "2026-05-04T09:28:22.055632+00:00",
   "publisher": {"@type": "Organization", "name": "Soterra Labs"}
 }
 </script>
@@ -53,7 +53,7 @@
   "creator": {"@type": "Organization", "name": "Soterra Labs"},
   "license": "https://soterralabs.ai/legal/",
   "isAccessibleForFree": true,
-  "dateModified": "2026-04-27T23:11:29.772770+00:00",
+  "dateModified": "2026-05-04T09:28:22.055632+00:00",
   "keywords": "MLPerf, MLPerf Inference, MLCommons benchmarks, llama2, llama3.1, mixtral, stable diffusion, H100, H200, B200, GB200, MI300X, MI325X"
 }
 </script>
@@ -192,8 +192,8 @@
     </p>
     
     <p class="freshness">
-      Ingested: <time datetime="2026-04-27T23:11:29.772770+00:00">April 27, 2026 at 23:11 UTC</time>
-      <span class="muted">(<span data-iso="2026-04-27T23:11:29.772770+00:00">6 days ago</span>)</span>
+      Ingested: <time datetime="2026-05-04T09:28:22.055632+00:00">May 4, 2026 at 09:28 UTC</time>
+      <span class="muted">(<span data-iso="2026-05-04T09:28:22.055632+00:00">Just now</span>)</span>
     </p>
     
   </div>
@@ -243,7 +243,7 @@
   <details class="workload" id="llama2-70b-99-offline" open>
     <summary>
       <span class="wl-name">llama2-70b-99 — Offline</span>
-      <span class="wl-meta">45 submissions <span class="top">&middot; top per-GPU: 13,015 tok/s · 52,062 tok/s system (Azure 4× GB200)</span></span>
+      <span class="wl-meta">90 submissions <span class="top">&middot; top per-GPU: 13,015 tok/s · 52,062 tok/s system (Azure 4× GB200)</span></span>
     </summary>
     <div class="wl-body">
       <div class="table-scroll">
@@ -275,12 +275,45 @@
             
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA Blackwell GB200</td>
+              <td>Azure</td>
+              <td>ND_GB200_v6</td>
+              <td class="num">4</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">13,015.4</td>
+              <td class="num secondary">52,061.6</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell GB200</td>
               <td>NVIDIA</td>
               <td>—</td>
               <td class="num">4</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">12,934.2</td>
               <td class="num secondary">51,736.9</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell GB200</td>
+              <td>NVIDIA</td>
+              <td>—</td>
+              <td class="num">4</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,934.2</td>
+              <td class="num secondary">51,736.9</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell GB200</td>
+              <td>Nebius</td>
+              <td>Nebius GB200</td>
+              <td class="num">4</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,420.9</td>
+              <td class="num secondary">49,683.5</td>
               <td class="num">99%</td>
             </tr>
             
@@ -308,12 +341,45 @@
             
             <tr>
               <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Lenovo</td>
+              <td>ThinkSystem SR680a V3</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,863.6</td>
+              <td class="num secondary">102,909.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
               <td>Lambda</td>
               <td>NVIDIA DGX B200</td>
               <td class="num">8</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">12,840.6</td>
               <td class="num secondary">102,725.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Lambda</td>
+              <td>NVIDIA DGX B200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,840.6</td>
+              <td class="num secondary">102,725.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Supermicro</td>
+              <td>SYS-422GS-NBRT-LCC</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,812.2</td>
+              <td class="num secondary">102,498.0</td>
               <td class="num">99%</td>
             </tr>
             
@@ -341,12 +407,45 @@
             
             <tr>
               <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Dell</td>
+              <td>Dell PowerEdge XE9685L</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,766.4</td>
+              <td class="num secondary">102,131.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
               <td>NVIDIA</td>
               <td>NVIDIA DGX B200</td>
               <td class="num">8</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">12,690.9</td>
               <td class="num secondary">101,527.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>NVIDIA</td>
+              <td>NVIDIA DGX B200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,690.9</td>
+              <td class="num secondary">101,527.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Supermicro</td>
+              <td>AS-4126GS-NBR-LCC</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,689.5</td>
+              <td class="num secondary">101,516.0</td>
               <td class="num">99%</td>
             </tr>
             
@@ -374,6 +473,28 @@
             
             <tr>
               <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Dell</td>
+              <td>Dell PowerEdge XE9680L</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,656.6</td>
+              <td class="num secondary">101,253.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Nebius</td>
+              <td>Nebius B200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,655.8</td>
+              <td class="num secondary">101,246.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
               <td>Nebius</td>
               <td>Nebius B200</td>
               <td class="num">8</td>
@@ -391,6 +512,28 @@
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">12,326.0</td>
               <td class="num secondary">98,607.7</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>GigaComputing</td>
+              <td>G894-SD1</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,326.0</td>
+              <td class="num secondary">98,607.7</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Google</td>
+              <td>NVIDIA DGX B200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">9,807.9</td>
+              <td class="num secondary">78,463.5</td>
               <td class="num">99%</td>
             </tr>
             
@@ -418,12 +561,45 @@
             
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Dell</td>
+              <td>Dell PowerEdge XE9680</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,414.6</td>
+              <td class="num secondary">35,316.7</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
               <td>Quanta Cloud Technology</td>
               <td>QuantaGrid D74H-7U</td>
               <td class="num">8</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">4,386.4</td>
               <td class="num secondary">35,091.5</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Quanta Cloud Technology</td>
+              <td>QuantaGrid D74H-7U</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,386.4</td>
+              <td class="num secondary">35,091.5</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>ASUSTeK</td>
+              <td>ASUSTeK ESC N8 H200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,384.4</td>
+              <td class="num secondary">35,075.1</td>
               <td class="num">99%</td>
             </tr>
             
@@ -451,6 +627,28 @@
             
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Google</td>
+              <td>NVIDIA H200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,380.5</td>
+              <td class="num secondary">35,043.7</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>HPE</td>
+              <td>HPE Cray XD670</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,370.6</td>
+              <td class="num secondary">34,964.6</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
               <td>HPE</td>
               <td>HPE Cray XD670</td>
               <td class="num">8</td>
@@ -468,6 +666,28 @@
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">4,351.5</td>
               <td class="num secondary">34,812.1</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Nebius</td>
+              <td>Nebius H200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,351.5</td>
+              <td class="num secondary">34,812.1</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Dell</td>
+              <td>Dell PowerEdge XE9680L</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,323.5</td>
+              <td class="num secondary">34,588.3</td>
               <td class="num">99%</td>
             </tr>
             
@@ -497,10 +717,43 @@
               <td class="gpu-cell">NVIDIA Hopper H200</td>
               <td>Cisco</td>
               <td>Cisco UCS C885A M8</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,318.5</td>
+              <td class="num secondary">34,548.2</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Cisco</td>
+              <td>Cisco UCS C885A M8</td>
               <td class="num">16</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">4,305.9</td>
               <td class="num secondary">68,894.8</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Cisco</td>
+              <td>Cisco UCS C885A M8</td>
+              <td class="num">16</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,305.9</td>
+              <td class="num secondary">68,894.8</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Dell Broadcom</td>
+              <td>Dell PowerEdge XE9680</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,287.7</td>
+              <td class="num secondary">34,301.9</td>
               <td class="num">99%</td>
             </tr>
             
@@ -528,12 +781,45 @@
             
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Dell</td>
+              <td>Dell PowerEdge XE7745</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">3,908.4</td>
+              <td class="num secondary">31,267.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
               <td>ASUSTeK</td>
               <td>ESC8000A-E12</td>
               <td class="num">8</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">3,810.9</td>
               <td class="num secondary">30,487.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>ASUSTeK</td>
+              <td>ESC8000A-E12</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">3,810.9</td>
+              <td class="num secondary">30,487.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Quanta Cloud Technology</td>
+              <td>D75E-4U_H200-NVL-141GBx4</td>
+              <td class="num">4</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">3,764.4</td>
+              <td class="num secondary">15,057.6</td>
               <td class="num">99%</td>
             </tr>
             
@@ -565,8 +851,41 @@
               <td>QuantaGrid D74A-7U</td>
               <td class="num">8</td>
               <td class="engine-cell">vLLM</td>
+              <td class="num primary">4,319.4</td>
+              <td class="num secondary">34,555.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>AMD</td>
+              <td>QuantaGrid D74A-7U</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
               <td class="num primary">4,315.1</td>
               <td class="num secondary">34,520.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>AMD</td>
+              <td>QuantaGrid D74A-7U</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">4,315.1</td>
+              <td class="num secondary">34,520.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>GigaComputing</td>
+              <td>G893-ZX1-AAX2</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">4,310.4</td>
+              <td class="num secondary">34,483.2</td>
               <td class="num">99%</td>
             </tr>
             
@@ -594,12 +913,45 @@
             
             <tr>
               <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>MangoBoost</td>
+              <td>MangoBoost</td>
+              <td class="num">8</td>
+              <td class="engine-cell">LLMBoost</td>
+              <td class="num primary">4,306.8</td>
+              <td class="num secondary">34,454.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
               <td>ASUSTeK</td>
               <td>ESC_A8A_MI325X_256GBx8</td>
               <td class="num">8</td>
               <td class="engine-cell">vLLM</td>
               <td class="num primary">4,248.4</td>
               <td class="num secondary">33,987.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>ASUSTeK</td>
+              <td>ESC_A8A_MI325X_256GBx8</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">4,248.4</td>
+              <td class="num secondary">33,987.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>Vultr</td>
+              <td>Supermicro AS -8126GS-TNMR</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">4,220.3</td>
+              <td class="num secondary">33,762.5</td>
               <td class="num">99%</td>
             </tr>
             
@@ -627,12 +979,45 @@
             
             <tr>
               <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>MiTAC</td>
+              <td>G8825Z5</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">4,212.9</td>
+              <td class="num secondary">33,703.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
               <td>Supermicro</td>
               <td>AS-8126GS-TNMR</td>
               <td class="num">8</td>
               <td class="engine-cell">LLMBoost</td>
               <td class="num primary">4,183.6</td>
               <td class="num secondary">33,468.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>Supermicro</td>
+              <td>AS-8126GS-TNMR</td>
+              <td class="num">8</td>
+              <td class="engine-cell">LLMBoost</td>
+              <td class="num primary">4,183.6</td>
+              <td class="num secondary">33,468.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>Quanta Cloud Technology</td>
+              <td>D75T-7U_8xMI325X</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">4,095.1</td>
+              <td class="num secondary">32,760.5</td>
               <td class="num">99%</td>
             </tr>
             
@@ -662,10 +1047,43 @@
               <td class="gpu-cell">AMD Instinct MI325X</td>
               <td>Supermicro MangoBoost</td>
               <td>Supermicro AS-8126GS-TNMR</td>
+              <td class="num">16</td>
+              <td class="engine-cell">LLMBoost</td>
+              <td class="num primary">4,082.5</td>
+              <td class="num secondary">65,320.1</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>Supermicro MangoBoost</td>
+              <td>Supermicro AS-8126GS-TNMR</td>
               <td class="num">24</td>
               <td class="engine-cell">LLMBoost</td>
               <td class="num primary">3,839.9</td>
               <td class="num secondary">92,158.2</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>Supermicro MangoBoost</td>
+              <td>Supermicro AS-8126GS-TNMR</td>
+              <td class="num">24</td>
+              <td class="engine-cell">LLMBoost</td>
+              <td class="num primary">3,839.9</td>
+              <td class="num secondary">92,158.2</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>MangoBoost</td>
+              <td>MangoBoost Heterogeneous Cluster</td>
+              <td class="num">48</td>
+              <td class="engine-cell">LLMBoost</td>
+              <td class="num primary">3,524.9</td>
+              <td class="num secondary">169,197.0</td>
               <td class="num">99%</td>
             </tr>
             
@@ -695,10 +1113,43 @@
               <td class="gpu-cell">NVIDIA Hopper H100</td>
               <td>Cisco</td>
               <td>HPF HGX System</td>
+              <td class="num">32</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">3,902.5</td>
+              <td class="num secondary">124,879.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H100</td>
+              <td>Cisco</td>
+              <td>HPF HGX System</td>
               <td class="num">16</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">3,897.0</td>
               <td class="num secondary">62,351.6</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H100</td>
+              <td>Cisco</td>
+              <td>HPF HGX System</td>
+              <td class="num">16</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">3,897.0</td>
+              <td class="num secondary">62,351.6</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI300X</td>
+              <td>MangoBoost</td>
+              <td>Supermicro AS-8125GS-TNMR2</td>
+              <td class="num">8</td>
+              <td class="engine-cell">LLMBoost</td>
+              <td class="num primary">3,481.8</td>
+              <td class="num secondary">27,854.4</td>
               <td class="num">99%</td>
             </tr>
             
@@ -726,12 +1177,45 @@
             
             <tr>
               <td class="gpu-cell">AMD Instinct MI300X</td>
+              <td>AMD</td>
+              <td>Supermicro AS-8125GS-TNMR2</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">3,475.5</td>
+              <td class="num secondary">27,803.9</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI300X</td>
               <td>Dell MangoBoost</td>
               <td>Dell PowerEdge XE9680</td>
               <td class="num">8</td>
               <td class="engine-cell">LLMBoost</td>
               <td class="num primary">3,459.8</td>
               <td class="num secondary">27,678.1</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI300X</td>
+              <td>Dell MangoBoost</td>
+              <td>Dell PowerEdge XE9680</td>
+              <td class="num">8</td>
+              <td class="engine-cell">LLMBoost</td>
+              <td class="num primary">3,459.8</td>
+              <td class="num secondary">27,678.1</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI300X</td>
+              <td>Dell</td>
+              <td>Dell Poweredge XE9680</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">3,415.7</td>
+              <td class="num secondary">27,325.9</td>
               <td class="num">99%</td>
             </tr>
             
@@ -757,6 +1241,17 @@
               <td class="num">99%</td>
             </tr>
             
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI300X</td>
+              <td>Dell MangoBoost</td>
+              <td>Dell PowerEdge XE9680</td>
+              <td class="num">16</td>
+              <td class="engine-cell">LLMBoost</td>
+              <td class="num primary">3,348.3</td>
+              <td class="num secondary">53,572.2</td>
+              <td class="num">99%</td>
+            </tr>
+            
           </tbody>
         </table>
       </div>
@@ -766,7 +1261,7 @@
   <details class="workload" id="llama2-70b-99-server">
     <summary>
       <span class="wl-name">llama2-70b-99 — Server</span>
-      <span class="wl-meta">43 submissions <span class="top">&middot; top per-GPU: 12,701 tok/s · 101,611 tok/s system (Nebius 8× B200)</span></span>
+      <span class="wl-meta">86 submissions <span class="top">&middot; top per-GPU: 12,701 tok/s · 101,611 tok/s system (Nebius 8× B200)</span></span>
     </summary>
     <div class="wl-body">
       <div class="table-scroll">
@@ -798,12 +1293,45 @@
             
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Nebius</td>
+              <td>Nebius B200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,701.4</td>
+              <td class="num secondary">101,611.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
               <td>Lambda</td>
               <td>NVIDIA DGX B200</td>
               <td class="num">8</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">12,499.2</td>
               <td class="num secondary">99,993.9</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Lambda</td>
+              <td>NVIDIA DGX B200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,499.2</td>
+              <td class="num secondary">99,993.9</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Dell</td>
+              <td>Dell PowerEdge XE9685L</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,401.8</td>
+              <td class="num secondary">99,214.4</td>
               <td class="num">99%</td>
             </tr>
             
@@ -832,11 +1360,44 @@
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA Blackwell B200</td>
               <td>Supermicro</td>
+              <td>AS-4126GS-NBR-LCC</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,398.3</td>
+              <td class="num secondary">99,186.5</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Supermicro</td>
               <td>SYS-422GS-NBRT-LCC</td>
               <td class="num">8</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">12,397.6</td>
               <td class="num secondary">99,181.1</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Supermicro</td>
+              <td>SYS-422GS-NBRT-LCC</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,397.6</td>
+              <td class="num secondary">99,181.1</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Google</td>
+              <td>NVIDIA DGX B200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,396.2</td>
+              <td class="num secondary">99,169.8</td>
               <td class="num">99%</td>
             </tr>
             
@@ -864,6 +1425,28 @@
             
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Lenovo</td>
+              <td>ThinkSystem SR680a V3</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,394.9</td>
+              <td class="num secondary">99,159.3</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Dell</td>
+              <td>Dell PowerEdge XE9680L</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,392.4</td>
+              <td class="num secondary">99,139.2</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
               <td>Dell</td>
               <td>Dell PowerEdge XE9680L</td>
               <td class="num">8</td>
@@ -881,6 +1464,28 @@
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">12,390.4</td>
               <td class="num secondary">99,123.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>NVIDIA</td>
+              <td>NVIDIA DGX B200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,390.4</td>
+              <td class="num secondary">99,123.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>GigaComputing</td>
+              <td>G894-SD1</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,383.2</td>
+              <td class="num secondary">99,066.0</td>
               <td class="num">99%</td>
             </tr>
             
@@ -908,12 +1513,45 @@
             
             <tr>
               <td class="gpu-cell">NVIDIA Blackwell GB200</td>
+              <td>NVIDIA</td>
+              <td>—</td>
+              <td class="num">4</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,339.9</td>
+              <td class="num secondary">49,359.6</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell GB200</td>
               <td>Nebius</td>
               <td>Nebius GB200</td>
               <td class="num">4</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">12,304.0</td>
               <td class="num secondary">49,215.9</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell GB200</td>
+              <td>Nebius</td>
+              <td>Nebius GB200</td>
+              <td class="num">4</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">12,304.0</td>
+              <td class="num secondary">49,215.9</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell GB200</td>
+              <td>Azure</td>
+              <td>ND_GB200_v6</td>
+              <td class="num">4</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">11,504.1</td>
+              <td class="num secondary">46,016.5</td>
               <td class="num">99%</td>
             </tr>
             
@@ -941,12 +1579,45 @@
             
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>ASUSTeK</td>
+              <td>ASUSTeK ESC N8 H200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,274.2</td>
+              <td class="num secondary">34,193.8</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
               <td>Nebius</td>
               <td>Nebius H200</td>
               <td class="num">8</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">4,253.7</td>
               <td class="num secondary">34,029.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Nebius</td>
+              <td>Nebius H200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,253.7</td>
+              <td class="num secondary">34,029.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Dell Broadcom</td>
+              <td>Dell PowerEdge XE9680</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,173.1</td>
+              <td class="num secondary">33,384.7</td>
               <td class="num">99%</td>
             </tr>
             
@@ -974,6 +1645,28 @@
             
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Quanta Cloud Technology</td>
+              <td>QuantaGrid D74H-7U</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,169.5</td>
+              <td class="num secondary">33,356.2</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Dell</td>
+              <td>Dell PowerEdge XE9680</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,155.5</td>
+              <td class="num secondary">33,244.3</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
               <td>Dell</td>
               <td>Dell PowerEdge XE9680</td>
               <td class="num">8</td>
@@ -996,12 +1689,45 @@
             
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Cisco</td>
+              <td>Cisco UCS C885A M8</td>
+              <td class="num">16</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,152.4</td>
+              <td class="num secondary">66,439.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
               <td>HPE</td>
               <td>HPE Cray XD670</td>
               <td class="num">8</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">4,145.6</td>
               <td class="num secondary">33,164.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>HPE</td>
+              <td>HPE Cray XD670</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,145.6</td>
+              <td class="num secondary">33,164.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Cisco</td>
+              <td>Cisco UCS C885A M8</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,145.4</td>
+              <td class="num secondary">33,163.3</td>
               <td class="num">99%</td>
             </tr>
             
@@ -1030,6 +1756,28 @@
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA Hopper H200</td>
               <td>Dell</td>
+              <td>Dell PowerEdge XE9680L</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4,145.2</td>
+              <td class="num secondary">33,161.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Dell</td>
+              <td>Dell PowerEdge XE7745</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">3,633.8</td>
+              <td class="num secondary">29,070.3</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Dell</td>
               <td>Dell PowerEdge XE7745</td>
               <td class="num">8</td>
               <td class="engine-cell">TensorRT</td>
@@ -1046,6 +1794,28 @@
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">3,434.0</td>
               <td class="num secondary">13,736.1</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Quanta Cloud Technology</td>
+              <td>D75E-4U_H200-NVL-141GBx4</td>
+              <td class="num">4</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">3,434.0</td>
+              <td class="num secondary">13,736.1</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>ASUSTeK</td>
+              <td>ESC8000A-E12</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">3,201.8</td>
+              <td class="num secondary">25,614.7</td>
               <td class="num">99%</td>
             </tr>
             
@@ -1073,12 +1843,45 @@
             
             <tr>
               <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>GigaComputing</td>
+              <td>G893-ZX1-AAX2</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">4,017.4</td>
+              <td class="num secondary">32,139.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
               <td>AMD</td>
               <td>QuantaGrid D74A-7U</td>
               <td class="num">8</td>
               <td class="engine-cell">vLLM</td>
               <td class="num primary">4,003.4</td>
               <td class="num secondary">32,027.6</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>AMD</td>
+              <td>QuantaGrid D74A-7U</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">4,003.4</td>
+              <td class="num secondary">32,027.6</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>MiTAC</td>
+              <td>G8825Z5</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">3,969.5</td>
+              <td class="num secondary">31,755.7</td>
               <td class="num">99%</td>
             </tr>
             
@@ -1106,6 +1909,28 @@
             
             <tr>
               <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>MangoBoost</td>
+              <td>MangoBoost</td>
+              <td class="num">8</td>
+              <td class="engine-cell">LLMBoost</td>
+              <td class="num primary">3,959.0</td>
+              <td class="num secondary">31,671.9</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>Supermicro</td>
+              <td>AS-8126GS-TNMR</td>
+              <td class="num">8</td>
+              <td class="engine-cell">LLMBoost</td>
+              <td class="num primary">3,955.8</td>
+              <td class="num secondary">31,646.2</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
               <td>Supermicro</td>
               <td>AS-8126GS-TNMR</td>
               <td class="num">8</td>
@@ -1128,12 +1953,45 @@
             
             <tr>
               <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>Quanta Cloud Technology</td>
+              <td>D75T-7U_8xMI325X</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">3,925.2</td>
+              <td class="num secondary">31,401.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
               <td>ASUSTeK</td>
               <td>ESC_A8A_MI325X_256GBx8</td>
               <td class="num">8</td>
               <td class="engine-cell">vLLM</td>
               <td class="num primary">3,905.1</td>
               <td class="num secondary">31,241.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>ASUSTeK</td>
+              <td>ESC_A8A_MI325X_256GBx8</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">3,905.1</td>
+              <td class="num secondary">31,241.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>Vultr</td>
+              <td>Supermicro AS -8126GS-TNMR</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">3,792.4</td>
+              <td class="num secondary">30,339.4</td>
               <td class="num">99%</td>
             </tr>
             
@@ -1163,10 +2021,43 @@
               <td class="gpu-cell">AMD Instinct MI325X</td>
               <td>Supermicro MangoBoost</td>
               <td>Supermicro AS-8126GS-TNMR</td>
+              <td class="num">16</td>
+              <td class="engine-cell">LLMBoost</td>
+              <td class="num primary">3,587.0</td>
+              <td class="num secondary">57,391.8</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>Supermicro MangoBoost</td>
+              <td>Supermicro AS-8126GS-TNMR</td>
               <td class="num">24</td>
               <td class="engine-cell">LLMBoost</td>
               <td class="num primary">3,358.1</td>
               <td class="num secondary">80,594.9</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>Supermicro MangoBoost</td>
+              <td>Supermicro AS-8126GS-TNMR</td>
+              <td class="num">24</td>
+              <td class="engine-cell">LLMBoost</td>
+              <td class="num primary">3,358.1</td>
+              <td class="num secondary">80,594.9</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>MangoBoost</td>
+              <td>MangoBoost Heterogeneous Cluster</td>
+              <td class="num">48</td>
+              <td class="engine-cell">LLMBoost</td>
+              <td class="num primary">3,189.1</td>
+              <td class="num secondary">153,076.0</td>
               <td class="num">99%</td>
             </tr>
             
@@ -1196,10 +2087,43 @@
               <td class="gpu-cell">NVIDIA Hopper H100</td>
               <td>Cisco</td>
               <td>HPF HGX System</td>
+              <td class="num">32</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">3,821.1</td>
+              <td class="num secondary">122,274.0</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H100</td>
+              <td>Cisco</td>
+              <td>HPF HGX System</td>
               <td class="num">16</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">3,818.8</td>
               <td class="num secondary">61,101.3</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H100</td>
+              <td>Cisco</td>
+              <td>HPF HGX System</td>
+              <td class="num">16</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">3,818.8</td>
+              <td class="num secondary">61,101.3</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI300X</td>
+              <td>MangoBoost</td>
+              <td>Supermicro AS-8125GS-TNMR2</td>
+              <td class="num">8</td>
+              <td class="engine-cell">LLMBoost</td>
+              <td class="num primary">3,107.6</td>
+              <td class="num secondary">24,860.5</td>
               <td class="num">99%</td>
             </tr>
             
@@ -1222,6 +2146,28 @@
               <td class="engine-cell">vLLM</td>
               <td class="num primary">3,093.4</td>
               <td class="num secondary">24,747.6</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI300X</td>
+              <td>Dell</td>
+              <td>Dell Poweredge XE9680</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">3,093.4</td>
+              <td class="num secondary">24,747.6</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI300X</td>
+              <td>AMD</td>
+              <td>Supermicro AS-8125GS-TNMR2</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">3,074.2</td>
+              <td class="num secondary">24,593.8</td>
               <td class="num">99%</td>
             </tr>
             
@@ -1251,6 +2197,28 @@
               <td class="gpu-cell">AMD Instinct MI300X</td>
               <td>Dell MangoBoost</td>
               <td>Dell PowerEdge XE9680</td>
+              <td class="num">8</td>
+              <td class="engine-cell">LLMBoost</td>
+              <td class="num primary">3,066.6</td>
+              <td class="num secondary">24,532.7</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI300X</td>
+              <td>Dell MangoBoost</td>
+              <td>Dell PowerEdge XE9680</td>
+              <td class="num">16</td>
+              <td class="engine-cell">LLMBoost</td>
+              <td class="num primary">2,972.6</td>
+              <td class="num secondary">47,561.7</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI300X</td>
+              <td>Dell MangoBoost</td>
+              <td>Dell PowerEdge XE9680</td>
               <td class="num">16</td>
               <td class="engine-cell">LLMBoost</td>
               <td class="num primary">2,972.6</td>
@@ -1267,7 +2235,7 @@
   <details class="workload" id="llama3-1-405b-server">
     <summary>
       <span class="wl-name">llama3.1-405b — Server</span>
-      <span class="wl-meta">22 submissions <span class="top">&middot; top per-GPU: 161 tok/s · 11,614 tok/s system (NVIDIA 72× GB200)</span></span>
+      <span class="wl-meta">44 submissions <span class="top">&middot; top per-GPU: 161 tok/s · 11,614 tok/s system (NVIDIA 72× GB200)</span></span>
     </summary>
     <div class="wl-body">
       <div class="table-scroll">
@@ -1299,12 +2267,45 @@
             
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA Blackwell GB200</td>
+              <td>NVIDIA</td>
+              <td>—</td>
+              <td class="num">72</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">161.3</td>
+              <td class="num secondary">11,614.3</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell GB200</td>
               <td>Nebius</td>
               <td>Nebius GB200</td>
               <td class="num">4</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">149.0</td>
               <td class="num secondary">596.1</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell GB200</td>
+              <td>Nebius</td>
+              <td>Nebius GB200</td>
+              <td class="num">4</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">149.0</td>
+              <td class="num secondary">596.1</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell GB200</td>
+              <td>Azure</td>
+              <td>ND_GB200_v6</td>
+              <td class="num">4</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">146.0</td>
+              <td class="num secondary">584.0</td>
               <td class="num">99%</td>
             </tr>
             
@@ -1327,6 +2328,28 @@
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">159.9</td>
               <td class="num secondary">1,279.5</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Nebius</td>
+              <td>Nebius B200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">159.9</td>
+              <td class="num secondary">1,279.5</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Lenovo</td>
+              <td>ThinkSystem SR780a V3</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">156.1</td>
+              <td class="num secondary">1,249.0</td>
               <td class="num">99%</td>
             </tr>
             
@@ -1365,12 +2388,56 @@
             
             <tr>
               <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Google</td>
+              <td>NVIDIA DGX B200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">155.8</td>
+              <td class="num secondary">1,246.8</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Lambda</td>
+              <td>NVIDIA DGX B200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">155.8</td>
+              <td class="num secondary">1,246.8</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
               <td>Dell</td>
               <td>Dell PowerEdge XE9685L</td>
               <td class="num">8</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">155.8</td>
               <td class="num secondary">1,246.6</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Dell</td>
+              <td>Dell PowerEdge XE9685L</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">155.8</td>
+              <td class="num secondary">1,246.6</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>GigaComputing</td>
+              <td>G894-SD1</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">155.6</td>
+              <td class="num secondary">1,245.0</td>
               <td class="num">99%</td>
             </tr>
             
@@ -1398,6 +2465,28 @@
             
             <tr>
               <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Supermicro</td>
+              <td>SYS-422GS-NBRT-LCC</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">155.6</td>
+              <td class="num secondary">1,244.7</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Broadcom Supermicro</td>
+              <td>Supermicro SYS-422GA-NBRT-LCC</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">155.5</td>
+              <td class="num secondary">1,243.9</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
               <td>Broadcom Supermicro</td>
               <td>Supermicro SYS-422GA-NBRT-LCC</td>
               <td class="num">8</td>
@@ -1415,6 +2504,28 @@
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">155.5</td>
               <td class="num secondary">1,243.7</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Oracle</td>
+              <td>BM.GPU.B200.8</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">155.5</td>
+              <td class="num secondary">1,243.7</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Dell</td>
+              <td>Dell PowerEdge XE9680L</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">155.4</td>
+              <td class="num secondary">1,243.2</td>
               <td class="num">99%</td>
             </tr>
             
@@ -1443,7 +2554,40 @@
             <tr>
               <td class="gpu-cell">NVIDIA Blackwell B200</td>
               <td>Supermicro</td>
+              <td>SYS-A21GE-NBRT</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">155.4</td>
+              <td class="num secondary">1,242.8</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Supermicro</td>
               <td>SYS-422GA-NBRT-LCC</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">155.1</td>
+              <td class="num secondary">1,240.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Supermicro</td>
+              <td>SYS-422GA-NBRT-LCC</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">155.1</td>
+              <td class="num secondary">1,240.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>NVIDIA</td>
+              <td>NVIDIA DGX B200</td>
               <td class="num">8</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">155.1</td>
@@ -1475,6 +2619,28 @@
             
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Quanta Cloud Technology</td>
+              <td>QuantaGrid D74H-7U</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">36.9</td>
+              <td class="num secondary">295.5</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Nebius</td>
+              <td>Nebius H200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">36.9</td>
+              <td class="num secondary">295.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
               <td>Nebius</td>
               <td>Nebius H200</td>
               <td class="num">8</td>
@@ -1492,6 +2658,28 @@
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">36.5</td>
               <td class="num secondary">584.3</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Cisco</td>
+              <td>Cisco UCS C885A M8</td>
+              <td class="num">16</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">36.5</td>
+              <td class="num secondary">584.3</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Dell Broadcom</td>
+              <td>Dell PowerEdge XE9680</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">34.7</td>
+              <td class="num secondary">277.3</td>
               <td class="num">99%</td>
             </tr>
             
@@ -1521,6 +2709,28 @@
               <td class="gpu-cell">NVIDIA Hopper H100</td>
               <td>Cisco</td>
               <td>HPF HGX System</td>
+              <td class="num">32</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">35.2</td>
+              <td class="num secondary">1,126.9</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H100</td>
+              <td>Cisco</td>
+              <td>HPF HGX System</td>
+              <td class="num">16</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">35.2</td>
+              <td class="num secondary">563.4</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H100</td>
+              <td>Cisco</td>
+              <td>HPF HGX System</td>
               <td class="num">16</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">35.2</td>
@@ -1537,7 +2747,7 @@
   <details class="workload" id="mixtral-8x7b-server">
     <summary>
       <span class="wl-name">mixtral-8x7b — Server</span>
-      <span class="wl-meta">10 submissions <span class="top">&middot; top per-GPU: 7,619 tok/s · 60,955 tok/s system (HPE 8× H200)</span></span>
+      <span class="wl-meta">20 submissions <span class="top">&middot; top per-GPU: 7,619 tok/s · 60,955 tok/s system (HPE 8× H200)</span></span>
     </summary>
     <div class="wl-body">
       <div class="table-scroll">
@@ -1569,12 +2779,45 @@
             
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>HPE</td>
+              <td>HPE Cray XD670</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">7,619.4</td>
+              <td class="num secondary">60,955.1</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
               <td>ASUSTeK</td>
               <td>ASUSTeK ESC N8 H200</td>
               <td class="num">8</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">7,499.1</td>
               <td class="num secondary">59,992.8</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>ASUSTeK</td>
+              <td>ASUSTeK ESC N8 H200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">7,499.1</td>
+              <td class="num secondary">59,992.8</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>AMD</td>
+              <td>QuantaGrid D74A-7U</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">7,472.9</td>
+              <td class="num secondary">59,783.6</td>
               <td class="num">99%</td>
             </tr>
             
@@ -1602,12 +2845,45 @@
             
             <tr>
               <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>Quanta Cloud Technology</td>
+              <td>D75T-7U_8xMI325X</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">7,380.1</td>
+              <td class="num secondary">59,040.8</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
               <td>GigaComputing</td>
               <td>G893-ZX1-AAX2</td>
               <td class="num">8</td>
               <td class="engine-cell">vLLM</td>
               <td class="num primary">7,280.3</td>
               <td class="num secondary">58,242.7</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>GigaComputing</td>
+              <td>G893-ZX1-AAX2</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">7,280.3</td>
+              <td class="num secondary">58,242.7</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>MiTAC</td>
+              <td>G8825Z5</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">7,135.9</td>
+              <td class="num secondary">57,087.1</td>
               <td class="num">99%</td>
             </tr>
             
@@ -1635,12 +2911,45 @@
             
             <tr>
               <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>Vultr</td>
+              <td>Supermicro AS -8126GS-TNMR</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">7,081.7</td>
+              <td class="num secondary">56,653.7</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
               <td>ASUSTeK</td>
               <td>ESC_A8A_MI325X_256GBx8</td>
               <td class="num">8</td>
               <td class="engine-cell">vLLM</td>
               <td class="num primary">6,975.0</td>
               <td class="num secondary">55,800.3</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>ASUSTeK</td>
+              <td>ESC_A8A_MI325X_256GBx8</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">6,975.0</td>
+              <td class="num secondary">55,800.3</td>
+              <td class="num">99%</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">AMD Instinct MI300X</td>
+              <td>AMD</td>
+              <td>Supermicro AS-8125GS-TNMR2</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">5,975.5</td>
+              <td class="num secondary">47,804.3</td>
               <td class="num">99%</td>
             </tr>
             
@@ -1666,6 +2975,17 @@
               <td class="num">99%</td>
             </tr>
             
+            <tr class="gpu-band">
+              <td class="gpu-cell">AMD Instinct MI300X</td>
+              <td>Dell</td>
+              <td>Dell Poweredge XE9680</td>
+              <td class="num">8</td>
+              <td class="engine-cell">vLLM</td>
+              <td class="num primary">5,975.2</td>
+              <td class="num secondary">47,801.9</td>
+              <td class="num">99%</td>
+            </tr>
+            
           </tbody>
         </table>
       </div>
@@ -1675,7 +2995,7 @@
   <details class="workload" id="stable-diffusion-xl-offline">
     <summary>
       <span class="wl-name">stable-diffusion-xl — Offline</span>
-      <span class="wl-meta">18 submissions <span class="top">&middot; top per-GPU: 4 smp/s · 33 smp/s system (Lambda 8× B200)</span></span>
+      <span class="wl-meta">36 submissions <span class="top">&middot; top per-GPU: 4 smp/s · 33 smp/s system (Lambda 8× B200)</span></span>
     </summary>
     <div class="wl-body">
       <div class="table-scroll">
@@ -1707,12 +3027,45 @@
             
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Lambda</td>
+              <td>NVIDIA DGX B200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4.1</td>
+              <td class="num secondary">32.6</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
               <td>Dell</td>
               <td>Dell PowerEdge XE9685L</td>
               <td class="num">8</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">4.0</td>
               <td class="num secondary">32.3</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Dell</td>
+              <td>Dell PowerEdge XE9685L</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4.0</td>
+              <td class="num secondary">32.3</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Google</td>
+              <td>NVIDIA DGX B200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4.0</td>
+              <td class="num secondary">32.1</td>
               <td class="num">—</td>
             </tr>
             
@@ -1742,6 +3095,28 @@
               <td class="gpu-cell">NVIDIA Blackwell B200</td>
               <td>University-of-Florida</td>
               <td>NVIDIA DGX B200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4.0</td>
+              <td class="num secondary">31.9</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>University-of-Florida</td>
+              <td>NVIDIA DGX B200</td>
+              <td class="num">1</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4.0</td>
+              <td class="num secondary">4.0</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>University-of-Florida</td>
+              <td>NVIDIA DGX B200</td>
               <td class="num">1</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">4.0</td>
@@ -1753,6 +3128,28 @@
               <td class="gpu-cell">NVIDIA Blackwell B200</td>
               <td>Broadcom Supermicro</td>
               <td>Supermicro SYS-422GA-NBRT-LCC</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4.0</td>
+              <td class="num secondary">31.8</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Broadcom Supermicro</td>
+              <td>Supermicro SYS-422GA-NBRT-LCC</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4.0</td>
+              <td class="num secondary">31.8</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>Lenovo</td>
+              <td>ThinkSystem SR780a V3</td>
               <td class="num">8</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">4.0</td>
@@ -1784,12 +3181,45 @@
             
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>NVIDIA</td>
+              <td>NVIDIA DGX B200</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">4.0</td>
+              <td class="num secondary">31.8</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
               <td>GigaComputing</td>
               <td>G894-SD1</td>
               <td class="num">8</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">3.9</td>
               <td class="num secondary">31.6</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA Blackwell B200</td>
+              <td>GigaComputing</td>
+              <td>G894-SD1</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">3.9</td>
+              <td class="num secondary">31.6</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Quanta Cloud Technology</td>
+              <td>QuantaGrid D74H-7U</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">2.4</td>
+              <td class="num secondary">19.2</td>
               <td class="num">—</td>
             </tr>
             
@@ -1817,12 +3247,45 @@
             
             <tr>
               <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Cisco</td>
+              <td>Cisco UCS C885A M8</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">2.4</td>
+              <td class="num secondary">19.1</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
               <td>Dell Broadcom</td>
               <td>Dell PowerEdge XE9680</td>
               <td class="num">8</td>
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">2.3</td>
               <td class="num secondary">18.6</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Dell Broadcom</td>
+              <td>Dell PowerEdge XE9680</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">2.3</td>
+              <td class="num secondary">18.6</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Dell</td>
+              <td>Dell PowerEdge XE7745</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">2.1</td>
+              <td class="num secondary">17.1</td>
               <td class="num">—</td>
             </tr>
             
@@ -1848,6 +3311,28 @@
               <td class="num">—</td>
             </tr>
             
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H200</td>
+              <td>Quanta Cloud Technology</td>
+              <td>D75E-4U_H200-NVL-141GBx4</td>
+              <td class="num">4</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">2.1</td>
+              <td class="num secondary">8.4</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">AMD Instinct MI325X</td>
+              <td>AMD</td>
+              <td>Quanta S7PA</td>
+              <td class="num">8</td>
+              <td class="engine-cell">shark-ai</td>
+              <td class="num primary">2.3</td>
+              <td class="num secondary">18.6</td>
+              <td class="num">—</td>
+            </tr>
+            
             <tr class="gpu-band">
               <td class="gpu-cell">AMD Instinct MI325X</td>
               <td>AMD</td>
@@ -1870,6 +3355,17 @@
               <td class="num">—</td>
             </tr>
             
+            <tr>
+              <td class="gpu-cell">NVIDIA Hopper H100</td>
+              <td>The Stage</td>
+              <td>Nebius H100</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TheStageAI</td>
+              <td class="num primary">2.3</td>
+              <td class="num secondary">18.1</td>
+              <td class="num">—</td>
+            </tr>
+            
             <tr class="gpu-band">
               <td class="gpu-cell">NVIDIA L40S</td>
               <td>Dell</td>
@@ -1878,6 +3374,28 @@
               <td class="engine-cell">TensorRT</td>
               <td class="num primary">0.7</td>
               <td class="num secondary">5.5</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr class="gpu-band">
+              <td class="gpu-cell">NVIDIA L40S</td>
+              <td>Dell</td>
+              <td>Dell PowerEdge XE7740</td>
+              <td class="num">8</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">0.7</td>
+              <td class="num secondary">5.5</td>
+              <td class="num">—</td>
+            </tr>
+            
+            <tr>
+              <td class="gpu-cell">NVIDIA L4</td>
+              <td>Dell</td>
+              <td>PowerEdge R570</td>
+              <td class="num">4</td>
+              <td class="engine-cell">TensorRT</td>
+              <td class="num primary">0.3</td>
+              <td class="num secondary">1.0</td>
               <td class="num">—</td>
             </tr>
             
