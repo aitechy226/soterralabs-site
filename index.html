@@ -250,10 +250,14 @@
     }
     .section-head .head-text { flex: 1 1 0; min-width: 0; }
     .band-eyebrow {
+      display: inline-block;
       font-size: 12px; font-weight: 700;
       letter-spacing: 0.20em; text-transform: uppercase;
       color: var(--green-deep);
-      margin: 0 0 8px;
+      background: rgba(22,163,74,0.10);
+      padding: 3px 10px;
+      border-radius: 3px;
+      margin: 0 0 10px;
     }
     .band-title {
       font-size: 28px; font-weight: 800; line-height: 1.22;
@@ -284,6 +288,18 @@
     .prose p:last-child { margin-bottom: 0; }
     .prose strong { color: var(--teal-deep); font-weight: 700; }
 
+    /* Section dividers — 6px gradient rule between body bands */
+    .body-wrap section.band + section.band {
+      position: relative;
+    }
+    .body-wrap section.band + section.band::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--teal-deep), var(--teal) 50%, var(--brand-green));
+    }
+
     /* What-we-build two-block layout */
     .build-blocks {
       display: grid; grid-template-columns: 1fr; gap: 28px;
@@ -295,7 +311,8 @@
       border-left: 3px solid var(--brand-green);
       border-radius: 6px;
     }
-    .build-block:nth-child(2) { border-left-color: var(--teal); }
+    .build-block:nth-child(1) { background: rgba(74,222,128,0.06); border-color: rgba(74,222,128,0.25); }
+    .build-block:nth-child(2) { background: rgba(0,112,192,0.05); border-color: rgba(0,112,192,0.18); border-left-color: var(--teal); }
     .build-block h3 {
       font-size: 18px; font-weight: 700;
       color: var(--teal-deep);
@@ -336,9 +353,10 @@
       transition: box-shadow 0.2s, transform 0.2s;
       color: inherit;
     }
-    .post-card:nth-child(2) { border-left-color: var(--teal); }
-    .post-card:nth-child(3) { border-left-color: var(--teal-deep); }
-    .post-card:nth-child(4) { border-left-color: var(--brand-green); }
+    .post-card:nth-child(1) { background: rgba(74,222,128,0.06); }
+    .post-card:nth-child(2) { border-left-color: var(--teal); background: rgba(0,112,192,0.05); }
+    .post-card:nth-child(3) { border-left-color: var(--teal-deep); background: rgba(10,31,68,0.05); }
+    .post-card:nth-child(4) { border-left-color: var(--brand-green); background: rgba(74,222,128,0.06); }
     .post-card:hover {
       box-shadow: 0 6px 18px rgba(10,31,68,0.08);
       transform: translateY(-2px);
@@ -569,8 +587,8 @@
       </div>
     </section>
 
-    <!-- §2 What we build — #eef2f8 -->
-    <section class="band alt" id="build">
+    <!-- §2 What we build — #ffffff -->
+    <section class="band" id="build">
       <div class="container">
         <div class="section-head">
           <div class="head-text">
@@ -650,8 +668,8 @@
       </div>
     </section>
 
-    <!-- §4 About — #eef2f8 -->
-    <section class="band alt" id="about">
+    <!-- §4 About — #ffffff -->
+    <section class="band" id="about">
       <div class="container">
         <div class="section-head">
           <div class="head-text">
