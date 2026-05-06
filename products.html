@@ -4,24 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Products — Soterra Labs</title>
-  <meta name="description" content="AI-powered tools from Soterra Labs — built to work before your sales team does." />
+  <meta name="description" content="A growing suite of AI intelligence tools from Soterra Labs — sizing, readiness, validation, and GTM fit, each grounded in structured data rather than estimation." />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     .tm { font-size: 0.5em; vertical-align: super; font-weight: 500; margin-left: 1px; }
 
     :root {
-      --teal:       #0070c0;
-      --teal-light: #e3f2fd;
-      --teal-deep:  #0a1f44;
-      --accent:     #7ec8e3;
-      --dark:       #1a1a2e;
-      --mid:        #374151;
-      --muted:      #6b7280;
-      --border:     #e5e7eb;
-      --bg-card:    #ffffff;
-      --shadow-sm:  0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.04);
-      --shadow-md:  0 2px 6px rgba(0,0,0,0.05), 0 8px 20px rgba(0,0,0,0.06);
-      --shadow-lg:  0 4px 10px rgba(0,0,0,0.06), 0 14px 36px rgba(10,31,68,0.10);
+      --teal:        #0070c0;
+      --teal-light:  #e3f2fd;
+      --teal-deep:   #0a1f44;
+      --accent:      #7ec8e3;
+      --brand-green: #4ade80;
+      --green-deep:  #16a34a;
+      --dark:        #1a1a2e;
+      --mid:         #374151;
+      --muted:       #6b7280;
+      --border:      #e5e7eb;
+      --bg-card:     #ffffff;
+      --shadow-sm:   0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.04);
+      --shadow-md:   0 2px 6px rgba(0,0,0,0.05), 0 8px 20px rgba(0,0,0,0.06);
+      --shadow-lg:   0 4px 10px rgba(0,0,0,0.06), 0 14px 36px rgba(10,31,68,0.10);
     }
 
     html { scroll-behavior: smooth; }
@@ -83,9 +85,7 @@
       color: var(--teal);
       background: var(--teal-light);
     }
-    .nav-links a.active {
-      color: var(--teal);
-    }
+    .nav-links a.active { color: var(--teal); }
 
     /* hamburger */
     .nav-toggle {
@@ -193,8 +193,6 @@
     /* ── PRODUCT CARD ── */
     .product-card {
       background: var(--bg-card);
-      border: none;
-      border-top: 4px solid var(--teal);
       border-radius: 12px;
       padding: 32px;
       box-shadow: var(--shadow-md);
@@ -206,78 +204,39 @@
       transform: translateY(-3px);
       box-shadow: var(--shadow-lg);
     }
-    .product-tag {
-      display: inline-block;
+    .product-eyebrow {
       font-size: 10px;
       font-weight: 800;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: var(--teal);
       margin-bottom: 10px;
     }
     .product-card h2 {
       font-size: 22px;
       font-weight: 700;
       color: var(--dark);
-      margin-bottom: 8px;
+      margin-bottom: 12px;
       line-height: 1.3;
     }
-    .product-card h2 sup {
-      font-size: 0.5em;
-      font-weight: 600;
-      vertical-align: super;
-    }
-    .product-card .product-one-liner {
+    .product-card p {
       font-size: 15px;
       color: var(--mid);
-      line-height: 1.6;
-      margin-bottom: 20px;
-      flex-grow: 1;
-    }
-    .product-card .product-details {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.6;
+      line-height: 1.65;
       margin-bottom: 24px;
-    }
-    .product-card .product-details strong {
-      color: var(--dark);
+      flex-grow: 1;
     }
     .product-cta {
       display: inline-block;
-      background: var(--teal);
       color: #fff;
       text-decoration: none;
       padding: 12px 24px;
       border-radius: 6px;
       font-size: 14px;
       font-weight: 600;
-      transition: background 0.15s;
+      transition: opacity 0.15s;
       align-self: flex-start;
     }
-    .product-cta:hover { background: #005a9e; }
-
-    /* ── COMING SOON CARD ── */
-    .product-card.coming-soon {
-      border-top-color: var(--border);
-      opacity: 0.55;
-    }
-    .product-card.coming-soon:hover {
-      transform: none;
-      box-shadow: var(--shadow-md);
-    }
-    .coming-badge {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--muted);
-      background: #f0f2f5;
-      padding: 4px 10px;
-      border-radius: 4px;
-      margin-bottom: 10px;
-    }
+    .product-cta:hover { opacity: 0.88; }
 
     /* ── FOOTER ── */
     footer {
@@ -286,10 +245,7 @@
       padding: 24px;
       text-align: center;
     }
-    footer p {
-      font-size: 13px;
-      color: #cbd5e1;
-    }
+    footer p { font-size: 13px; color: #cbd5e1; }
     footer span { color: #60a5fa; }
     footer .footer-sep { color: #64748b; margin: 0 8px; }
     footer .footer-link { color: #60a5fa; text-decoration: none; }
@@ -308,7 +264,8 @@
         <span></span><span></span><span></span>
       </button>
       <ul class="nav-links" id="navLinks">
-        <li><a href="index.html#services">Services</a></li>
+        <li><a href="index.html#fit">Where we fit</a></li>
+        <li><a href="index.html#build">What we build</a></li>
         <li><a href="products.html" class="active">Products</a></li>
         <li><a href="/anvil/">Reference</a></li>
         <li><a href="index.html#thinking">Thinking</a></li>
@@ -332,8 +289,8 @@
   <div class="page-hero">
     <div class="inner">
       <div class="page-hero-label">Products</div>
-      <h1>What we ship.</h1>
-      <p>Pre-sale intelligence tools and production AI systems. Each one built for a specific problem, deployed in your environment.</p>
+      <h1>A growing suite of AI intelligence tools.</h1>
+      <p>Live and accepting demos. More are in active development and pre-release &mdash; reach out if you want to know what&rsquo;s in the pipeline.</p>
     </div>
   </div>
 
@@ -342,46 +299,36 @@
     <div class="products-inner">
       <div class="products-grid">
 
-        <!-- GPU NAVIGATOR -->
-        <div class="product-card">
-          <div class="product-tag">GTM Intelligence</div>
-          <h2>GPU Navigator<sup class="tm">&#8482;</sup></h2>
-          <div class="product-one-liner">
-            Most GPU vendors show a catalog and a price. GPU Navigator<sup class="tm">&#8482;</sup> starts with the workload and works backward to the right GPU — so the prospect arrives at the first call already qualified.
-          </div>
-          <div class="product-details">
-            <strong>Built for:</strong> GPU infrastructure vendors<br/>
-            <strong>Prospect time:</strong> 5 minutes<br/>
-            <strong>Output:</strong> Personalized GPU recommendation, VRAM fit analysis, multi-GPU detection, cost estimate at your rates<br/>
-            <strong>Sales rep gets:</strong> Full brief by email before the first call
-          </div>
-          <a href="gpu-navigator.html" class="product-cta">See how it works &rarr;</a>
+        <!-- 1. GPU Sizing & Fit — brand green -->
+        <div class="product-card" style="border-top: 4px solid #16a34a;">
+          <div class="product-eyebrow" style="color: #16a34a;">GTM Intelligence</div>
+          <h2>GPU Sizing &amp; Fit Assessment</h2>
+          <p>A 15-minute self-service assessment that sizes a workload against a GPU catalog, benchmarks the vendor&rsquo;s rates against the competitive landscape, and scores the prospect&rsquo;s fit &mdash; so the sales team&rsquo;s first conversation starts from a qualified position rather than discovery.</p>
+          <a href="gpu-navigator.html" class="product-cta" style="background: #16a34a;">See how it works &rarr;</a>
         </div>
 
-        <!-- AI SYSTEMS -->
-        <div class="product-card" style="border-top-color: #2563eb;">
-          <div class="product-tag" style="color: #2563eb;">AI Systems</div>
-          <h2>Custom AI — Packaged to Run</h2>
-          <div class="product-one-liner">
-            Document processing, intelligent search, multi-agent workflows, automated pipelines — scoped to your problem, deployed in your environment, delivered as a running system.
-          </div>
-          <div class="product-details">
-            <strong>Built for:</strong> Teams replacing manual work with AI<br/>
-            <strong>Includes:</strong> RAG systems, agentic workflows, document intelligence, workflow automation<br/>
-            <strong>Delivery:</strong> Production-ready, deployed in your infrastructure
-          </div>
-          <a href="index.html#contact" class="product-cta" style="background: #2563eb;">Start a conversation &rarr;</a>
+        <!-- 2. AI Factory Sizing — primary blue -->
+        <div class="product-card" style="border-top: 4px solid #0070c0;">
+          <div class="product-eyebrow" style="color: #0070c0;">AI Factory</div>
+          <h2>AI Factory Sizing</h2>
+          <p>Given a workload and a target GPU family, produces the compute blueprint for an on-premises AI factory deployment &mdash; server configuration, cluster topology, cooling class, and serving runtime, derived from physics rather than estimation. Designed to map to OEM-validated stacks; covers the full infrastructure scope with compute as the primary output in the current release.</p>
+          <a href="index.html#contact" class="product-cta" style="background: #0070c0;">Request a demo &rarr;</a>
         </div>
 
-        <!-- YOUR PROBLEM HERE -->
-        <div class="product-card coming-soon">
-          <div class="coming-badge">Your Problem Here</div>
-          <h2>Something we should build?</h2>
-          <div class="product-one-liner">
-            Every product on this page started as a conversation about a real problem. If you have one, we'd like to hear it.
-          </div>
-          <div class="product-details"></div>
-          <a href="index.html#contact" class="product-cta" style="background: var(--mid);">Start a conversation &rarr;</a>
+        <!-- 3. AI Readiness Audit — cyan -->
+        <div class="product-card" style="border-top: 4px solid #0891b2;">
+          <div class="product-eyebrow" style="color: #0891b2;">Data Foundation</div>
+          <h2>AI Readiness Audit</h2>
+          <p>A structured assessment across six domains &mdash; data architecture, storage, engineering pipelines, infrastructure, compliance, and cost &mdash; that determines whether an organization&rsquo;s data foundation can support the AI workloads being planned. Produces a scored gap report before the pilot begins.</p>
+          <a href="index.html#contact" class="product-cta" style="background: #0891b2;">Request a demo &rarr;</a>
+        </div>
+
+        <!-- 4. Inference Benchmarking — indigo -->
+        <div class="product-card" style="border-top: 4px solid #6366f1;">
+          <div class="product-eyebrow" style="color: #6366f1;">Hardware Validation</div>
+          <h2>Inference Benchmarking</h2>
+          <p>Measures whether the hardware a development team is building on can handle the inference load their application will produce &mdash; under realistic concurrency, with their own workload shapes, not vendor benchmark conditions. Output is a verdict the developer can act on: production-ready, marginal, or below threshold, with a specific next step.</p>
+          <a href="index.html#contact" class="product-cta" style="background: #6366f1;">Request a demo &rarr;</a>
         </div>
 
       </div>
