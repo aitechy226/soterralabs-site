@@ -221,26 +221,30 @@ main { padding: 0; }
   line-height: 1.15;
 }
 .page-header h1 .accent-word { color: var(--brand-green); }
-.page-header h1 .round-tag {
-  font-size: 16px;
+.page-header .round-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.page-header .round-tag {
+  font-size: 14px;
   font-weight: 600;
   color: var(--brand-green);
   letter-spacing: 0;
-  margin-left: 8px;
   font-family: 'SF Mono', Menlo, Consolas, monospace;
 }
+.page-header .round-published {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+}
+.page-header .round-published time { color: #fff; font-weight: 600; }
 .page-header .lead {
   font-size: 18px;
   color: rgba(255,255,255,0.82);
   margin-bottom: 18px;
   line-height: 1.7;
 }
-.page-header .round-published {
-  font-size: 13px;
-  color: rgba(255,255,255,0.7);
-  margin-bottom: 10px;
-}
-.page-header .round-published time { color: #fff; font-weight: 600; }
 
 /* Freshness pill on dark hero (green = fresh) */
 .page-header .freshness {

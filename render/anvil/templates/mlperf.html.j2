@@ -49,10 +49,11 @@
 <div class="page-header">
   <div class="page-header-inner">
     <div class="eyebrow">Soterra Labs Anvil &middot; MLPerf Results</div>
-    <h1>MLPerf Inference Results <span class="round-tag">Round {{ mlperf.latest_round }}</span></h1>
-    <p class="round-published">
-      Round published: <time datetime="{{ mlperf.round_published_at_iso }}">{{ mlperf.round_published_at_display }}</time>
-    </p>
+    <h1>MLPerf Inference Results</h1>
+    <div class="round-meta">
+      <span class="round-tag">Round {{ mlperf.latest_round }}</span>
+      <span class="round-published">Published: <time datetime="{{ mlperf.round_published_at_iso }}">{{ mlperf.round_published_at_display }}</time></span>
+    </div>
     <p class="lead">
       Published MLPerf Inference Datacenter results for common workloads, sourced from MLCommons. Every row links to the official submission detail page.
     </p>
