@@ -352,6 +352,8 @@
       border-radius: 6px;
       transition: box-shadow 0.2s, transform 0.2s;
       color: inherit;
+      cursor: pointer;
+      text-decoration: none;
     }
     .post-card:nth-child(1) { background: rgba(74,222,128,0.06); }
     .post-card:nth-child(2) { border-left-color: var(--teal); background: rgba(0,112,192,0.05); }
@@ -361,6 +363,15 @@
       box-shadow: 0 6px 18px rgba(10,31,68,0.08);
       transform: translateY(-2px);
     }
+    .post-card:hover .post-title { text-decoration: underline; }
+    .post-read {
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--green-deep);
+      margin: 10px 0 0;
+    }
+    .post-card:nth-child(2) .post-read { color: var(--teal); }
+    .post-card:nth-child(3) .post-read { color: var(--teal-deep); }
     .post-tag {
       font-size: 11px; font-weight: 700;
       letter-spacing: 0.14em; text-transform: uppercase;
@@ -644,24 +655,28 @@
             <p class="post-tag">GPU &middot; Infrastructure &middot; TCO</p>
             <h3 class="post-title">GPU Infrastructure: The Five Calculations That Actually Matter</h3>
             <p class="post-excerpt">$/hr is the last number to calculate. VRAM fit, quantization impact, multi-node threshold, egress cost, and real TCO, in that order.</p>
+            <p class="post-read">Read &rarr;</p>
           </a>
 
           <a href="/thinking/enterprise-rag-trust-layer" class="post-card">
             <p class="post-tag">RAG &middot; FSI &middot; Production</p>
             <h3 class="post-title">The Trust Layer: What Separates Good RAG from Enterprise RAG</h3>
             <p class="post-excerpt">Four bugs surfaced while hardening a RAG system for FSI. The fixes reveal what separates a working RAG from one that survives audit.</p>
+            <p class="post-read">Read &rarr;</p>
           </a>
 
           <a href="/thinking/agentic-hype-vs-reality" class="post-card">
             <p class="post-tag">Agents &middot; Architecture</p>
             <h3 class="post-title">Why Your AI Agent Demo Looks Great and Your Production System Doesn't</h3>
             <p class="post-excerpt">Reliability and auditability are the two arguments. Which one holds up when the next model release ships?</p>
+            <p class="post-read">Read &rarr;</p>
           </a>
 
           <a href="/thinking/mcp-service-to-service" class="post-card">
             <p class="post-tag">MCP &middot; LangGraph &middot; KYC</p>
             <h3 class="post-title">I Used MCP as a Service-to-Service Protocol. Here's What I Learned.</h3>
             <p class="post-excerpt">MCP was designed as an LLM-to-tool protocol. The tradeoffs of using it as a service layer between a LangGraph graph and integration servers.</p>
+            <p class="post-read">Read &rarr;</p>
           </a>
 
         </div>
