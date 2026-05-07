@@ -213,7 +213,7 @@ main { padding: 0; }
   margin-bottom: 16px;
 }
 .page-header h1 {
-  font-size: clamp(24px, 3.2vw, 34px);
+  font-size: clamp(20px, 2.4vw, 28px);
   font-weight: 700;
   color: #fff;
   margin-bottom: 12px;
