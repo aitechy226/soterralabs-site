@@ -48,6 +48,7 @@
       <ul class="nav-links" id="navLinks">
         <li><a href="/#fit">Where we fit</a></li>
         <li><a href="/#build">What we build</a></li>
+        <li><a href="/gpu-navigator">Products</a></li>
         {%- if section == "anvil" %}
         <li class="has-children">
           <a href="/anvil/" {% if active_nav == 'reference' %}class="active"{% endif %}>Reference</a>
@@ -62,7 +63,6 @@
         <li><a href="/anvil/">Reference</a></li>
         {%- endif %}
         <li><a href="/#thinking">Thinking</a></li>
-        <li><a href="/#value">Why partner</a></li>
         <li><a href="/#about">About</a></li>
         <li><a href="/#contact">Contact</a></li>
       </ul>
@@ -144,6 +144,39 @@
       document.addEventListener('visibilitychange', function() {
         if (!document.hidden) refresh();
       });
+      // Freshness sidecar — fetches /anvil/data/freshness.json and
+      // wires data-freshness-rel/abs/time placeholders. Timestamps never
+      // baked into HTML so cron commits never conflict with local branches.
+      function loadFreshness() {
+        fetch('/anvil/data/freshness.json')
+          .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+          .then(function(d) {
+            var now = new Date();
+            document.querySelectorAll('[data-freshness-rel]').forEach(function(el) {
+              var e = d[el.getAttribute('data-freshness-rel')];
+              if (!e || !e.fetched_at) return;
+              el.setAttribute('data-iso', e.fetched_at);
+              var t = parseIso(e.fetched_at);
+              if (t) el.textContent = relativeFrom(t, now);
+            });
+            document.querySelectorAll('[data-freshness-abs]').forEach(function(el) {
+              var e = d[el.getAttribute('data-freshness-abs')];
+              if (e && e.display) el.textContent = e.display;
+            });
+            document.querySelectorAll('[data-freshness-time]').forEach(function(el) {
+              var e = d[el.getAttribute('data-freshness-time')];
+              if (!e) return;
+              if (e.fetched_at) el.setAttribute('datetime', e.fetched_at);
+              if (e.display) el.textContent = e.display;
+            });
+          })
+          .catch(function() {});
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadFreshness);
+      } else {
+        loadFreshness();
+      }
     })();
   </script>
 

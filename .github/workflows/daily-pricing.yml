@@ -15,16 +15,16 @@ on:
   workflow_dispatch: {}   # Manual fire-anytime button in Actions UI
 
 # One run at a time; queue rather than overlap (fetchers + commit
-# would race on pricing.sqlite + the rendered HTML).
+# would race on pricing.sqlite).
 concurrency:
   group: anvil-pricing-write
   cancel-in-progress: false
 
 permissions:
-  contents: write   # Need to commit re-rendered HTML back to main
+  contents: write   # Need to commit pricing.sqlite back to main
 
 jobs:
-  fetch-and-render:
+  fetch-and-commit:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -81,16 +81,17 @@ jobs:
           fi
           python -m scripts.fetch_gcp_pricing
 
-      - name: Render Anvil pages
-        run: python -m render.anvil.build
+      - name: Write freshness.json
+        working-directory: anvil
+        run: python -m scripts.write_freshness
 
-      - name: Commit re-rendered HTML if changed
+      - name: Commit updated pricing data
         run: |
           git config user.name  "anvil-cron[bot]"
           git config user.email "anvil-cron@users.noreply.github.com"
-          git add anvil/index.html anvil/pricing/index.html anvil/mlperf/index.html anvil/style.css anvil/data/pricing.sqlite 2>/dev/null || true
+          git add anvil/data/pricing.sqlite anvil/data/freshness.json 2>/dev/null || true
           if git diff --cached --quiet; then
-            echo "No HTML changes to commit."
+            echo "No pricing data changes to commit."
           else
             git commit -m "anvil cron: refresh pricing $(date -u +%Y-%m-%d)"
             git push origin main

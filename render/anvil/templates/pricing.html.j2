@@ -55,8 +55,8 @@
     </p>
     {% if not pricing.is_stale %}
     <p class="freshness">
-      Last refreshed: <time datetime="{{ pricing.latest_fetch_iso }}">{{ pricing.latest_fetch_display }}</time>
-      <span class="muted">(<span data-iso="{{ pricing.latest_fetch_iso }}">{{ pricing.relative_age_display }}</span>)</span>
+      Last refreshed: <time data-freshness-time="pricing">—</time>
+      <span class="muted">(<span data-freshness-rel="pricing">—</span>)</span>
     </p>
     {% endif %}
   </div>

@@ -84,6 +84,7 @@
       <ul class="nav-links" id="navLinks">
         <li><a href="/#fit">Where we fit</a></li>
         <li><a href="/#build">What we build</a></li>
+        <li><a href="/gpu-navigator">Products</a></li>
         <li class="has-children">
           <a href="/anvil/" class="active">Reference</a>
           <ul class="dropdown">
@@ -92,7 +93,6 @@
           </ul>
         </li>
         <li><a href="/#thinking">Thinking</a></li>
-        <li><a href="/#value">Why partner</a></li>
         <li><a href="/#about">About</a></li>
         <li><a href="/#contact">Contact</a></li>
       </ul>
@@ -174,6 +174,39 @@
       document.addEventListener('visibilitychange', function() {
         if (!document.hidden) refresh();
       });
+      // Freshness sidecar — fetches /anvil/data/freshness.json and
+      // wires data-freshness-rel/abs/time placeholders. Timestamps never
+      // baked into HTML so cron commits never conflict with local branches.
+      function loadFreshness() {
+        fetch('/anvil/data/freshness.json')
+          .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+          .then(function(d) {
+            var now = new Date();
+            document.querySelectorAll('[data-freshness-rel]').forEach(function(el) {
+              var e = d[el.getAttribute('data-freshness-rel')];
+              if (!e || !e.fetched_at) return;
+              el.setAttribute('data-iso', e.fetched_at);
+              var t = parseIso(e.fetched_at);
+              if (t) el.textContent = relativeFrom(t, now);
+            });
+            document.querySelectorAll('[data-freshness-abs]').forEach(function(el) {
+              var e = d[el.getAttribute('data-freshness-abs')];
+              if (e && e.display) el.textContent = e.display;
+            });
+            document.querySelectorAll('[data-freshness-time]').forEach(function(el) {
+              var e = d[el.getAttribute('data-freshness-time')];
+              if (!e) return;
+              if (e.fetched_at) el.setAttribute('datetime', e.fetched_at);
+              if (e.display) el.textContent = e.display;
+            });
+          })
+          .catch(function() {});
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadFreshness);
+      } else {
+        loadFreshness();
+      }
     })();
   </script>
 
@@ -189,8 +222,8 @@
     </p>
     
     <p class="freshness">
-      Last refreshed: <time datetime="2026-05-08T07:24:22.062158+00:00">May 8, 2026 at 07:24 UTC</time>
-      <span class="muted">(<span data-iso="2026-05-08T07:24:22.062158+00:00">Just now</span>)</span>
+      Last refreshed: <time data-freshness-time="pricing">—</time>
+      <span class="muted">(<span data-freshness-rel="pricing">—</span>)</span>
     </p>
     
   </div>

@@ -132,6 +132,10 @@ class AssetCard(_Frozen):
     freshness_iso: str = ""             # ISO 8601 UTC timestamp
     freshness_main_relative: str = ""   # '5 hours ago' (when relative goes inside <strong>)
     freshness_muted_relative: str = ""  # '14 hours ago' (when relative goes inside .muted span)
+    # JSON-sidecar fields — set when timestamps come from freshness.json
+    # instead of being baked into the HTML. Prevents cron conflicts.
+    freshness_json_key: str = ""        # key into freshness.json ('pricing' | 'mlperf')
+    freshness_rel_in_muted: bool = False  # True → relative-time span goes in .muted (MLPerf)
 
 
 class LandingContext(_Frozen):

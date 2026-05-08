@@ -702,14 +702,11 @@ def build_landing_context(
             else "Data is stale" if pricing_ready and pricing.is_stale  # type: ignore[union-attr]
             else "Coming soon"
         ),
-        freshness_muted=(
-            f"· {pricing.latest_fetch_display}" if pricing_ready and pricing.latest_fetch_display  # type: ignore[union-attr]
-            else ""
-        ),
-        freshness_iso=(pricing.latest_fetch_iso if pricing_fresh else ""),  # type: ignore[union-attr]
-        freshness_main_relative=(
-            pricing.relative_age_display if pricing_fresh else ""  # type: ignore[union-attr]
-        ),
+        freshness_muted="· " if pricing_fresh else "",
+        # Timestamps come from freshness.json (JS) — not baked into HTML.
+        # Prevents git conflicts when cron commits new data.
+        freshness_json_key="pricing" if pricing_fresh else "",
+        freshness_rel_in_muted=False,
     ))
 
     # MLPerf card. Relative phrase appears in `muted` ("· Ingested
@@ -725,13 +722,10 @@ def build_landing_context(
             f"Round {mlperf_round}" if mlperf_ready and mlperf_round
             else "Coming soon"
         ),
-        freshness_muted=(
-            "· Ingested " if mlperf_ready and mlperf_relative_age else ""
-        ),
-        freshness_iso=(mlperf_fetched_at_iso or "") if mlperf_ready else "",
-        freshness_muted_relative=(
-            mlperf_relative_age if mlperf_ready and mlperf_relative_age else ""
-        ),
+        freshness_muted="· Ingested " if mlperf_ready else "",
+        # Timestamps come from freshness.json (JS) — not baked into HTML.
+        freshness_json_key="mlperf" if mlperf_ready else "",
+        freshness_rel_in_muted=True,
     ))
 
     return LandingContext(cards=tuple(cards))

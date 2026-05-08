@@ -23,7 +23,7 @@ permissions:
   contents: write
 
 jobs:
-  fetch-and-render:
+  fetch-and-commit:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -52,16 +52,17 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: python -m scripts.fetch_mlperf
 
-      - name: Render Anvil pages
-        run: python -m render.anvil.build
+      - name: Write freshness.json
+        working-directory: anvil
+        run: python -m scripts.write_freshness
 
-      - name: Commit re-rendered HTML if changed
+      - name: Commit updated MLPerf data
         run: |
           git config user.name  "anvil-cron[bot]"
           git config user.email "anvil-cron@users.noreply.github.com"
-          git add anvil/index.html anvil/pricing/index.html anvil/mlperf/index.html anvil/style.css anvil/data/mlperf.sqlite 2>/dev/null || true
+          git add anvil/data/mlperf.sqlite anvil/data/freshness.json 2>/dev/null || true
           if git diff --cached --quiet; then
-            echo "No HTML changes to commit."
+            echo "No MLPerf data changes to commit."
           else
             git commit -m "anvil cron: refresh mlperf $(date -u +%Y-%m-%d)"
             git push origin main
