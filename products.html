@@ -247,6 +247,32 @@
       margin-bottom: 14px;
     }
 
+    /* ── SECTION DIVIDER ── */
+    .section-divider {
+      grid-column: 1 / -1;
+      padding: 32px 0 8px;
+      border-top: 1px solid var(--border);
+      margin-top: 16px;
+    }
+    .section-divider-label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .section-divider-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 4px;
+    }
+    .section-divider-sub {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
     /* ── FOOTER ── */
     footer {
       background: var(--dark);
@@ -298,14 +324,20 @@
   <div class="page-hero">
     <div class="inner">
       <div class="page-hero-label">Products</div>
-      <h1>A growing suite of AI intelligence tools.</h1>
-      <p>Live and accepting demos. More are in active development and pre-release &mdash; reach out if you want to know what&rsquo;s in the pipeline.</p>
+      <h1>Two product lines. One engineering practice.</h1>
+      <p>GTM intelligence tools that change how infrastructure is bought, and production AI systems built to run in regulated environments. Live and accepting demos &mdash; reach out if you want to know what&rsquo;s in the pipeline.</p>
     </div>
   </div>
 
   <!-- PRODUCT GRID -->
   <div class="products-section">
     <div class="products-inner">
+      <div class="section-divider" style="border-top: none; padding-top: 0; margin-top: 0; padding-bottom: 24px;">
+        <div class="section-divider-label">Product Line 1</div>
+        <div class="section-divider-title">GTM Intelligence</div>
+        <div class="section-divider-sub">Self-contained tools that run in the room with the buyer. No backend, no server &mdash; licensed per deployment.</div>
+      </div>
+
       <div class="products-grid">
 
         <!-- 1. GPU Sizing & Fit — brand green -->
@@ -359,6 +391,35 @@
           <h2><span style="color:#b45309;">Tokenomics</span><span style="color:#1a1a2e;"> Navigator</span></h2>
           <div class="product-subhead">Inference Cost Modeling</div>
           <p>Applies a published methodology to a buyer&rsquo;s workload, model, and hardware configuration to produce a Executive Bridge Report: cost-per-million-tokens as a range, utilization sensitivity curve, KV cache memory tax, and three-year TCO projection. Every output traces to a vendor-published specification or documented assumption &mdash; built to survive a finance committee, not just an engineering review.</p>
+          <a href="index.html#contact" class="product-cta" style="background: #64748b;">Request a demo &rarr;</a>
+        </div>
+
+      </div>
+
+      <!-- Production AI Systems section -->
+      <div class="products-grid" id="production" style="margin-top: 0;">
+
+        <div class="section-divider">
+          <div class="section-divider-label">Product Line 2</div>
+          <div class="section-divider-title">Production AI Systems</div>
+          <div class="section-divider-sub">Server-backed agentic systems built for regulated environments. Deterministic graph controls flow &mdash; LLM generates prose. Licensed per SKU per deployment.</div>
+        </div>
+
+        <!-- 7. KYC & Client Onboarding — violet -->
+        <div class="product-card" style="border-top: 4px solid #7c3aed;">
+          <div class="product-eyebrow" style="color: #7c3aed;">Agentic Workflow</div>
+          <h2><span style="color:#7c3aed;">KYC</span><span style="color:#1a1a2e;"> Onboarding Orchestrator</span></h2>
+          <div class="product-subhead">Automated KYC &amp; Client Onboarding</div>
+          <p>Automates the full KYC due diligence and onboarding sequence for financial institutions &mdash; entity data, credit ratings, sanctions screening, and PEP checks run in the correct order, risk evaluated by deterministic logic, compliance documentation generated automatically. Low and medium risk cases clear without analyst involvement; the analyst queue receives only cases that require human judgment, pre-populated with all findings.</p>
+          <a href="index.html#contact" class="product-cta" style="background: #64748b;">Request a demo &rarr;</a>
+        </div>
+
+        <!-- 8. Enterprise RAG Platform — sky blue -->
+        <div class="product-card" style="border-top: 4px solid #0369a1;">
+          <div class="product-eyebrow" style="color: #0369a1;">Agentic RAG</div>
+          <h2><span style="color:#0369a1;">Enterprise</span><span style="color:#1a1a2e;"> RAG Platform</span></h2>
+          <div class="product-subhead">Regulated Industry Intelligence</div>
+          <p>A shared engine &mdash; LangGraph graph controls all routing, LLM handles retrieval synthesis &mdash; with five independently licensable products: Financial Intelligence, Compliance Intelligence, Legal Intelligence, Clinical Intelligence, and Manufacturing Intelligence. Each SKU ships with its own corpus scaffold, domain rules, and documentation as a self-contained deployment.</p>
           <a href="index.html#contact" class="product-cta" style="background: #64748b;">Request a demo &rarr;</a>
         </div>
 
