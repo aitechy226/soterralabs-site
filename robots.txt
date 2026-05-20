@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /dev/
+Disallow: /archive/
+Disallow: /render/
 
 Sitemap: https://soterralabs.ai/sitemap.xml
