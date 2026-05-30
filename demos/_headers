@@ -1,0 +1,18 @@
+# DFA Cloudflare Pages headers (Marcus cookbook §I + Marcus pressure-test §C).
+# SSOT: this file. CSP <meta> in HTML is dev-fallback only, must be subset.
+#
+# Committed source of truth. The Pages deploy pipeline (SaaS architect spec
+# §11 — built-artifacts branch, per-vendor dist/<tool>/<slug>/) is not yet
+# wired. When it is, this file must sit at the root of the Pages output so the
+# /* matcher applies to the served artifact. Host-rooted (nested subdomain per
+# spec), so /* is correct regardless of subdomain-vs-path.
+
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; font-src 'self' data:; frame-ancestors 'none'; form-action 'none'; base-uri 'self'; object-src 'none'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=()
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
