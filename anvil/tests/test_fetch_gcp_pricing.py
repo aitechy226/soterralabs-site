@@ -187,3 +187,25 @@ def test_resolve_api_key_missing_raises(monkeypatch) -> None:
     monkeypatch.delenv("GCP_API_KEY", raising=False)
     with pytest.raises(fetch_gcp_pricing._AuthError, match="GCP_API_KEY not set"):
         fetch_gcp_pricing._resolve_api_key()
+
+
+# ---- _walk_skus — key transport (anvil-fetcher-error-surfacing, 2026-07-21) ----
+
+
+# RED-VERIFIED: 2026-07-22
+def test_walk_skus_sends_key_as_header_not_url_param() -> None:
+    """GCP_API_KEY must ride in the x-goog-api-key request header, never
+    in the URL query string — httpx logs full request URLs at INFO
+    independent of any exception, so a URL-borne secret leaks regardless
+    of exception-handling discipline (Priya finding, PRODUCE D3)."""
+    with patch("scripts.fetch_gcp_pricing.get_json") as mock_get_json:
+        mock_get_json.return_value = {"skus": []}
+        list(fetch_gcp_pricing._walk_skus("supersecret-key-abc123"))
+
+    assert mock_get_json.called
+    call_args = mock_get_json.call_args
+    called_url = call_args.args[0] if call_args.args else call_args.kwargs.get("url")
+    assert "supersecret-key-abc123" not in called_url
+    assert "key=" not in called_url
+    headers = call_args.kwargs.get("headers", {})
+    assert headers.get("x-goog-api-key") == "supersecret-key-abc123"

@@ -13,10 +13,8 @@ Endpoints documented per PRODUCE §2.1.
 """
 from __future__ import annotations
 
-import httpx
-
 from scripts import notify
-from scripts._fetcher_base import fetch_run, insert_quote
+from scripts._fetcher_base import fetch_run, get_json, insert_quote
 from scripts.cloud_mappings import AWS_GPU_LIKE_RE, AWS_INSTANCE_TO_GPU
 
 REGIONS_OF_INTEREST = ["us-east-1", "us-west-2", "eu-west-1"]
@@ -33,12 +31,12 @@ INDEX_URL = (
 def main() -> None:
     """Entry point — invoked from CLI / GitHub Actions workflow."""
     with fetch_run("aws") as (conn, _run_id):
-        index = httpx.get(INDEX_URL, timeout=30).json()
+        index = get_json(INDEX_URL, timeout=30)
         unmapped_gpu_likes: set[str] = set()
         for region in REGIONS_OF_INTEREST:
             region_url_suffix = index["regions"][region]["currentVersionUrl"]
             offers_url = "https://pricing.us-east-1.amazonaws.com" + region_url_suffix
-            offers = httpx.get(offers_url, timeout=120).json()
+            offers = get_json(offers_url, timeout=120)
             unmapped_gpu_likes |= _ingest_region(conn, region, offers, offers_url)
         conn.commit()
 

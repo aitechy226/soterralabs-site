@@ -54,10 +54,13 @@ def safe_error_context(exc: BaseException, upstream_host: str | None = None) -> 
     full request URL — including query-string API keys — into the
     exception message. Use this helper instead.
     """
+    status = getattr(exc, "status_code", None)
+    if status is None:
+        status = getattr(getattr(exc, "response", None), "status_code", None)
     return {
         "error_class": type(exc).__name__,
         "upstream_host": upstream_host,
-        "status": getattr(getattr(exc, "response", None), "status_code", None),
+        "status": status,
     }
 
 
