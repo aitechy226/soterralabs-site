@@ -181,6 +181,32 @@ def test_safe_error_context_handles_httpx_response_status():
     assert ctx["status"] == 503
 
 
+# RED-VERIFIED: 2026-07-22
+def test_safe_error_context_reads_plain_status_code_attribute():
+    """FetchHTTPError carries status_code directly (no .response wrapper) —
+    safe_error_context must read it. Checked before .response.status_code
+    per _fetcher_base.get_json's error types (anvil-fetcher-error-surfacing)."""
+    from scripts import _fetcher_base
+
+    exc = _fetcher_base.FetchHTTPError(429, "https://prices.azure.com/api/retail/prices")
+    ctx = notify.safe_error_context(exc, upstream_host="azure")
+    assert ctx["status"] == 429
+    assert ctx["error_class"] == "FetchHTTPError"
+
+
+# RED-VERIFIED: 2026-07-22
+def test_safe_error_context_transport_error_status_is_none():
+    """FetchTransportError has no HTTP status — safe_error_context must
+    return status=None, not raise or misread .response (which doesn't
+    exist on this exception type)."""
+    from scripts import _fetcher_base
+
+    exc = _fetcher_base.FetchTransportError("ConnectTimeout", "https://prices.azure.com/api/retail/prices")
+    ctx = notify.safe_error_context(exc, upstream_host="azure")
+    assert ctx["status"] is None
+    assert ctx["error_class"] == "FetchTransportError"
+
+
 # ---- end-to-end ----
 
 def test_alert_redacts_secrets_in_email_body(monkeypatch):

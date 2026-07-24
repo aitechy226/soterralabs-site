@@ -19,10 +19,8 @@ Filtering decisions:
 """
 from __future__ import annotations
 
-import httpx
-
 from scripts import notify
-from scripts._fetcher_base import fetch_run, insert_quote
+from scripts._fetcher_base import fetch_run, get_json, insert_quote
 from scripts.cloud_mappings import AZURE_GPU_LIKE_RE, AZURE_INSTANCE_TO_GPU
 
 REGIONS_OF_INTEREST = ["eastus", "eastus2", "westus2", "westeurope", "southcentralus"]
@@ -97,7 +95,7 @@ def _ingest_region(conn, region: str, target_skus: list[str]) -> set[str]:
         f"{API_BASE}?$filter={_build_filter(region, target_skus)}"
     )
     while url:
-        page = httpx.get(url, timeout=PAGE_TIMEOUT_SECONDS).json()
+        page = get_json(url, timeout=PAGE_TIMEOUT_SECONDS)
         for item in page.get("Items", []):
             if not _is_linux_consumption(item):
                 continue

@@ -4,11 +4,16 @@ Fetches the Cloud Billing Catalog API for the Compute Engine service,
 walks SKUs whose description matches `cloud_mappings.GCP_SKU_PATTERNS`,
 and inserts per-GPU on-demand quotes via `_fetcher_base.insert_quote`.
 
-Auth: requires `GCP_API_KEY` env var. Catalog access is read-only and
-free under the standard quota; create the key at
-https://console.cloud.google.com/apis/credentials. Cron secret name:
-`GCP_API_KEY` (per `~/.claude/projects/.../memory/...` and the
-project SETUP doc).
+Auth: requires `GCP_API_KEY` env var, sent via the `x-goog-api-key`
+request header (never the URL query string — httpx logs full request
+URLs at INFO independent of any exception, so a URL-borne key leaks
+regardless of exception-handling discipline; confirmed live that GCP's
+Cloud Billing Catalog API accepts the header form — see
+docs/specs/2026-07-21-anvil-fetcher-error-surfacing-architect.md § D3).
+Catalog access is read-only and free under the standard quota; create
+the key at https://console.cloud.google.com/apis/credentials. Cron
+secret name: `GCP_API_KEY` (per `~/.claude/projects/.../memory/...` and
+the project SETUP doc).
 
 Per-GPU vs per-VM convention: GCP bills GPUs as separate SKUs from the
 underlying VM. Each row this fetcher inserts represents one GPU at the
@@ -28,10 +33,8 @@ from __future__ import annotations
 
 import os
 
-import httpx
-
 from scripts import notify
-from scripts._fetcher_base import fetch_run, insert_quote
+from scripts._fetcher_base import fetch_run, get_json, insert_quote
 from scripts.cloud_mappings import GCP_GPU_LIKE_RE, map_gcp_description
 
 REGIONS_OF_INTEREST = ["us-central1", "us-east4", "europe-west4"]
@@ -89,19 +92,18 @@ def _hourly_usd(sku: dict) -> float | None:
 
 def _walk_skus(api_key: str):
     """Yield every SKU under the Compute Engine service. Pages
-    transparently via nextPageToken."""
-    url = f"{API_BASE}/{COMPUTE_ENGINE_SERVICE}/skus?key={api_key}"
+    transparently via nextPageToken. api_key rides in the x-goog-api-key
+    header, never the URL — see module docstring."""
+    headers = {"x-goog-api-key": api_key}
+    url = f"{API_BASE}/{COMPUTE_ENGINE_SERVICE}/skus"
     while url:
-        page = httpx.get(url, timeout=PAGE_TIMEOUT_SECONDS).json()
+        page = get_json(url, timeout=PAGE_TIMEOUT_SECONDS, headers=headers)
         for sku in page.get("skus", []):
             yield sku
         token = page.get("nextPageToken")
         if not token:
             return
-        url = (
-            f"{API_BASE}/{COMPUTE_ENGINE_SERVICE}/skus"
-            f"?key={api_key}&pageToken={token}"
-        )
+        url = f"{API_BASE}/{COMPUTE_ENGINE_SERVICE}/skus?pageToken={token}"
 
 
 def _ingest_skus(conn, skus_iter, regions: list[str]) -> set[str]:

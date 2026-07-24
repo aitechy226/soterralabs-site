@@ -11,8 +11,9 @@ Per iterate-coding rule #7 — every branch covered:
 from __future__ import annotations
 
 import sqlite3
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
+import httpx
 import pytest
 
 from scripts import _fetcher_base
@@ -217,3 +218,152 @@ def test_insert_quote_zero_price_rejected(in_memory_pricing_db):
             price_per_hour_usd=0, source_url="https://test",
         )
         assert inserted is False
+
+
+# ---- get_json / retry — anvil-fetcher-error-surfacing wave (2026-07-21) ----
+
+
+def _resp(status: int, json_body: dict | None = None, headers: dict | None = None):
+    """Fake httpx.Response — status + optional headers + .json() return."""
+    r = MagicMock()
+    r.status_code = status
+    r.headers = httpx.Headers(headers or {})
+    r.json.return_value = json_body if json_body is not None else {}
+    return r
+
+
+# RED-VERIFIED: 2026-07-22
+def test_get_json_retries_429_then_succeeds():
+    """A 429 with Retry-After, followed by a 200, returns the 200 payload."""
+    responses = [
+        _resp(429, headers={"Retry-After": "1"}),
+        _resp(200, {"ok": True}),
+    ]
+    with patch("scripts._fetcher_base.httpx.get", side_effect=responses) as mock_get, \
+         patch("scripts._fetcher_base.time.sleep") as mock_sleep:
+        result = _fetcher_base.get_json("https://example.test/skus", timeout=5)
+
+    assert result == {"ok": True}
+    assert mock_get.call_count == 2
+    mock_sleep.assert_called_once_with(1.0)
+
+
+# RED-VERIFIED: 2026-07-22
+def test_get_json_transport_error_retries_then_raises_fetch_transport_error():
+    """Transport-level failures (timeout, connect error) retry through the
+    bounded loop, then raise FetchTransportError with status_code=None —
+    never a raw httpx exception."""
+    with patch(
+        "scripts._fetcher_base.httpx.get",
+        side_effect=httpx.ConnectTimeout("boom"),
+    ) as mock_get, patch("scripts._fetcher_base.time.sleep") as mock_sleep:
+        with pytest.raises(_fetcher_base.FetchTransportError) as exc_info:
+            _fetcher_base.get_json("https://example.test/skus", timeout=5)
+
+    assert exc_info.value.status_code is None
+    assert exc_info.value.error_class == "ConnectTimeout"
+    assert mock_get.call_count == _fetcher_base.RETRY_MAX_ATTEMPTS
+    assert mock_sleep.call_count == _fetcher_base.RETRY_MAX_ATTEMPTS - 1
+    # No original httpx exception chained into the traceback.
+    assert exc_info.value.__cause__ is None
+
+
+# RED-VERIFIED: 2026-07-22
+def test_get_json_3xx_raises_fetch_http_error_not_json_decode_error():
+    """httpx does not follow redirects by default (follow_redirects=False),
+    so a 3xx response body is not JSON — falling through to resp.json()
+    would reproduce the exact opaque JSONDecodeError this wave exists to
+    kill. A 3xx must raise FetchHTTPError immediately, not attempt to
+    parse the body. Found by blind CODE PRESSURE-TEST (2026-07-22)."""
+    with patch(
+        "scripts._fetcher_base.httpx.get", return_value=_resp(302),
+    ) as mock_get, patch("scripts._fetcher_base.time.sleep") as mock_sleep:
+        with pytest.raises(_fetcher_base.FetchHTTPError) as exc_info:
+            _fetcher_base.get_json("https://example.test/skus", timeout=5)
+
+    assert exc_info.value.status_code == 302
+    assert mock_get.call_count == 1
+    mock_sleep.assert_not_called()
+
+
+# RED-VERIFIED: 2026-07-22
+def test_get_json_non_retryable_4xx_raises_immediately():
+    """A non-429 4xx (client error) raises FetchHTTPError on the first
+    attempt — retrying a bad request never helps."""
+    with patch(
+        "scripts._fetcher_base.httpx.get", return_value=_resp(403),
+    ) as mock_get, patch("scripts._fetcher_base.time.sleep") as mock_sleep:
+        with pytest.raises(_fetcher_base.FetchHTTPError) as exc_info:
+            _fetcher_base.get_json("https://example.test/skus", timeout=5)
+
+    assert exc_info.value.status_code == 403
+    assert mock_get.call_count == 1
+    mock_sleep.assert_not_called()
+
+
+# RED-VERIFIED: 2026-07-22
+def test_get_json_does_not_chain_original_httpx_exception():
+    """FetchHTTPError raised on final HTTP failure carries no chained
+    original httpx exception — an uncaught traceback must not print the
+    raw httpx exception (which, for a URL carrying a secret, would defeat
+    redaction entirely). Confirmed via __cause__/__suppress_context__,
+    not just str(exc)."""
+    responses = [_resp(500), _resp(500), _resp(500)]
+    with patch("scripts._fetcher_base.httpx.get", side_effect=responses), \
+         patch("scripts._fetcher_base.time.sleep"):
+        with pytest.raises(_fetcher_base.FetchHTTPError) as exc_info:
+            _fetcher_base.get_json("https://example.test/skus", timeout=5)
+
+    assert exc_info.value.__cause__ is None
+    assert exc_info.value.__suppress_context__ is True
+
+
+# RED-VERIFIED: 2026-07-22
+def test_retry_delay_caps_retry_after_header():
+    """Retry-After above the ceiling is capped, not obeyed verbatim.
+    Both the standard header and Azure's non-standard header are checked."""
+    assert _fetcher_base._retry_delay(
+        0, httpx.Headers({"Retry-After": "60"})
+    ) == _fetcher_base.RETRY_MAX_DELAY_SECONDS
+    assert _fetcher_base._retry_delay(
+        0, httpx.Headers({"x-ms-ratelimit-retailprices-retry-after": "60"})
+    ) == _fetcher_base.RETRY_MAX_DELAY_SECONDS
+    assert _fetcher_base._retry_delay(
+        0, httpx.Headers({"Retry-After": "5"})
+    ) == 5.0
+
+
+# RED-VERIFIED: 2026-07-22
+def test_fetch_run_http_error_captures_status_code():
+    """A FetchHTTPError raised inside fetch_run folds its HTTP status into
+    both fetch_runs.error_message and the alert context — closing the
+    diagnostic gap that let today's opaque JSONDecodeError through."""
+    import tempfile
+    from pathlib import Path
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        db_path = Path(tmpdir) / "pricing.sqlite"
+        conn0 = sqlite3.connect(str(db_path))
+        from tests.conftest import _PRICING_SCHEMA
+        conn0.executescript(_PRICING_SCHEMA)
+        conn0.close()
+
+        with patch("scripts._fetcher_base.notify.alert") as mock_alert:
+            with pytest.raises(_fetcher_base.FetchHTTPError):
+                with _fetcher_base.fetch_run("azure", db_path=db_path):
+                    raise _fetcher_base.FetchHTTPError(
+                        429, "https://prices.azure.com/api/retail/prices"
+                    )
+
+        conn2 = sqlite3.connect(str(db_path))
+        row = conn2.execute(
+            "SELECT status, error_message FROM fetch_runs ORDER BY id DESC LIMIT 1"
+        ).fetchone()
+        assert row[0] == "failed"
+        assert row[1] == "FetchHTTPError (HTTP 429)"
+        conn2.close()
+
+        mock_alert.assert_called_once()
+        assert mock_alert.call_args.args[0] == "critical"
+        assert mock_alert.call_args.kwargs["context"]["status"] == 429
+        assert mock_alert.call_args.kwargs["context"]["error_class"] == "FetchHTTPError"
