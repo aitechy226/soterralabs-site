@@ -26,6 +26,11 @@ This is a deploy gate ambiguous result: it is not possible to confirm whether th
 pricing page is live or shows a placeholder. The L3 audit requires a confirmed live state
 before proceeding.
 
+## Prior deferrals
+
+- **2026-08-05**: HTTP 403 from soterralabs.ai (not verified as live). Deferred.
+- **2026-08-07**: Network egress policy blocks soterralabs.ai entirely (EGRESS_BLOCKED). Deferred.
+
 ## What to check
 
 - Confirm whether `soterralabs.ai` should be added to the allowed-egress list for this
