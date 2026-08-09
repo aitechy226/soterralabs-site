@@ -66,10 +66,7 @@ jobs:
           ALERT_TO:          ${{ secrets.ALERT_TO }}
           ALERT_FROM:        ${{ secrets.ALERT_FROM }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        # D5 VERIFICATION — TEMPORARY forced failure, revert immediately after one dispatch run
-        run: |
-          echo "::error::D5 verification: Azure step forced to fail"
-          exit 1
+        run: python -m scripts.fetch_azure_pricing
 
       - name: Fetch GCP pricing (skipped if GCP_API_KEY absent)
         id: fetch_gcp
