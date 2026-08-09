@@ -3,6 +3,10 @@ dev/
 *.pdf
 .DS_Store
 
+# Superpowers brainstorm-session scaffolding — transient drafts + server
+# state from brainstorming skills. Never part of the repo.
+.superpowers/
+
 # Playwright MCP cache — captured snapshots / screenshots / state from
 # `mcp__plugin_playwright_playwright__*` calls. Transient session state,
 # not part of the repo. Was untracked but accumulating across sessions.
