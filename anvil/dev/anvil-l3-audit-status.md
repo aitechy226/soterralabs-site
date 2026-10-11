@@ -1,6 +1,6 @@
 # Anvil L3 Visual Audit — Deploy-State Gate Result
 
-**Date:** 2026-10-09 (UTC)
+**Date:** 2026-10-11 (UTC)
 
 ## Observation
 
@@ -16,6 +16,13 @@ The hostname does not resolve at all; no HTTP response was received.
 
 ## Conclusion
 
-Wave 1 is **not yet live** as of 2026-10-09.
+Wave 1 is **not yet live** as of 2026-10-11.
 
 **L3 audit deferred — re-arm /schedule for the next attempt.**
+
+## History
+
+| Date       | Result                          |
+|------------|---------------------------------|
+| 2026-10-09 | DNS failure — site not found    |
+| 2026-10-11 | DNS failure — site not found    |
