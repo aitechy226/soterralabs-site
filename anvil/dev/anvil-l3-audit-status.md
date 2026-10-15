@@ -1,14 +1,14 @@
 # Anvil L3 Visual Audit — Deploy-State Gate Result
 
-**Date:** 2026-10-13 (UTC)
+**Date:** 2026-10-15 (UTC)
 
 ## Observation
 
 Attempted to fetch: `https://soterralabs.ai/anvil/pricing`
 
-**Result:** Proxy policy denial — `CONNECT tunnel failed, response 403` (soterralabs.ai:443 blocked by network policy in sandbox)
+**Result:** DNS failure — `getaddrinfo ENOTFOUND soterralabs.ai` (domain does not resolve from sandbox)
 
-The sandbox proxy does not permit outbound HTTPS to soterralabs.ai; no HTTP response was received from the origin server.
+The sandbox cannot perform DNS resolution for soterralabs.ai; no HTTP response was received from the origin server.
 
 ### Markers checked
 - (a) `<h1>Cloud GPU Pricing</h1>` — **NOT FOUND** (no response)
@@ -16,9 +16,13 @@ The sandbox proxy does not permit outbound HTTPS to soterralabs.ai; no HTTP resp
 
 ## Conclusion
 
-Wave 1 deploy status remains **unverifiable** from this sandbox as of 2026-10-13 due to persistent network policy blocking outbound access to soterralabs.ai.
+Wave 1 deploy status remains **unverifiable** from this sandbox as of 2026-10-15. Four consecutive attempts have all failed (DNS failure or proxy block). The deploy gate cannot be resolved from this environment.
 
 **L3 audit deferred — re-arm /schedule for the next attempt.**
+
+## Persistent Blocker — Recommended Action
+
+After 4 failed attempts (Oct 9–15), the sandbox consistently cannot reach soterralabs.ai. The Layer 3 tests are engine-isolated (in-memory SQLite, local build.py calls — NO browser, NO production fetch). They do not require the production site to be live. Consider updating the scheduled task prompt to skip the deploy gate and proceed directly to Step 2, or run this manually from outside the sandbox.
 
 ## History
 
@@ -27,3 +31,4 @@ Wave 1 deploy status remains **unverifiable** from this sandbox as of 2026-10-13
 | 2026-10-09 | DNS failure — site not found                                  |
 | 2026-10-11 | DNS failure — site not found                                  |
 | 2026-10-13 | Proxy 403 — CONNECT blocked by sandbox network policy         |
+| 2026-10-15 | DNS failure — site not found (ENOTFOUND)                      |
