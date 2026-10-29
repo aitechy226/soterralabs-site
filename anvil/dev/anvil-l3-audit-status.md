@@ -1,6 +1,6 @@
 # Anvil L3 Visual Audit — Status
 
-## Latest run: 2026-10-03 (UTC)
+## Latest run: 2026-10-29 (UTC)
 
 **Outcome:** BLOCKED — deploy-gate check cannot be completed.
 
@@ -25,6 +25,12 @@ No other outbound fetch route is available in this environment without proxy rec
 3. Re-arm `/schedule` for the next attempt once egress is resolved.
 
 `L3 audit deferred — re-arm /schedule for the next attempt.`
+
+---
+
+## Prior run: 2026-10-03 (UTC)
+
+Same blocker — egress proxy blocked `soterralabs.ai`. Status identical to above.
 
 ---
 
