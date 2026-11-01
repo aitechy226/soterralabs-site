@@ -1,5 +1,21 @@
 # Anvil Layer 3 Audit — Deferred Status
 
+## Attempt 4 — 2026-11-01 (UTC)
+
+URL checked: `https://soterralabs.ai/anvil/pricing`
+
+**Observation:** DNS resolution failed — `getaddrinfo ENOTFOUND soterralabs.ai`. The domain is not reachable from the remote execution environment (same failure as attempts 1–3 on 2026-10-21, 2026-10-27, and 2026-10-31).
+
+- HTTP status: N/A (connection refused at DNS level)
+- `<h1>Cloud GPU Pricing</h1>`: NOT confirmed
+- `<table class="pricing-table">` with data rows: NOT confirmed
+
+**Root cause (repeated):** The remote cloud execution environment's network policy does not allow outbound connections to soterralabs.ai. To resolve: add soterralabs.ai to the session's allowed network domains in the environment configuration. Until then, this audit will continue to defer on every attempt.
+
+L3 audit deferred — re-arm /schedule for the next attempt.
+
+---
+
 ## Attempt 3 — 2026-10-31 (UTC)
 
 URL checked: `https://soterralabs.ai/anvil/pricing`
