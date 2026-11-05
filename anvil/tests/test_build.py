@@ -192,13 +192,12 @@ def test_build_landing_pricing_ready_mlperf_not_ready():
     assert len(landing.cards) == 2
     pricing_card, mlperf_card = landing.cards
     assert pricing_card.is_ready is True
-    # Wave 2026-04-29 fix: relative phrase split out of freshness_main into
-    # freshness_main_relative so the template can wrap it in <span data-iso=...>
-    # for client-side recompute. freshness_main now carries just the static
-    # prefix "Refreshed " (trailing space intentional).
+    # Wave 4A freshness.json sidecar: live-time data is fetched by JS from
+    # freshness.json. freshness_main carries just the static "Refreshed "
+    # prefix; the relative phrase comes from data-freshness-rel JS element.
     assert pricing_card.freshness_main == "Refreshed "
-    assert pricing_card.freshness_main_relative == "2 hours ago"
-    assert pricing_card.freshness_iso == "2026-04-26T14:35:00+00:00"
+    assert pricing_card.freshness_main_relative == ""
+    assert pricing_card.freshness_json_key == "pricing"
     assert mlperf_card.is_ready is False
     assert mlperf_card.freshness_main == "Coming soon"
     # Coming-soon cards have no fetched_at → no live treatment
@@ -208,12 +207,11 @@ def test_build_landing_pricing_ready_mlperf_not_ready():
 
 
 def test_build_landing_card_data_iso_renders_in_html():
-    """Regression: the JS shim recomputes [data-iso] elements on page
-    load. Without the wrapper, bake-in text goes stale between cron
-    runs (the static-site-rendering scar 2026-04-28 + 2026-04-29).
-    Asserts the rendered HTML actually carries data-iso attrs on the
-    landing-page freshness pill — caught the LANDING-card regression
-    after the pricing/mlperf PAGES were fixed."""
+    """Regression: landing-page freshness pills carry live-update hooks.
+    Wave 4A switched from baked-in data-iso spans to freshness.json sidecar
+    (data-freshness-rel / data-freshness-abs) so the JS fetcher drives
+    all three pages consistently and cron commits don't conflict with
+    baked-in timestamps."""
     from render.models import GpuGroup, PricingContext, Quote
     p_ctx = PricingContext(
         latest_fetch_iso="2026-04-28T08:18:48+00:00",
@@ -238,12 +236,12 @@ def test_build_landing_card_data_iso_renders_in_html():
     env = build.make_jinja_env(mlperf_ready=True)
     html = build.render_landing_page(env, landing)
 
-    # Pricing card: data-iso wraps the relative phrase ("2 hours ago"),
-    # not the "Refreshed" prefix.
-    assert 'data-iso="2026-04-28T08:18:48+00:00">2 hours ago</span>' in html
-    # MLPerf card: data-iso wraps the muted relative ("14 hours ago"),
-    # the "Round v5.1" main label is plain text.
-    assert 'data-iso="2026-04-27T23:11:29+00:00">14 hours ago</span>' in html
+    # Pricing card: data-freshness-rel="pricing" drives the JS recompute
+    # for the relative-age span inside the main <strong>.
+    assert 'data-freshness-rel="pricing"' in html
+    # MLPerf card (rel_in_muted=True): data-freshness-rel="mlperf" is in
+    # the muted span; "Round v5.1" main label is plain text.
+    assert 'data-freshness-rel="mlperf"' in html
 
 
 def test_build_landing_pricing_stale_shows_data_stale():
