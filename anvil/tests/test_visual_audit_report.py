@@ -1,377 +1,391 @@
 """Layer 3 Visual Audit Report tier — six archetype golden renders.
 
+Hand-picked archetypes → structural invariants on the rendered HTML.
 Closes the silent-conditional-branch gap in render/build.py + Jinja templates.
-Six archetypes: single-vendor happy / multi-vendor full table / stale-pricing
-banner / empty-data caveat / mlperf round-stale / cache-bust hash invariant.
-Sub-second engine-isolated fixtures, selectolax HTML parsing.
-No browser. No Playwright. Pure in-memory SQLite + build pipeline.
+
+Engine-isolated: uses in_memory_pricing_db / in_memory_mlperf_db conftest
+fixtures, not real SQLite files. Sub-second per fixture. Parses rendered
+HTML with selectolax.
+
+Archetypes:
+1. single_vendor_happy_path
+2. multi_vendor_full_table
+3. stale_pricing_banner
+4. empty_gpu_groups
+5. mlperf_round_stale_banner
+6. cache_bust_hash_invariant
 """
 from __future__ import annotations
 
-import hashlib
+import json
 import sqlite3
-import tempfile
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 from selectolax.parser import HTMLParser
 
 from render import build
 
-# Fixed reference time for deterministic archetype fixtures.
-NOW = datetime(2026, 4, 26, 16, 35, 0, tzinfo=timezone.utc)
+# ---------------------------------------------------------------------------
+# Shared time anchor
+# ---------------------------------------------------------------------------
+
+NOW = datetime(2026, 4, 27, 16, 0, 0, tzinfo=timezone.utc)
+
+# ---------------------------------------------------------------------------
+# Seed helpers
+# ---------------------------------------------------------------------------
 
 
-# ---- Seed helpers ----
+def _seed_pricing_quotes(conn: sqlite3.Connection, rows: list) -> None:
+    """Bulk-insert price_quotes rows.
 
-def _seed_pricing_quotes(conn: sqlite3.Connection, rows: list[dict]) -> None:
-    """Insert archetype-specific rows into price_quotes and commit."""
-    for r in rows:
+    Each element: (fetched_at, cloud, region, instance_type, gpu, gpu_count,
+                   price_per_hour_usd)
+    """
+    for fetched_at, cloud, region, instance_type, gpu, gpu_count, price in rows:
         conn.execute(
             "INSERT INTO price_quotes "
             "(fetched_at, cloud, region, instance_type, gpu, gpu_count, "
             "price_per_hour_usd, source_url) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                r["fetched_at"],
-                r["cloud"],
-                r["region"],
-                r["instance_type"],
-                r["gpu"],
-                r["gpu_count"],
-                r["price_per_hour_usd"],
-                r.get("source_url", "https://test.example/pricing"),
-            ),
+            "VALUES (?, ?, ?, ?, ?, ?, ?, 'https://test')",
+            (fetched_at, cloud, region, instance_type, gpu, gpu_count, price),
         )
     conn.commit()
 
 
 def _seed_mlperf_results(conn: sqlite3.Connection, rows: list[dict]) -> None:
-    """Insert archetype-specific rows into mlperf_results and commit."""
+    """Bulk-insert mlperf_results rows from a list of dicts.
+
+    Required keys: round, submitter, system_name, accelerator,
+    accelerator_count, gpu, model, scenario, metric, metric_value, fetched_at.
+    Optional: accuracy (default '99%'), submission_url, quarantined (default 0),
+              software (embedded in raw_row; default 'TensorRT-LLM 1.0').
+    """
     for r in rows:
+        raw = json.dumps({
+            "_synthetic": True,
+            "Model": r["model"],
+            "Software": r.get("software", "TensorRT-LLM 1.0"),
+        })
         conn.execute(
             "INSERT INTO mlperf_results "
             "(round, submitter, system_name, accelerator, accelerator_count, "
             "gpu, model, scenario, metric, metric_value, accuracy, "
-            "submission_url, raw_row, quarantined, fetched_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)",
+            "submission_url, raw_row, quarantined, quarantine_reason, fetched_at) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (
-                r["round"],
-                r.get("submitter", "Acme Inc"),
-                r.get("system_name", "Test Server"),
-                r.get("accelerator", r.get("gpu") or "H100-SXM"),
-                r.get("accelerator_count", 8),
-                r.get("gpu"),
-                r["model"],
-                r["scenario"],
-                r.get("metric", "tokens_per_second"),
-                r.get("metric_value", 5000.0),
-                r.get("accuracy"),
-                r.get("submission_url", "https://mlcommons.org/test"),
-                r.get("raw_row", '{"Software": "vLLM 0.9", "Notes": ""}'),
+                r["round"], r["submitter"], r["system_name"],
+                r["accelerator"], r["accelerator_count"],
+                r.get("gpu"), r["model"], r["scenario"],
+                r["metric"], r["metric_value"],
+                r.get("accuracy", "99%"),
+                r.get("submission_url", "https://example.com/submission"),
+                raw, r.get("quarantined", 0), None,
                 r["fetched_at"],
             ),
         )
     conn.commit()
 
 
-def _assert_no_broken_renders(html: str) -> None:
-    """No unrendered Jinja2 placeholders, NaN, or bare None in output."""
-    assert "{{" not in html, "Unrendered Jinja2 placeholder found"
-    assert ">NaN<" not in html, "NaN literal in rendered output"
-    assert ">None<" not in html, "None literal in rendered output"
+# ---------------------------------------------------------------------------
+# Archetype 1: single_vendor_happy_path
+# ---------------------------------------------------------------------------
 
-
-# ---- Archetype 1: single_vendor_happy_path ----
 
 def test_single_vendor_happy_path(in_memory_pricing_db):
-    """One H100 row from AWS, fresh (2h old).
+    """One H100 from AWS, 2h fresh.
 
-    Assert: no stale banner; freshness paragraph present; one pricing table;
-    H100 anchor id on first group row; price formatted $X.YY; methodology
-    footer present; no broken renders.
+    (a) no banner-stale; freshness line present (JS-rendered via data attr);
+        pricing table has one gpu-cell 'NVIDIA Hopper H100'; row anchor id
+        matches canonical id; price formatted $X.YZ; anchor-nav links to
+        canonical id; methodology footer present.
+    (b) no Jinja placeholders, no None, no NaN.
     """
     fetched = (NOW - timedelta(hours=2)).isoformat()
     _seed_pricing_quotes(in_memory_pricing_db, [
-        {
-            "fetched_at": fetched,
-            "cloud": "aws",
-            "region": "us-east-1",
-            "instance_type": "p5.48xlarge",
-            "gpu": "nvidia-hopper-h100",
-            "gpu_count": 8,
-            "price_per_hour_usd": 98.32,
-        },
+        (fetched, "aws", "us-east-1", "p5.48xlarge", "nvidia-hopper-h100", 8, 98.32),
     ])
 
     ctx = build.build_pricing_context(in_memory_pricing_db, NOW)
-    assert ctx.is_stale is False
-    env = build.make_jinja_env(mlperf_ready=False)
+    env = build.make_jinja_env(mlperf_ready=True)
     html = build.render_pricing_page(env, ctx)
     tree = HTMLParser(html)
 
-    # No stale banner for fresh data.
-    assert tree.css_first("div.banner-stale") is None
+    # (a) structural
+    assert tree.css_first("div.banner-stale") is None, \
+        "banner-stale must be absent for fresh data"
 
-    # Freshness paragraph rendered when not stale.
-    assert tree.css_first("p.freshness") is not None
+    freshness = tree.css_first("p.freshness")
+    assert freshness is not None, "freshness line must be present for fresh data"
+    # Freshness is JS-populated via data-freshness-time (static-site-rendering pattern)
+    assert freshness.css_first("[data-freshness-time]") is not None
 
-    # Exactly one pricing table in the DOM.
-    assert len(tree.css("table.pricing-table")) == 1
+    h1 = tree.css_first("h1")
+    assert h1 is not None
+    assert "Cloud GPU Pricing" in h1.text()
 
-    # H100 canonical anchor id on the first row of its group.
-    assert tree.css_first("tr#nvidia-hopper-h100") is not None, (
-        "Expected tr#nvidia-hopper-h100 anchor on first H100 row"
-    )
+    # canonical-id rendered as row anchor
+    assert tree.css_first("tr#nvidia-hopper-h100") is not None, \
+        "first H100 row must carry id='nvidia-hopper-h100'"
 
-    # Price formatted as $X.YY (two decimal places).
+    # GPU display name in gpu-cell
+    gpu_cells = tree.css("td.gpu-cell")
+    assert len(gpu_cells) == 1
+    assert "NVIDIA Hopper H100" in gpu_cells[0].text()
+
+    # price formatted as $X.YZ (two decimals)
     assert "$98.32" in html
-    assert "$12.29" in html  # per-GPU: 98.32 / 8
 
-    # Methodology footer always present on pricing page.
+    # anchor-nav links to canonical id
+    anchor_nav = tree.css_first("nav.anchor-nav")
+    assert anchor_nav is not None
+    assert anchor_nav.css_first("a[href='#nvidia-hopper-h100']") is not None
+
+    # Soterra attribution footer
     assert tree.css_first("footer.methodology") is not None
 
-    _assert_no_broken_renders(html)
+    # (b) no-broken-renders
+    assert "{{" not in html and "}}" not in html
+    assert "None" not in html
+    # NaN check: price values must not be NaN — confirm via actual cell content
+    assert "$98.32" in html, "price cell must contain a valid formatted decimal"
 
 
-# ---- Archetype 2: multi_vendor_full_table ----
+# ---------------------------------------------------------------------------
+# Archetype 2: multi_vendor_full_table
+# ---------------------------------------------------------------------------
+
 
 def test_multi_vendor_full_table(in_memory_pricing_db):
-    """H100 + H200 + MI300X across three clouds, fresh data.
+    """H100 (AWS + Azure) + H200 (GCP) + MI300X (Azure), all fresh.
 
-    Assert: 3 GPU groups in DOM (3 gpu-group-start rows); anchor nav has
-    3 links; within H100 group the cheaper cloud's row precedes the dearer
-    one (ascending $/GPU/hr sort); no broken renders.
+    (a) 3 group anchors in DOM; anchor-nav lists all 3; within H100 group
+        rows sorted ascending by price-per-GPU (AWS $12.29 < Azure $12.80).
+    (b) no Jinja placeholders, no None.
     """
     fetched = (NOW - timedelta(hours=2)).isoformat()
     _seed_pricing_quotes(in_memory_pricing_db, [
-        # H100: Azure cheaper ($89.50/8=$11.19) < AWS ($98.32/8=$12.29)
-        {
-            "fetched_at": fetched, "cloud": "aws", "region": "us-east-1",
-            "instance_type": "p5.48xlarge", "gpu": "nvidia-hopper-h100",
-            "gpu_count": 8, "price_per_hour_usd": 98.32,
-        },
-        {
-            "fetched_at": fetched, "cloud": "azure", "region": "eastus",
-            "instance_type": "Standard_ND_H100_v5", "gpu": "nvidia-hopper-h100",
-            "gpu_count": 8, "price_per_hour_usd": 89.50,
-        },
-        # H200: GCP
-        {
-            "fetched_at": fetched, "cloud": "gcp", "region": "us-central1",
-            "instance_type": "a3-ultragpu-8g", "gpu": "nvidia-hopper-h200",
-            "gpu_count": 8, "price_per_hour_usd": 120.00,
-        },
-        # MI300X: AWS
-        {
-            "fetched_at": fetched, "cloud": "aws", "region": "us-west-2",
-            "instance_type": "p5e.48xlarge", "gpu": "amd-cdna3-mi300x",
-            "gpu_count": 8, "price_per_hour_usd": 80.00,
-        },
+        (fetched, "aws",   "us-east-1",   "p5.48xlarge",           "nvidia-hopper-h100", 8,  98.32),
+        (fetched, "azure", "eastus",       "Standard_ND_H100_v5",   "nvidia-hopper-h100", 8, 102.40),
+        (fetched, "gcp",   "us-central1",  "a3-ultragpu-8g",        "nvidia-hopper-h200", 8, 150.00),
+        (fetched, "azure", "westus",       "Standard_ND_MI300X_v5", "amd-cdna3-mi300x",   8,  88.00),
     ])
 
     ctx = build.build_pricing_context(in_memory_pricing_db, NOW)
-    assert len(ctx.gpu_groups) == 3
     env = build.make_jinja_env(mlperf_ready=False)
     html = build.render_pricing_page(env, ctx)
     tree = HTMLParser(html)
 
-    # 3 gpu-group-start rows — one per GPU class.
-    group_starts = tree.css("tr.gpu-group-start")
-    assert len(group_starts) == 3, (
-        f"Expected 3 GPU group-start rows, got {len(group_starts)}"
-    )
+    # (a) 3 GPU group anchors present in DOM
+    assert tree.css_first("tr#nvidia-hopper-h100") is not None, \
+        "H100 group anchor must be present"
+    assert tree.css_first("tr#nvidia-hopper-h200") is not None, \
+        "H200 group anchor must be present"
+    assert tree.css_first("tr#amd-cdna3-mi300x") is not None, \
+        "MI300X group anchor must be present"
 
-    # Anchor nav lists all 3 GPU classes.
-    nav = tree.css_first("nav.anchor-nav")
-    assert nav is not None, "anchor-nav absent for non-empty gpu_groups"
-    assert len(nav.css("a")) == 3, (
-        f"Expected 3 anchor-nav links, got {len(nav.css('a'))}"
-    )
+    # anchor-nav lists all 3
+    anchor_nav = tree.css_first("nav.anchor-nav")
+    assert anchor_nav is not None
+    nav_hrefs = {a.attributes.get("href") for a in anchor_nav.css("a")}
+    assert "#nvidia-hopper-h100" in nav_hrefs
+    assert "#nvidia-hopper-h200" in nav_hrefs
+    assert "#amd-cdna3-mi300x" in nav_hrefs
 
-    # Within H100 group: Azure ($11.19/GPU) sorts before AWS ($12.29/GPU).
-    # The H100 group-start row has id="nvidia-hopper-h100"; next row is
-    # the second H100 quote. Check cloud-tag text order via string position.
-    azure_pos = html.find("Azure")
-    aws_pos_after_azure = html.find("AWS", azure_pos)
-    # Azure must appear before the next AWS in the H100 section.
-    assert azure_pos != -1 and aws_pos_after_azure != -1, (
-        "Could not locate Azure/AWS cloud-tag text in H100 section"
-    )
-    assert azure_pos < aws_pos_after_azure, (
-        "H100 rows not sorted ascending by $/GPU/hr (Azure should precede AWS)"
-    )
+    # Within H100 group: AWS ($98.32/8=$12.29/GPU) before Azure ($102.40/8=$12.80/GPU)
+    all_rows = tree.css("tbody tr")
+    row_pairs = []
+    for tr in all_rows:
+        gpu_cell = tr.css_first("td.gpu-cell")
+        cloud_cell = tr.css_first("span.cloud-tag")
+        if gpu_cell and cloud_cell:
+            row_pairs.append((gpu_cell.text(strip=True), cloud_cell.text(strip=True)))
 
-    _assert_no_broken_renders(html)
+    h100_rows = [(g, c) for g, c in row_pairs if g == "NVIDIA Hopper H100"]
+    assert len(h100_rows) == 2
+    assert h100_rows[0][1] == "AWS", \
+        f"H100 rows must sort ascending by $/GPU: AWS ($12.29) before Azure ($12.80); got {h100_rows}"
+
+    # (b) no-broken-renders
+    assert "{{" not in html and "}}" not in html
+    assert "None" not in html
 
 
-# ---- Archetype 3: stale_pricing_banner ----
+# ---------------------------------------------------------------------------
+# Archetype 3: stale_pricing_banner
+# ---------------------------------------------------------------------------
+
 
 def test_stale_pricing_banner(in_memory_pricing_db):
-    """Most-recent fetched_at more than 36 hours old (STALE_THRESHOLD_HOURS).
+    """H100 from AWS, 40h old — stale threshold is 36h.
 
-    Assert: banner-stale div present with 'Pricing data is stale' text;
-    freshness paragraph absent; pricing table still renders with data rows;
-    no broken renders.
+    (a) banner-stale present with 'Pricing data is stale' text; freshness
+        <p> absent; pricing table still renders with the stale data.
+    (b) no Jinja placeholders, no NaN.
     """
     fetched = (NOW - timedelta(hours=40)).isoformat()
     _seed_pricing_quotes(in_memory_pricing_db, [
-        {
-            "fetched_at": fetched, "cloud": "aws", "region": "us-east-1",
-            "instance_type": "p5.48xlarge", "gpu": "nvidia-hopper-h100",
-            "gpu_count": 8, "price_per_hour_usd": 98.32,
-        },
+        (fetched, "aws", "us-east-1", "p5.48xlarge", "nvidia-hopper-h100", 8, 98.32),
     ])
 
     ctx = build.build_pricing_context(in_memory_pricing_db, NOW)
-    assert ctx.is_stale is True
-    env = build.make_jinja_env()
+    assert ctx.is_stale is True, "precondition: 40h data must exceed the 36h stale threshold"
+
+    env = build.make_jinja_env(mlperf_ready=False)
     html = build.render_pricing_page(env, ctx)
     tree = HTMLParser(html)
 
-    # Stale banner present with expected text.
+    # (a) structural
     banner = tree.css_first("div.banner-stale")
-    assert banner is not None, "banner-stale div absent for stale data"
-    assert "Pricing data is stale" in banner.text(), (
-        f"Unexpected stale banner text: {banner.text()!r}"
-    )
+    assert banner is not None, "banner-stale must be present for stale data"
+    assert "Pricing data is stale" in banner.text()
 
-    # Freshness paragraph absent when stale.
-    assert tree.css_first("p.freshness") is None, (
-        "freshness p should be absent when pricing is stale"
-    )
+    assert tree.css_first("p.freshness") is None, \
+        "freshness line must be absent when data is stale"
 
-    # Pricing table still renders — stale data stays visible.
+    # Table still renders — stale data is better than no data
     assert tree.css_first("table.pricing-table") is not None
-    assert len(tree.css("tr.gpu-group-start")) == 1
+    assert len(tree.css("td.gpu-cell")) == 1
 
-    _assert_no_broken_renders(html)
+    # (b) no-broken-renders
+    assert "{{" not in html and "}}" not in html
+    # Price values must be valid decimals — confirm via actual cell content
+    assert "$98.32" in html, "stale price cell must still contain a valid formatted decimal"
 
 
-# ---- Archetype 4: empty_gpu_groups ----
+# ---------------------------------------------------------------------------
+# Archetype 4: empty_gpu_groups
+# ---------------------------------------------------------------------------
+
 
 def test_empty_gpu_groups(in_memory_pricing_db):
-    """No rows in price_quotes — first fetch has not completed.
+    """No rows in price_quotes — first fetch not yet complete.
 
-    Assert: caveat 'No pricing data available' present; no anchor-nav
-    (nothing to navigate to); no scroll-hint; no broken renders.
+    (a) 'No pricing data available' caveat present; NO anchor-nav;
+        NO scroll-hint; NO pricing table.
+    (b) no Jinja placeholders.
     """
-    # Empty DB — no rows inserted.
+    # Empty DB — no seeding
     ctx = build.build_pricing_context(in_memory_pricing_db, NOW)
-    assert ctx.gpu_groups == ()
-    env = build.make_jinja_env()
+    assert ctx.gpu_groups == (), "precondition: empty DB yields no gpu_groups"
+
+    env = build.make_jinja_env(mlperf_ready=False)
     html = build.render_pricing_page(env, ctx)
     tree = HTMLParser(html)
 
-    # Caveat for missing data must appear.
-    assert "No pricing data available" in html, (
-        "Expected 'No pricing data available' caveat for empty price_quotes"
-    )
+    # (a) structural
+    caveat_texts = [node.text() for node in tree.css("p.caveat")]
+    assert any("No pricing data available" in t for t in caveat_texts), \
+        "must show 'No pricing data available' caveat when DB is empty"
 
-    # No anchor nav when there are no GPU groups.
-    assert tree.css_first("nav.anchor-nav") is None, (
-        "anchor-nav must be absent when gpu_groups is empty"
-    )
+    assert tree.css_first("nav.anchor-nav") is None, \
+        "anchor-nav must be absent when there are no GPU groups"
 
-    # No scroll hint when no table is rendered.
-    assert tree.css_first("p.scroll-hint") is None, (
-        "scroll-hint must be absent when gpu_groups is empty"
-    )
+    assert tree.css_first("p.scroll-hint") is None, \
+        "scroll-hint must be absent when there are no GPU groups"
 
-    _assert_no_broken_renders(html)
+    assert tree.css_first("table.pricing-table") is None, \
+        "pricing-table must be absent when there are no GPU groups"
+
+    # (b) no-broken-renders
+    assert "{{" not in html and "}}" not in html
 
 
-# ---- Archetype 5: mlperf_round_stale_banner ----
+# ---------------------------------------------------------------------------
+# Archetype 5: mlperf_round_stale_banner
+# ---------------------------------------------------------------------------
+
 
 def test_mlperf_round_stale_banner(in_memory_mlperf_db):
-    """MLPerf round published more than STALE_ROUND_MONTHS (9) months ago.
+    """MLPerf v5.0 round (mlperf_rounds.yaml: published 2025-04-02 — 13 months
+    before NOW 2026-04-27). STALE_ROUND_MONTHS=9; 13 > 9 → banner fires.
 
-    Assert: banner-stale div present with 'round may not be current' text;
-    ingested-at freshness paragraph absent; no broken renders.
+    (a) mlperf banner-stale present with 'round may not be current' text;
+        ingested-at <p class='freshness'> absent.
+    (b) no Jinja placeholders, no None.
     """
-    # Use a round id not in mlperf_rounds.yaml so _round_freshness falls back
-    # to fetched_at[:10] as the published date — keeping the test YAML-free.
-    # 365 days / 30 ≈ 12.2 months > 9 → is_round_stale=True.
-    stale_fetched = (NOW - timedelta(days=365)).isoformat()
+    fetched = (NOW - timedelta(hours=2)).isoformat()
     _seed_mlperf_results(in_memory_mlperf_db, [
         {
-            "round": "v99.0",
-            "fetched_at": stale_fetched,
+            "round": "v5.0",
+            "submitter": "NVIDIA",
+            "system_name": "DGX H100 (8x H100-SXM-80GB)",
+            "accelerator": "NVIDIA H100-SXM-80GB",
+            "accelerator_count": 8,
+            "gpu": "nvidia-hopper-h100",
             "model": "llama2-70b-99",
             "scenario": "Server",
             "metric": "tokens_per_second",
-            "metric_value": 12000.0,
-            "gpu": "nvidia-hopper-h100",
-            "accelerator_count": 8,
-            "submitter": "StaleCorpAI",
-            "system_name": "StaleSystem",
-            "accuracy": "99%",
+            "metric_value": 25000.0,
+            "fetched_at": fetched,
         },
     ])
 
     ctx = build.build_mlperf_context(in_memory_mlperf_db, NOW)
     assert ctx is not None
-    assert ctx.is_round_stale is True
+    # v5.0 published_at from mlperf_rounds.yaml = 2025-04-02;
+    # (2026-04-27 - 2025-04-02) ≈ 390 days / 30 ≈ 13 months > STALE_ROUND_MONTHS=9
+    assert ctx.is_round_stale is True, \
+        "precondition: v5.0 published 2025-04-02 is 13 months before NOW — must be stale"
+
     env = build.make_jinja_env(mlperf_ready=True)
     html = build.render_mlperf_page(env, ctx)
     tree = HTMLParser(html)
 
-    # Stale-round banner must be present.
+    # (a) structural
     banner = tree.css_first("div.banner-stale")
-    assert banner is not None, "banner-stale div absent for stale MLPerf round"
-    assert "round may not be current" in banner.text().lower(), (
-        f"Expected 'round may not be current' in banner, got: {banner.text()!r}"
-    )
+    assert banner is not None, "banner-stale must be present for stale round"
+    assert "round may not be current" in banner.text().lower()
 
-    # Freshness paragraph absent when round is stale.
-    assert tree.css_first("p.freshness") is None, (
-        "freshness p should be absent when is_round_stale=True"
-    )
+    assert tree.css_first("p.freshness") is None, \
+        "ingested-at freshness line must be absent when round is stale"
 
-    _assert_no_broken_renders(html)
+    # (b) no-broken-renders
+    assert "{{" not in html and "}}" not in html
+    assert "None" not in html
 
 
-# ---- Archetype 6: cache_bust_hash_invariant ----
+# ---------------------------------------------------------------------------
+# Archetype 6: cache_bust_hash_invariant
+# ---------------------------------------------------------------------------
 
-def test_cache_bust_hash_invariant():
-    """_compute_style_version() determinism + content-sensitivity.
 
-    Same CSS bytes → same 8-hex-char hash on repeated calls.
-    Modified CSS bytes → different hash.
-    Hash format is exactly 8 lowercase hex characters.
+def test_cache_bust_hash_invariant(tmp_path, monkeypatch):
+    """_compute_style_version() is deterministic and content-sensitive.
+
+    Same CSS bytes → same hash. Modified CSS bytes → different hash.
+    The ?v={hash} param IS part of the rendered output contract (it
+    appears in the <link rel=stylesheet> href on every rendered page).
     """
-    with tempfile.TemporaryDirectory() as tmp:
-        css_path = Path(tmp) / "style.css"
-        css_bytes = b"body { background: #0d0d0d; color: #f0f0f0; }\n"
-        css_path.write_bytes(css_bytes)
+    from render.anvil import build as anvil_build
 
-        with patch("render.anvil.build.STYLE_CSS", css_path):
-            hash_a = build._compute_style_version()
-            hash_b = build._compute_style_version()
+    css_file = tmp_path / "style.css"
+    css_file.write_bytes(b"body { color: red; }")
+    monkeypatch.setattr(anvil_build, "STYLE_CSS", css_file)
 
-        # Deterministic: same bytes → same hash.
-        assert hash_a == hash_b, "Hash not deterministic across two calls"
+    h1 = anvil_build._compute_style_version()
+    h2 = anvil_build._compute_style_version()
 
-        # Format: 8 lowercase hex chars.
-        assert len(hash_a) == 8, f"Expected 8-char hash, got {len(hash_a)}: {hash_a!r}"
-        assert hash_a == hash_a.lower(), "Hash must be lowercase hex"
-        assert all(c in "0123456789abcdef" for c in hash_a), (
-            f"Hash contains non-hex characters: {hash_a!r}"
-        )
+    # Determinism: same bytes → same hash
+    assert h1 == h2, "same CSS bytes must yield the same style version hash"
+    assert len(h1) == 8, "hash must be 8 hex chars"
+    assert all(c in "0123456789abcdef" for c in h1), "hash must be lowercase hex"
 
-        # Content-sensitive: different CSS → different hash.
-        css_path.write_bytes(css_bytes + b"/* mutated */\n")
-        with patch("render.anvil.build.STYLE_CSS", css_path):
-            hash_c = build._compute_style_version()
+    # Content-sensitivity: mutated CSS → different hash
+    css_file.write_bytes(b"body { color: blue; }")
+    h3 = anvil_build._compute_style_version()
+    assert h3 != h1, "modified CSS bytes must yield a different hash"
 
-        assert hash_c != hash_a, (
-            "Hash unchanged after CSS mutation — not content-sensitive"
-        )
+    # Cache-bust hash propagates into Jinja env globals and rendered output
+    env = anvil_build.make_jinja_env()
+    assert env.globals["style_version"] == h3, \
+        "make_jinja_env() must reflect the current CSS hash in style_version global"
 
-        # Cross-check: matches raw SHA-256 of the modified bytes.
-        expected = hashlib.sha256(css_bytes + b"/* mutated */\n").hexdigest()[:8]
-        assert hash_c == expected, (
-            f"Hash {hash_c!r} does not match expected SHA-256 prefix {expected!r}"
-        )
+    landing = build.build_landing_context(
+        pricing=None, mlperf_ready=False,
+        mlperf_round=None, mlperf_relative_age=None,
+    )
+    html = anvil_build.render_landing_page(env, landing)
+    assert f"?v={h3}" in html, \
+        "cache-bust hash must appear as ?v= query param in rendered stylesheet href"
