@@ -1,6 +1,22 @@
 # Anvil L3 Visual Audit — Status
 
-## Latest run: 2026-10-29 (UTC)
+## Latest run: 2026-11-07 (UTC)
+
+**Outcome:** BLOCKED — deploy-gate check cannot be completed. Same persistent blocker (5th consecutive failure).
+
+**Observed at URL:** `https://soterralabs.ai/anvil/pricing`
+
+- HTTP result: `ENOTFOUND` — DNS resolution failed; `soterralabs.ai` is not reachable from this cloud session's network policy.
+- Condition (a) `<h1>Cloud GPU Pricing</h1>`: **cannot verify**
+- Condition (b) `<table class="pricing-table">` with data rows: **cannot verify**
+
+This blocker has persisted across all 5 scheduled runs (2026-09-25, 2026-10-03, 2026-10-29, and now 2026-11-07). The Layer 3 audit test code (6 archetype fixtures) is ready to write but gated on this deploy check passing. **Recommended action: add `soterralabs.ai` to the session's allowed network domains** at https://code.claude.com/docs/en/claude-code-on-the-web, then re-arm the schedule.
+
+`L3 audit deferred — re-arm /schedule for the next attempt.`
+
+---
+
+## Prior run: 2026-10-29 (UTC)
 
 **Outcome:** BLOCKED — deploy-gate check cannot be completed.
 
