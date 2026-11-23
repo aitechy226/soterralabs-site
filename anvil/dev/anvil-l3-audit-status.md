@@ -1,5 +1,19 @@
 # Anvil Layer 3 Audit — Deferred Status
 
+## Attempt 8 — 2026-11-23 (UTC)
+
+URL checked: `https://soterralabs.ai/anvil/pricing`
+
+**Observation:** DNS resolution failed — `getaddrinfo ENOTFOUND soterralabs.ai`. Network block persists (attempt 8).
+
+**L3 test status:** Re-verified all 6 Layer 3 archetypes against current HEAD (after 10 days of daily cron refreshes) — 6/6 green (0.48s). Full suite: 448 passed, 7 pre-existing failures on main (unchanged), 1 pre-existing collection error in `test_render_site_content.py` (repo name mismatch, unrelated to L3).
+
+**PR #1 (`anvil-l3-visual-audit`) remains open and awaiting Sri's merge.**
+
+**Recommended action for Sri:** Merge PR #1 to land the Layer 3 tests on main. To enable future deploy-gate checks, add `soterralabs.ai` to the allowed network domains in the cloud session's environment configuration (https://code.claude.com/docs/en/claude-code-on-the-web).
+
+---
+
 ## Attempt 7 — 2026-11-19 (UTC)
 
 URL checked: `https://soterralabs.ai/anvil/pricing`
